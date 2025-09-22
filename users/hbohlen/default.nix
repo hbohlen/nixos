@@ -1,4 +1,4 @@
-# /users/my-user/default.nix
+# /users/hbohlen/default.nix
 { config, pkgs, inputs, lib, hostname, ... }:
 
 {
@@ -8,8 +8,8 @@
   ];
 
   # Home Manager needs a bit of information about you and the paths it should manage.
-  home.username = "my-user";
-  home.homeDirectory = "/home/my-user";
+  home.username = "hbohlen";
+  home.homeDirectory = "/home/hbohlen";
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -18,19 +18,21 @@
   home.packages = with pkgs; [
     # Development tools
     vscode
-    jetbrains.idea-community
+    zed-editor
+    nodejs
+    python3
+    uv
+    git
+    gh
     
-    # Communication
-    slack
-    discord
-    
-    # Multimedia
-    spotify
-    vlc
-
-    # Utilities
-    libreoffice
-    gimp
+    # Applications
+    affine
+    _1password
+    _1password-gui
+    opencode
+    podman
+    podman-desktop
+    vivaldi
     
     # Add more packages specific to this user
   ];

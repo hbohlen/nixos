@@ -24,7 +24,7 @@ Path
 	/modules/home-manager/
 	Contains reusable Home Manager modules for user-level configurations (e.g., desktop.nix, shell.nix, opnix.nix).
 	/users/
-	Defines user accounts and their associated Home Manager configurations. Each subdirectory (e.g., my-user/) contains a home.nix file.
+	Defines user accounts and their associated Home Manager configurations. Each subdirectory (e.g., hbohlen/) contains a home.nix file.
 	/secrets/
 	A placeholder directory for encrypted secret files. While Opnix injects secrets at runtime, other tools like sops-nix or agenix would store their encrypted files here.
 	/scripts/
@@ -103,12 +103,12 @@ The following flake.nix demonstrates a robust pattern for managing multiple host
      nixosConfigurations = {
        "my-laptop" = mkSystem {
          hostname = "my-laptop";
-         username = "my-user";
+         username = "hbohlen";
        };
 
        "my-desktop" = mkSystem {
          hostname = "my-desktop";
-         username = "my-user";
+         username = "hbohlen";
          # Example of an extra module for a specific host.
          extraModules = [./hosts/my-desktop/gaming.nix ];
        };
@@ -584,7 +584,7 @@ Each host in the /hosts/ directory has a default.nix file that serves as its mai
  networking.hostName = "my-laptop"; # Must match the name in flake.nix
 
  # Define the user account for this machine.
- users.users.my-user = {
+ users.users.hbohlen = {
    isNormalUser = true;
    extraGroups = [ "wheel" "networkmanager" ]; # Sudo and network access.
    # The password should be set via a secure, declarative method.
@@ -626,7 +626,7 @@ Each host in the /hosts/ directory has a default.nix file that serves as its mai
 }
 
 The user's home.nix file, referenced by the main flake.nix, would then import the Home Manager modules:
-# /users/my-user/home.nix
+# /users/hbohlen/home.nix
 {... }:
 
 {

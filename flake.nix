@@ -72,19 +72,19 @@
       nixosConfigurations = {
         "laptop" = mkSystem {
           hostname = "laptop";
-          username = "my-user";
+          username = "hbohlen";
         };
 
         "desktop" = mkSystem {
           hostname = "desktop";
-          username = "my-user";
+          username = "hbohlen";
           # Example of an extra module for a specific host.
           extraModules = [ ./hosts/desktop/gaming.nix ];
         };
 
         "server" = mkSystem {
           hostname = "server";
-          username = "my-user";
+          username = "hbohlen";
         };
       };
     };

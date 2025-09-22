@@ -24,7 +24,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Define the user account for this machine.
-  users.users.my-user = {
+  users.users.hbohlen = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" "video" "audio" ]; # Sudo and network access.
     # The password should be set via a secure, declarative method.
