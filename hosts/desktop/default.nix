@@ -2,6 +2,7 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "vscode" ];
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/common.nix
