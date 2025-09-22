@@ -12,14 +12,14 @@
     enable = true;
     # Define secrets to be provisioned at runtime.
     secrets = {
-      "ssh-key" = {
+      "sshKey" = {
         path = ".ssh/id_ed25519";
         # Format: op://<vault>/<item>/<field>
         reference = "op://Personal/SSH Private Key/private key";
         # Set appropriate file permissions.
         mode = "0600";
       };
-      "api-token" = {
+      "apiToken" = {
         path = ".config/my-app/api.token";
         reference = "op://Work/API Tokens/My App Token";
         mode = "0600";
