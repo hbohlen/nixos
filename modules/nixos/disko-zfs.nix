@@ -90,7 +90,7 @@ in
           # "local" datasets are for data that can be regenerated and is not backed up.
           "local/root" = {
             type = "zfs_fs";
-            mountpoint = "legacy"; # NixOS will mount this at /.
+            mountpoint = "/"; # Changed from "legacy" to absolute path
             # This hook runs after the dataset is created, establishing the clean state.
             postCreateHook = ''
               zfs snapshot rpool/local/root@blank
@@ -98,22 +98,22 @@ in
           };
           "local/nix" = {
             type = "zfs_fs";
-            mountpoint = "legacy"; # Mounted at /nix.
+            mountpoint = "/nix"; # Changed from "legacy" to absolute path
             options."com.sun:auto-snapshot" = "false"; # Disable snapshots for the Nix store.
           };
 
           # "safe" datasets are for persistent data that should be backed up.
           "safe/persist" = {
             type = "zfs_fs";
-            mountpoint = "legacy"; # Mounted at /persist.
+            mountpoint = "/persist"; # Changed from "legacy" to absolute path
           };
           "safe/home" = {
             type = "zfs_fs";
-            mountpoint = "legacy"; # Mounted at /home.
+            mountpoint = "/home"; # Changed from "legacy" to absolute path
           };
           "safe/home/\${config.users.users.\${username}.name}" = {
             type = "zfs_fs";
-            mountpoint = "legacy"; # Mounted at /home/<username>.
+            mountpoint = "/home/\${config.users.users.\${username}.name}"; # Changed from "legacy" to absolute path
           };
         };
       };
