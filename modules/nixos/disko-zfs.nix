@@ -5,7 +5,7 @@ let
   # Make the device path configurable per host
   device = lib.mkDefault (
     if config.networking.hostName == "laptop" then
-      "/dev/disk/by-id/laptop-disk-id"
+      "/dev/nvme0n1"
     else if config.networking.hostName == "desktop" then
       "/dev/disk/by-id/desktop-disk-id"
     else if config.networking.hostName == "server" then
