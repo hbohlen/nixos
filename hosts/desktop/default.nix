@@ -2,7 +2,7 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "vscode" "1password-cli" "1password" ];
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "vscode" "1password-cli" "1password" "vivaldi" ];
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/common.nix
