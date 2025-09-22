@@ -28,14 +28,15 @@
 
   # Enable the unfree packages we need.
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    "1password"
     "1password-cli"
     "1password-gui"
+    "vivaldi"
     "vscode"
     "vscode-extension-ms-vsliveshare-vsliveshare"
   ];
 
-  programs._1password.enable = true;
+  # 1Password CLI and GUI
+  programs._1password-cli.enable = true;
   programs._1password-gui = {
     enable = true;
     # Enable PolKit for system authentication features (e.g., fingerprint unlock).

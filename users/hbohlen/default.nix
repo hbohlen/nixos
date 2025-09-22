@@ -27,12 +27,12 @@
     
     # Applications
     affine
-    _1password
-    _1password-gui
+  _1password-cli
+  _1password-gui
     opencode
     podman
     podman-desktop
-    vivaldi
+  vivaldi
     
     # Add more packages specific to this user
   ];
