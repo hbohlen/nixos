@@ -33,6 +33,7 @@
     "vscode"
     "vscode-extension-ms-vsliveshare-vsliveshare"
     "slack"
+    "discord"
   ];
 
   programs._1password.enable = true;
