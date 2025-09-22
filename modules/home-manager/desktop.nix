@@ -30,7 +30,7 @@
     ripgrep
     fd
     bat
-    exa
+    eza
     zoxide
     fzf
     # Add more packages as needed
