@@ -18,7 +18,7 @@
 
   # Home Manager needs a bit of information about you and the paths it should manage.
   home.username = "hbohlen";
-  home.homeDirectory = "/home/hbohlen";
+  home.homeDirectory = lib.mkForce "/home/hbohlen";
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
