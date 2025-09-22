@@ -10,22 +10,23 @@
   # Enable the 1Password secrets management program.
   programs.onepassword-secrets = {
     enable = true;
-    # Define a list of secrets to be provisioned at runtime.
-    secrets = [
-      {
+    # Define secrets to be provisioned at runtime.
+    secrets = {
+      "ssh-key" = {
         path = ".ssh/id_ed25519";
         # Format: op://<vault>/<item>/<field>
         reference = "op://Personal/SSH Private Key/private key";
         # Set appropriate file permissions.
         mode = "0600";
-      }
-      {
+      };
+      "api-token" = {
         path = ".config/my-app/api.token";
         reference = "op://Work/API Tokens/My App Token";
         mode = "0600";
-      }
+      };
       # Add more secrets as needed
-    ];
+    };
+  };
   };
 
   # Configure the SSH client to use the 1Password SSH agent for authentication.
