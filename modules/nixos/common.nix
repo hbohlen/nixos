@@ -9,6 +9,9 @@
     desktopManager.gnome.enable = true; # GDM requires this.
   };
   
+  # Disable power-profiles-daemon which conflicts with TLP
+  services.power-profiles-daemon.enable = false;
+  
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;

@@ -12,6 +12,16 @@
 
   # Host-specific settings.
   networking.hostName = "laptop"; # Must match the name in flake.nix
+  networking.hostId = "cafebabe"; # Required for ZFS, must be unique 8-character hex
+
+  # Boot loader configuration
+  boot.loader.grub = {
+    enable = true;
+    devices = [ "/dev/nvme0n1" ]; # Specify the device where GRUB should be installed
+    efiSupport = true;
+    useOSProber = true;
+  };
+  boot.loader.efi.canTouchEfiVariables = true;
 
   # Define the user account for this machine.
   users.users.my-user = {
