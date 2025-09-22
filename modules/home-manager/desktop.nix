@@ -315,7 +315,7 @@
 
   # Download a sample wallpaper
   xdg.configFile."wallpaper.png".source = pkgs.fetchurl {
-    url = "https://raw.githubusercontent.com/catppuccin/wallpapers/main/landscapes/evening-sky.png";
-    sha256 = "0f50s9l1xvdrahq1k09jsajchxyjlizijf17n4hhpbmqipamvy34";  # This is a placeholder hash, it will need to be updated
+    url = "https://raw.githubusercontent.com/NixOS/nixos-artwork/master/wallpapers/nix-wallpaper-simple-dark-gray_bottom.png";
+    sha256 = "254cb37fd7584722d09b124f2a9b43c572fbc91a8016de6e3340bd72b924118e";
   };
 }
