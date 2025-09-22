@@ -26,10 +26,12 @@
     extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
   };
 
-  # Enable the unfree 1Password packages.
+  # Enable the unfree packages we need.
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "1password"
     "1password-gui"
+    "vscode"
+    "vscode-extension-ms-vsliveshare-vsliveshare"
   ];
 
   programs._1password.enable = true;
