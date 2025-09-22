@@ -27,7 +27,6 @@
       # Add more secrets as needed
     };
   };
-  };
 
   # Configure the SSH client to use the 1Password SSH agent for authentication.
   # This requires enabling the SSH agent in the 1Password desktop app settings.
