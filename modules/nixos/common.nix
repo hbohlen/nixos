@@ -36,7 +36,7 @@
   ];
 
   # 1Password CLI and GUI
-  programs._1password-cli.enable = true;
+  programs._1password.enable = true;
   programs._1password-gui = {
     enable = true;
     # Enable PolKit for system authentication features (e.g., fingerprint unlock).
