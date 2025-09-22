@@ -30,7 +30,8 @@
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "1password"
     "1password-cli"
-    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "steam" ];
+    "steam"
+  ];
   programs._1password-gui = {
     enable = true;
     # Enable PolKit for system authentication features (e.g., fingerprint unlock).
