@@ -51,7 +51,7 @@
 
   programs.zsh = {
     enable = true;
-    enableAutosuggestions = true;
+    autosuggestion.enable = true;
     enableCompletion = true;
     syntaxHighlighting.enable = true;
     oh-my-zsh = {
@@ -87,37 +87,33 @@
     };
   };
 
-  # Git configuration
-  programs.git = {
+  # SSH configuration
+  programs.ssh = {
     enable = true;
-    userName = "Your Name";
-    userEmail = "your.email@example.com";
-    signing = {
-      key = "ssh-ed25519 AAAAC3NzaC1..."; # Replace with your SSH key
-      signByDefault = true;
-    };
-    extraConfig = {
-      init.defaultBranch = "main";
-      pull.rebase = true;
-      push.autoSetupRemote = true;
+    enableDefaultConfig = false;
+    matchBlocks."*" = {
+      forwardAgent = true;
+      identitiesOnly = true;
     };
   };
 
   # VSCode configuration
   programs.vscode = {
     enable = true;
-    extensions = with pkgs.vscode-extensions; [
-      vscodevim.vim
-      ms-python.python
-      rust-lang.rust-analyzer
-      # Add more extensions as needed
-    ];
-    userSettings = {
-      "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'monospace'";
-      "editor.fontSize" = 14;
-      "editor.lineNumbers" = "relative";
-      "workbench.colorTheme" = "Catppuccin Mocha";
-      # Add more settings as needed
+    profiles.default = {
+      extensions = with pkgs.vscode-extensions; [
+        vscodevim.vim
+        ms-python.python
+        rust-lang.rust-analyzer
+        # Add more extensions as needed
+      ];
+      userSettings = {
+        "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'monospace'";
+        "editor.fontSize" = 14;
+        "editor.lineNumbers" = "relative";
+        "workbench.colorTheme" = "Catppuccin Mocha";
+        # Add more settings as needed
+      };
     };
   };
 

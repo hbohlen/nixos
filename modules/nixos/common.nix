@@ -5,9 +5,9 @@
   # Enable Wayland and PipeWire for audio/video.
   services.xserver = {
     enable = true; # Still needed for XWayland.
-    displayManager.gdm.enable = true; # Or another Wayland-compatible DM.
-    desktopManager.gnome.enable = true; # GDM requires this.
   };
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
   
   # Disable power-profiles-daemon which conflicts with TLP
   services.power-profiles-daemon.enable = false;
@@ -75,7 +75,7 @@
   # System-wide fonts
   fonts.packages = with pkgs; [
     noto-fonts
-    noto-fonts-cjk
+    noto-fonts-cjk-sans
     noto-fonts-emoji
     (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
     # Add more fonts as needed
