@@ -1,0 +1,40 @@
+# /hosts/desktop/default.nix
+{ config, pkgs, lib, inputs, ... }:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+    ../../modules/nixos/common.nix
+    ../../modules/nixos/impermanence.nix
+    ../../modules/nixos/disko-zfs.nix
+    ./gaming.nix
+  ];
+
+  # Basic desktop configuration
+  networking.hostName = "desktop"; # Must match the name in flake.nix
+  
+  # Desktop-specific settings
+  services.xserver = {
+    enable = true;
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
+  };
+
+  # Enable sound
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+
+  # Additional desktop-specific packages
+  environment.systemPackages = with pkgs; [
+    # GUI applications
+    firefox
+    thunderbird
+    gimp
+    libreoffice
+    vlc
+  ];
+  
+  # This value determines the NixOS release with which your system is to be compatible.
+  # You should change this only after NixOS release notes indicate you should.
+  system.stateVersion = "25.05"; # Keep this value stable for a specific install.
+}

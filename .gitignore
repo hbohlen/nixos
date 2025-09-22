@@ -1,0 +1,23 @@
+# Nix-specific
+result
+result-*
+
+# Editor-specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OpenCode AI
+.opencode/
+
+# Secrets
+secrets/*
+!secrets/.gitkeep
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
