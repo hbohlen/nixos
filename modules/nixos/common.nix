@@ -34,6 +34,7 @@
     "vscode-extension-ms-vsliveshare-vsliveshare"
     "slack"
     "discord"
+    "spotify"
   ];
 
   programs._1password.enable = true;
