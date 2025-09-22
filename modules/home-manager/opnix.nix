@@ -47,7 +47,10 @@
       key = "ssh-ed25519 AAAAC3NzaC1..."; # Replace with your SSH key
       signByDefault = true;
       # Use SSH key from 1Password for signing
-      signOpts = "--ssh-provider=1password";
+    };
+    extraConfig = {
+      gpg.ssh.program = "${pkgs.openssh}/bin/ssh-keygen";
+      gpg.format = "ssh";
     };
   };
 }
