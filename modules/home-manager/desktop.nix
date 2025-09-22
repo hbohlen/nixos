@@ -12,7 +12,7 @@
     # Terminal emulator
     alacritty
     # File manager
-    dolphin
+    kdePackages.dolphin
     # Browser
     firefox
     # Screenshot tool
