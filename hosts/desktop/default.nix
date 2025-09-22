@@ -20,9 +20,21 @@
     desktopManager.gnome.enable = true;
   };
 
-  # Enable sound
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  # Audio: Use PipeWire, disable PulseAudio to avoid conflict
+  # sound.enable removed (deprecated)
+  hardware.pulseaudio.enable = false;
+
+  # ZFS requires a hostId (must be 8 hex digits, e.g. "deadbeef")
+  networking.hostId = "deadbeef";
+
+  # User configuration for hbohlen
+  users.users.hbohlen = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
+    initialPassword = "changeme"; # Replace with secure method in production
+    group = "hbohlen";
+  };
+  users.groups.hbohlen = {};
 
   # Additional desktop-specific packages
   environment.systemPackages = with pkgs; [

@@ -39,7 +39,6 @@
   # OpenGL and Vulkan support
   hardware.opengl = {
     enable = true;
-    driSupport = true;
     driSupport32Bit = true;
   };
 }
