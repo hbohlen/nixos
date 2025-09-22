@@ -5,7 +5,7 @@
   # Import the modules that define the core architecture of the system.
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/disko-zfs.nix
+    ./disko-zfs.nix
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/common.nix
   ];
