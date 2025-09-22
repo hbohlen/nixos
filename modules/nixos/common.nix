@@ -32,6 +32,7 @@
     "1password-gui"
     "vscode"
     "vscode-extension-ms-vsliveshare-vsliveshare"
+    "slack"
   ];
 
   programs._1password.enable = true;
