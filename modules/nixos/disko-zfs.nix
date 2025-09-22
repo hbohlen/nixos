@@ -111,7 +111,7 @@ in
             type = "zfs_fs";
             mountpoint = "legacy"; # Mounted at /home.
           };
-          "safe/home/${config.users.users.${username}.name}" = {
+          "safe/home/\${config.users.users.\${username}.name}" = {
             type = "zfs_fs";
             mountpoint = "legacy"; # Mounted at /home/<username>.
           };
