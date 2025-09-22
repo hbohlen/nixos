@@ -7,6 +7,15 @@
     ../../modules/home-manager/opnix.nix
   ];
 
+  # Enable unfree packages for home-manager
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    "_1password-cli"
+    "_1password-gui"
+    "vivaldi"
+    "vscode"
+    "zed-editor"
+  ];
+
   # Home Manager needs a bit of information about you and the paths it should manage.
   home.username = "hbohlen";
   home.homeDirectory = "/home/hbohlen";
