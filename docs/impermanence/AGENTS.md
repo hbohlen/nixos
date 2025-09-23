@@ -25,3 +25,17 @@ This directory contains comprehensive documentation and implementation files for
 - Understand the relationship between persistent paths and system functionality
 - Ensure critical system files and directories are properly persisted
 - Consider the implications of ephemeral root on service data and user files
+
+### ZFS Impermanence Implementation Details
+- Uses ZFS datasets: `rpool/local/root` (ephemeral), `rpool/safe/persist` (persistent)
+- Root dataset is rolled back to `@blank` snapshot on each boot
+- Rollback happens in initrd via systemd service for proper timing
+- Persistent data is bind-mounted from `/persist` to appropriate locations
+- Configuration follows modern best practices with initrd systemd integration
+- Boot process: initrd -> import pool -> rollback -> mount sysroot -> bind mounts
+
+### Critical Boot Dependencies
+- `zfs-import-rpool.service` must complete before rollback
+- `zfs-rollback` service must complete before `sysroot.mount`
+- Persistent directories must exist before services that need them start
+- SSH host keys are persisted to avoid regeneration on each boot

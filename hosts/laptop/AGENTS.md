@@ -18,7 +18,12 @@ This directory contains the laptop host configuration, optimized for portable us
 ## Notes for AI Agents
 - This host prioritizes power efficiency and portability over raw performance
 - Power management settings should be carefully tuned for battery life
+- **Hardware Model**: ASUS ROG Zephyrus M16 GU603ZW (or similar GU603H series)
+- **CPU**: Intel processors with proper microcode updates
+- **GPU**: Nvidia/Intel hybrid graphics with PRIME offload configuration
+- **Hardware Profile**: Uses nixos-hardware.nixosModules.asus-zephyrus-gu603h
 - Laptop-specific hardware like WiFi, Bluetooth, and trackpads need proper driver support
 - Consider thermal management and CPU scaling for laptop use cases
 - Test power management features thoroughly on actual laptop hardware
+- ASUS-specific features (ROG keyboard backlight, power profiles) are configured
 - The simple.nix file may be used for minimal installations or troubleshooting

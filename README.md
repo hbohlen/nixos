@@ -256,7 +256,7 @@ This configuration follows a modular architecture that promotes reusability and 
 
 - **`flake.nix`** - Central entry point defining all inputs, outputs, and host configurations
 - **`hosts/`** - Machine-specific configurations
-  - `desktop/` - High-performance desktop with gaming support
+  - `desktop/` - High-performance desktop with Intel/Nvidia hardware support
   - `laptop/` - Power-optimized portable configuration  
   - `server/` - Minimal headless server configuration
 - **`modules/`** - Reusable configuration modules
