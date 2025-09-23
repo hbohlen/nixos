@@ -27,6 +27,8 @@
     # will be lost on reboot. Here we use a placeholder.
     # In a real system, this could be managed by sops-nix or agenix.
     initialPassword = "changeme";
+    createHome = true;
+    home = "/home/${username}";
   };
 
   # Hardware-specific configurations for laptop
