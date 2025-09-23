@@ -11,7 +11,7 @@ Run Disko, passing the disk by-id value (safer than /dev/nvme0n1):
 ```
 sudo nix run --extra-experimental-features 'nix-command flakes' \
   github:nix-community/disko -- --mode disko \
-  --argstr device /dev/disk/by-id/<YOUR-DISK-ID> \
+  --argstr device /dev/disk/by-id/nvme-CT2000P310SSD8_24514D0F486C \
   ./disko-layout.nix
 ```
 
