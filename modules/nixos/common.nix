@@ -32,6 +32,7 @@
     "1password-cli"
     "steam"
     "vscode"
+    "vivaldi"
   ];
   programs._1password-gui = {
     enable = true;
