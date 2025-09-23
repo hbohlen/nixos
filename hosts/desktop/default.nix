@@ -8,7 +8,10 @@
     ../../modules/nixos/common.nix
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/nvidia-rog.nix
-    ./gaming.nix
+    # Intel CPU and desktop PC hardware support
+    inputs.nixos-hardware.nixosModules.common-cpu-intel
+    inputs.nixos-hardware.nixosModules.common-pc
+    inputs.nixos-hardware.nixosModules.common-pc-ssd
   ];
 
   # Basic desktop configuration

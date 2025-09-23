@@ -84,8 +84,6 @@
         "desktop" = mkSystem {
           hostname = "desktop";
           username = "hbohlen";
-          # Example of an extra module for a specific host.
-          extraModules = [ ./hosts/desktop/gaming.nix ];
         };
 
         "server" = mkSystem {
