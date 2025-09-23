@@ -71,6 +71,12 @@ sudo mount /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
 sudo nixos-install --flake .#desktop
 ```
 
+If you see a warning about `/boot/loader/random-seed` being world-accessible, ensure `/boot` is mounted with a restrictive umask. The Disko layout now sets `umask=0077` automatically. If needed during a manual session:
+
+```bash
+sudo mount -o remount,umask=0077 /mnt/boot
+```
+
 A modern, declarative, and ephemeral NixOS system with ZFS, Impermanence, and Hyprland.
 
 ## Architecture Overview
