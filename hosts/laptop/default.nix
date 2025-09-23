@@ -5,11 +5,11 @@
   # Import the modules that define the core architecture of the system.
   imports = [
     ./hardware-configuration.nix
-  ../../modules/nixos/disko-zfs.nix
+    ../../modules/nixos/disko-zfs.nix
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/common.nix
-    ../../modules/nixos/nvidia-rog.nix  # Add this line
-    inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
+    # ../../modules/nixos/nvidia-rog.nix  # Temporarily disabled for ISO install
+    # inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h  # Temporarily disabled for ISO install
   ];
 
   # Host-specific settings.

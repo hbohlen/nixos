@@ -5,11 +5,12 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Enable Wayland and PipeWire for audio/video.
-  services.xserver = {
-    enable = true; # Still needed for XWayland.
-  };
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
+  # Temporarily disabled for ISO install to save space
+  # services.xserver = {
+  #   enable = true; # Still needed for XWayland.
+  # };
+  # services.displayManager.gdm.enable = true;
+  # services.desktopManager.gnome.enable = true;
   
   # Disable power-profiles-daemon which conflicts with TLP
   services.power-profiles-daemon.enable = false;
@@ -22,21 +23,22 @@
   };
 
   # Enable Hyprland-specific services.
-  programs.hyprland.enable = true;
-  xdg.portal = {
-    enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
-  };
+  # Temporarily disabled for ISO install to save space
+  # programs.hyprland.enable = true;
+  # xdg.portal = {
+  #   enable = true;
+  #   extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
+  # };
 
-  # Enable the unfree packages we need.
+  # Enable the unfree packages we need (minimal set for ISO install).
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "1password"
     "1password-cli"
-    "steam"
-    "vscode"
-    "vivaldi"
-    "nvidia-x11"
-    "nvidia-settings"
+    # "steam"          # Temporarily disabled
+    # "vscode"         # Temporarily disabled
+    # "vivaldi"        # Temporarily disabled
+    # "nvidia-x11"     # Temporarily disabled
+    # "nvidia-settings" # Temporarily disabled
   ];
   programs._1password-gui = {
     enable = true;
@@ -44,30 +46,30 @@
     polkitPolicyOwners = [ username ];
   };
 
-  # Common packages for all systems
+  # Common packages for all systems (minimal set for ISO install)
   environment.systemPackages = with pkgs; [
-  # Basic utilities
-  wget
-  curl
-  git
-  vim
-  htop
-  gcc
-  clang
-  python3
-  nodejs
-  gnumake
-  cmake
-  docker
-  podman
-  go
-  rustc
-  cargo
-  jq
-  unzip
-  zip
-  tree
-  # Add more packages as needed
+    # Basic utilities only
+    wget
+    curl
+    git
+    vim
+    htop
+    # gcc         # Temporarily disabled
+    # clang       # Temporarily disabled
+    # python3     # Temporarily disabled
+    # nodejs      # Temporarily disabled
+    # gnumake     # Temporarily disabled
+    # cmake       # Temporarily disabled
+    # docker      # Temporarily disabled
+    # podman      # Temporarily disabled
+    # go          # Temporarily disabled
+    # rustc       # Temporarily disabled
+    # cargo       # Temporarily disabled
+    jq
+    unzip
+    zip
+    tree
+    # Add more packages as needed
   ];
 
   # Setup networking with NetworkManager
@@ -102,6 +104,6 @@
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
 
-  # Podman container support
-  virtualisation.podman.enable = true;
+  # Podman container support (temporarily disabled for ISO install)
+  # virtualisation.podman.enable = true;
 }
