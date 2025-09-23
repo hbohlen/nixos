@@ -36,6 +36,8 @@
     extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
     initialPassword = "changeme"; # Replace with secure method in production
     group = "hbohlen";
+    createHome = true;
+    home = "/home/hbohlen";
   };
   users.groups.hbohlen = {};
 

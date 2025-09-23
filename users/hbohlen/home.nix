@@ -1,5 +1,5 @@
 # /users/hbohlen/home.nix
-{ config, pkgs, inputs, lib, hostname, ... }:
+{ config, pkgs, inputs, lib, hostname, username, ... }:
 
 {
 	imports = [
@@ -10,8 +10,8 @@
 		# nixpkgs.config is managed globally to avoid conflicts with useGlobalPkgs
 
 	# Home Manager needs a bit of information about you and the paths it should manage.
-	home.username = "hbohlen";
-	home.homeDirectory = lib.mkForce "/home/hbohlen";
+	home.username = username;
+	home.homeDirectory = "/home/${username}";
 
 	# Let Home Manager install and manage itself.
 	programs.home-manager.enable = true;

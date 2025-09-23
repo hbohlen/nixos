@@ -11,6 +11,7 @@
 
   # Basic server configuration
   networking.hostName = "server"; # Must match the name in flake.nix
+  networking.hostId = "facefeed"; # Required for ZFS, must be unique 8-char hex
   
   # Server-specific settings
   services.openssh = {

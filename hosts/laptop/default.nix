@@ -28,7 +28,7 @@
     # In a real system, this could be managed by sops-nix or agenix.
     initialPassword = "changeme";
     createHome = true;
-    home = "/home/${username}";
+    home = "/home/hbohlen";
   };
 
   # Hardware-specific configurations for laptop
