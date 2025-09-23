@@ -5,6 +5,7 @@
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "vscode" "1password-cli" "1password" "vivaldi" "steam" "steam-unwrapped" "discord" ];
   imports = [
     ./hardware-configuration.nix
+    ../../modules/nixos/disko-zfs.nix
     ../../modules/nixos/common.nix
     ../../modules/nixos/impermanence.nix
     ./gaming.nix
@@ -13,16 +14,14 @@
   # Basic desktop configuration
   networking.hostName = "desktop"; # Must match the name in flake.nix
   
-  # Desktop-specific settings
-  services.xserver = {
-    enable = true;
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
-  };
+  # Desktop-specific settings (use new option paths)
+  services.xserver.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
 
   # Audio: Use PipeWire, disable PulseAudio to avoid conflict
   # sound.enable removed (deprecated)
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
 
   # Boot loader configuration (use systemd-boot with EFI)
   boot.loader.systemd-boot.enable = true;

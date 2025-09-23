@@ -36,9 +36,9 @@
     };
   };
 
-  # OpenGL and Vulkan support
-  hardware.opengl = {
+  # OpenGL and Vulkan support (updated options)
+  hardware.graphics = {
     enable = true;
-    driSupport32Bit = true;
+    enable32Bit = true;
   };
 }

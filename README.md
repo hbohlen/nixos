@@ -22,6 +22,55 @@ sudo nix run --extra-experimental-features 'nix-command flakes' \
 - Bootloader install failed: If you see an error like `bootctl --esp-path=/boot install` failed, ensure the EFI System Partition (ESP) exists, is formatted as vfat, and mounted at `/boot` during install. With this repo, Disko creates and mounts the ESP at `/boot`. If you ran Disko without specifying the correct device, re-run with the proper `--argstr device /dev/disk/by-id/<id>`.
 - Wrong device path: Avoid `/dev/nvme0n1` short names; prefer stable `/dev/disk/by-id/<id>` paths to prevent surprises when device enumeration changes.
 
+### Fix: `efiSysMountPoint = '/boot' is not a mounted partition`
+
+This means the ESP was not mounted at `/mnt/boot` when `nixos-install` tried to install systemd-boot.
+
+1) Re-run Disko to ensure partitions are created and mounted (replace the device):
+
+```bash
+sudo nix run --extra-experimental-features 'nix-command flakes' \
+  github:nix-community/disko -- --mode disko \
+  --argstr device /dev/disk/by-id/nvme-WDS100T3X0C-00SJG0_190670800068 \
+  ./disko-layout.nix
+
+```
+
+2) If you have already partitioned the disk, just mount everything:
+
+```bash
+sudo nix run --extra-experimental-features 'nix-command flakes' \
+  github:nix-community/disko -- --mode mount \
+  --argstr device /dev/disk/by-id/nvme-WDS100T3X0C-00SJG0_190670800068 \
+  ./disko-layout.nix
+```
+
+3) Verify mounts (you should see `/mnt/boot`):
+
+```bash
+findmnt -R /mnt | grep -E '/mnt$|/mnt/(boot|nix|persist|home)'
+```
+
+4) If `/mnt/boot` is still missing, mount ESP manually (careful: format only if needed):
+
+```bash
+# Identify the ESP by GPT partlabel "ESP"
+ls -l /dev/disk/by-partlabel/ESP
+
+# If not formatted (only do this on the correct ESP; data loss otherwise)
+# sudo mkfs.vfat -F32 -n ESP /dev/disk/by-partlabel/ESP
+
+# Mount ESP at the target root
+sudo mkdir -p /mnt/boot
+sudo mount /dev/disk/by-partlabel/ESP /mnt/boot
+```
+
+5) Re-run the install:
+
+```bash
+sudo nixos-install --flake .#desktop
+```
+
 A modern, declarative, and ephemeral NixOS system with ZFS, Impermanence, and Hyprland.
 
 ## Architecture Overview
