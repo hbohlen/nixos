@@ -1,9 +1,16 @@
 # Minimal Disko layout for CLI usage
+# This file is a function so you can pass the disk device at runtime.
+# Example:
+#   nix run --extra-experimental-features 'nix-command flakes' \
+#     github:nix-community/disko -- --mode disko \
+#     --argstr device /dev/disk/by-id/<YOUR-DISK-ID> \
+#     ./disko-layout.nix
+{ device ? "/dev/disk/by-id/REPLACE_WITH_YOUR_DISK_ID", ... }:
 {
 	disko.devices = {
 		disk = {
 			main = {
-				device = "/dev/nvme0n1";
+				device = device;
 				type = "disk";
 				content = {
 					type = "gpt";

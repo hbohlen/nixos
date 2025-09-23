@@ -1,8 +1,26 @@
 # NixOS Configuration
 
-`sudo nix run --extra-experimental-features 'nix-command flakes' github:nix-community/disko -- --mode disko ./disko-layout.nix`
+Find your target disk id (recommended):
+
+```
+ls -l /dev/disk/by-id/
+```
+
+Run Disko, passing the disk by-id value (safer than /dev/nvme0n1):
+
+```
+sudo nix run --extra-experimental-features 'nix-command flakes' \
+  github:nix-community/disko -- --mode disko \
+  --argstr device /dev/disk/by-id/<YOUR-DISK-ID> \
+  ./disko-layout.nix
+```
 
 `nixos-install --flake .#desktop`
+
+## Troubleshooting
+
+- Bootloader install failed: If you see an error like `bootctl --esp-path=/boot install` failed, ensure the EFI System Partition (ESP) exists, is formatted as vfat, and mounted at `/boot` during install. With this repo, Disko creates and mounts the ESP at `/boot`. If you ran Disko without specifying the correct device, re-run with the proper `--argstr device /dev/disk/by-id/<id>`.
+- Wrong device path: Avoid `/dev/nvme0n1` short names; prefer stable `/dev/disk/by-id/<id>` paths to prevent surprises when device enumeration changes.
 
 A modern, declarative, and ephemeral NixOS system with ZFS, Impermanence, and Hyprland.
 

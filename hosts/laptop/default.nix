@@ -14,13 +14,8 @@
   networking.hostName = "laptop"; # Must match the name in flake.nix
   networking.hostId = "cafebabe"; # Required for ZFS, must be unique 8-character hex
 
-  # Boot loader configuration
-  boot.loader.grub = {
-    enable = true;
-    devices = [ "/dev/nvme0n1" ]; # Specify the device where GRUB should be installed
-    efiSupport = true;
-    useOSProber = true;
-  };
+  # Boot loader configuration (use systemd-boot with EFI)
+  boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Define the user account for this machine.
@@ -70,5 +65,5 @@
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions,
   # are taken. It's crucial for managing upgrades.
-  system.stateVersion = "23.11";
+  system.stateVersion = "25.05";
 }

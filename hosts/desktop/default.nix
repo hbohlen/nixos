@@ -27,6 +27,10 @@
   # sound.enable removed (deprecated)
   hardware.pulseaudio.enable = false;
 
+  # Boot loader configuration (use systemd-boot with EFI)
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
   # ZFS requires a hostId (must be 8 hex digits, e.g. "deadbeef")
   networking.hostId = "deadbeef";
 

@@ -73,5 +73,11 @@
       device = "rpool/safe/home/${username}";
       fsType = "zfs";
     };
+    "/boot" = {
+      device = "/dev/disk/by-partlabel/ESP";
+      fsType = "vfat";
+      options = [ "umask=0077" ];
+      neededForBoot = true;
+    };
   };
 }
