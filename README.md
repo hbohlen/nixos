@@ -1,6 +1,6 @@
 # NixOS Configuration
 
-`sudo nix run --extra-experimental-features 'nix-command flakes' github:nix-community/disko -- --mode disko ./modules/nixos/disko-zfs.nix`
+`sudo nix run --extra-experimental-features 'nix-command flakes' github:nix-community/disko -- --mode disko ./disko-layout.nix`
 
 `nixos-install --flake .#desktop`
 

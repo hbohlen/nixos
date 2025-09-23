@@ -9,6 +9,8 @@
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/disko-zfs.nix
     ./gaming.nix
+    inputs.disko.nixosModules.disko
+    ../../disko-layout.nix
   ];
 
   # Basic desktop configuration
