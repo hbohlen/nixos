@@ -40,13 +40,28 @@
 
   # Common packages for all systems
   environment.systemPackages = with pkgs; [
-    # Basic utilities
-    wget
-    curl
-    git
-    vim
-    htop
-    # Add more packages as needed
+  # Basic utilities
+  wget
+  curl
+  git
+  vim
+  htop
+  gcc
+  clang
+  python3
+  nodejs
+  make
+  cmake
+  docker
+  podman
+  go
+  rustc
+  cargo
+  jq
+  unzip
+  zip
+  tree
+  # Add more packages as needed
   ];
 
   # Setup networking with NetworkManager
@@ -80,4 +95,7 @@
   # Bluetooth support
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
+
+  # Podman container support
+  virtualisation.podman.enable = true;
 }

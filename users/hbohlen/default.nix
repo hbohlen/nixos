@@ -154,13 +154,22 @@
     };
   };
 
-  # Conditional configuration based on hostname
-  home.file = lib.mkIf (hostname == "laptop") {
-    ".config/hypr/special-laptop-config.conf".text = ''
-      # This config is only applied on the laptop
-      # For example, special trackpad gestures or power settings
-    '';
-  };
+
+  # Example: Manage dotfiles with a bare git repo ("dotfiles" pattern)
+  # To use, run:
+  #   git --git-dir=$HOME/.cfg/ --work-tree=$HOME init
+  #   git --git-dir=$HOME/.cfg/ --work-tree=$HOME remote add origin <your-dotfiles-repo>
+  #   git --git-dir=$HOME/.cfg/ --work-tree=$HOME pull
+  #   git --git-dir=$HOME/.cfg/ --work-tree=$HOME add ...
+  #   git --git-dir=$HOME/.cfg/ --work-tree=$HOME commit -m "..."
+  #   git --git-dir=$HOME/.cfg/ --work-tree=$HOME push
+  # You can add an alias in your shell config:
+  #   alias config='git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+  # Ensure the .cfg directory is persisted (add to impermanence config):
+  #   - /persist/home/hbohlen/.cfg
+
+  # If you want to use chezmoi or yadm, add them to home.packages and configure as needed.
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

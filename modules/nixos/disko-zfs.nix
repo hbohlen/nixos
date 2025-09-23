@@ -7,7 +7,7 @@ let
     if config.networking.hostName == "laptop" then
       "/dev/nvme0n1"
     else if config.networking.hostName == "desktop" then
-      "/dev/disk/by-id/desktop-disk-id"
+      "/dev/nvme0n1"
     else if config.networking.hostName == "server" then
       "/dev/disk/by-id/server-disk-id"
     else
