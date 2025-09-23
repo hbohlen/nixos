@@ -329,6 +329,13 @@ This is a modern, declarative NixOS system built on the "Erase Your Darlings" ph
 - **Dry run**: `nixos-rebuild dry-activate --flake .#hostname`
 - **Check configuration**: `nix flake check`
 
+## Formatting
+
+- `npm run fmt`: Formats all files using Prettier with `prettier-plugin-alejandra` for `.nix`.
+- `npm run fmt:check`: Checks formatting without writing changes.
+- `./scripts/format.sh`: Smart wrapper that prefers Prettier, falls back to `nix fmt` or Alejandra.
+- `nix fmt`: Uses the flake's `formatter` (currently `nixfmt-rfc-style`).
+
 ## Getting Started
 
 1. Clone this repository

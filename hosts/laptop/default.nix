@@ -8,6 +8,8 @@
   ../../modules/nixos/disko-zfs.nix
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/common.nix
+    ../../modules/nixos/nvidia-rog.nix  # Add this line
+    inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
   ];
 
   # Host-specific settings.

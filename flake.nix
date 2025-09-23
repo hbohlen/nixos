@@ -64,6 +64,9 @@
             }
           ] ++ extraModules; # Allow for additional, one-off modules.
         };
+
+      # Helper to get pkgs for a given system without adding new inputs
+      pkgsFor = system: import nixpkgs { inherit system; };
     in
     {
       # Define the NixOS configurations for each machine.
@@ -85,6 +88,26 @@
         "server" = mkSystem {
           hostname = "server";
           username = "hbohlen";
+        };
+      };
+
+      # Provide a formatter so `nix fmt` works
+      formatter = {
+        x86_64-linux = (pkgsFor "x86_64-linux").nixfmt-rfc-style;
+      };
+
+      # Dev shell with common Nix tooling for contributors
+      devShells = {
+        x86_64-linux = {
+          default = (pkgsFor "x86_64-linux").mkShell {
+            packages = with (pkgsFor "x86_64-linux"); [
+              nixfmt-rfc-style
+              alejandra
+              nil
+              statix
+              deadnix
+            ];
+          };
         };
       };
     };
