@@ -38,8 +38,8 @@
     hideMounts = true;
     directories = [
       # System-level directories that need persistence
-      "/var/lib/nixos"
       "/var/log"
+      "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/lib/AccountsService"
       "/etc/NetworkManager/system-connections"
@@ -112,4 +112,10 @@
   
   # Remove the persist-ensure-ssh-keys service (not needed with proper initrd ordering)
   systemd.services.persist-ensure-ssh-keys = lib.mkForce { };
+  
+  # Fix for SSH service - ensure it starts after persistent directories are available
+  systemd.services.sshd = {
+    after = [ "systemd-tmpfiles-setup.service" ];
+    wants = [ "systemd-tmpfiles-setup.service" ];
+  };
 }
