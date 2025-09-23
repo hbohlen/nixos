@@ -1,5 +1,5 @@
 # /disko-layout.nix
-{ device ? "/dev/disk/by-id/REPLACE_WITH_YOUR_DISK_ID", ... }:
+{ device ? "/dev/disk/by-id/nvme-Micron_2450_MTFDKBA1T0TFK_2146334B7D47", ... }:
 {
   disko.devices = {
     disk = {
