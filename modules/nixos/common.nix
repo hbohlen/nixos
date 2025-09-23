@@ -2,6 +2,8 @@
 { config, pkgs, lib, username, ... }:
 
 {
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Enable Wayland and PipeWire for audio/video.
   services.xserver = {
     enable = true; # Still needed for XWayland.
