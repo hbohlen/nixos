@@ -66,9 +66,9 @@ This is a modern, declarative NixOS system built on the "Erase Your Darlings" ph
 
 1. Clone this repository
 2. Customize `hosts/laptop/hardware-configuration.nix` for your hardware
-3. Update the disk identifier in `modules/nixos/disko-zfs.nix`
+3. Provision the disk with Disko using your by-id path (see above)
 4. Set your username and preferences in the `users` directory
-5. Run `./scripts/rebuild.sh` to build and activate the configuration
+5. Build or install: `nixos-rebuild build --flake .#desktop` or `sudo nixos-install --flake .#desktop`
 
 ## Key Features
 
