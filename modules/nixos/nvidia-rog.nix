@@ -34,6 +34,10 @@
       # Enable NVIDIA settings
       nvidiaSettings = true;
       
+      # Use open-source kernel modules for RTX/GTX 16xx and newer
+      # Set to false for older GPUs
+      open = false;
+      
       # Power management for better battery life
       powerManagement = {
         enable = true;
@@ -49,6 +53,10 @@
           enable = true;
           enableOffloadCmd = true;
         };
+        # Configure bus IDs (you may need to adjust these based on your hardware)
+        # Run 'lspci | grep -i nvidia' and 'lspci | grep -i vga' to find your IDs
+        intelBusId = "PCI:0:2:0";
+        nvidiaBusId = "PCI:1:0:0";
       };
       
       # Force the use of the proprietary driver
