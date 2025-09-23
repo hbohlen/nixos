@@ -125,18 +125,3 @@
     wants = [ "systemd-tmpfiles-setup.service" ];
   };
 }
-
-  # Additional udev rules for NVIDIA and ASUS devices
-  services.udev.extraRules = ''
-    # NVIDIA GPU power management
-    ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x10de", ATTR{class}=="0x030000", ATTR{power/control}="auto"
-    
-    # Fix for ASUS keyboard backlight and other features
-    ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="0b05", ATTR{idProduct}=="19b6", ATTR{power/autosuspend}="-1"
-  '';
-
-  # Ensure X server uses NVIDIA drivers
-  services.xserver = {
-    videoDrivers = [ "nvidia" ];
-  };
-}
