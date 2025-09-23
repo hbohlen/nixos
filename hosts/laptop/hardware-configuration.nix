@@ -20,6 +20,9 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
+  # Blacklist nouveau driver to prevent conflicts with NVIDIA proprietary driver
+  boot.blacklistedKernelModules = [ "nouveau" ];
+
   # CPU settings
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

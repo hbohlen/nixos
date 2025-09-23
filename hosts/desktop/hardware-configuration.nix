@@ -15,6 +15,9 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  # Blacklist nouveau driver to prevent conflicts with NVIDIA proprietary driver
+  boot.blacklistedKernelModules = [ "nouveau" ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

@@ -1,15 +1,19 @@
 # /hosts/laptop/default.nix
-{ config, pkgs, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ 
+    "vscode" "1password-cli" "1password" "nvidia-x11" "nvidia-settings" "nvidia-persistenced" "libnvidia-ml"
+  ];
+
   # Import the modules that define the core architecture of the system.
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/disko-zfs.nix
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/common.nix
-    # ../../modules/nixos/nvidia-rog.nix  # Temporarily disabled for ISO install
-    # inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h  # Temporarily disabled for ISO install
+    ../../modules/nixos/nvidia-rog.nix
+    inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
   ];
 
   # Host-specific settings.

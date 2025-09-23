@@ -9,8 +9,8 @@
     dedicatedServer.openFirewall = true;
   };
 
-  # Optimizations for gaming
-  boot.kernelParams = [ "intel_pstate=active" ];
+  # Optimizations for gaming (AMD CPU)
+  boot.kernelParams = [ "amd_pstate=active" ];
   
   # Gaming-related packages
   environment.systemPackages = with pkgs; [
@@ -34,11 +34,5 @@
         gpu_device = 0;
       };
     };
-  };
-
-  # OpenGL and Vulkan support (updated options)
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
   };
 }
