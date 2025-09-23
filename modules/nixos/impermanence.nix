@@ -27,12 +27,11 @@
   };
 
   # CRITICAL FIX: Prevent device timeout issues during initrd boot
-  # Add explicit timeout and dependency management for ZFS datasets
-  boot.initrd.systemd.extraConfig = ''
-    # Increase device timeout to prevent premature timeouts
-    DefaultTimeoutStartSec=300s
-    DefaultTimeoutStopSec=30s
-  '';
+  # Use the new settings.Manager approach for systemd configuration
+  boot.initrd.systemd.settings.Manager = {
+    DefaultTimeoutStartSec = "300s";
+    DefaultTimeoutStopSec = "30s";
+  };
 
   # Ensure persistent directories are created before they're needed
   boot.initrd.systemd.services.create-needed-for-boot-dirs = {
