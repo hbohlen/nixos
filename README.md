@@ -62,7 +62,7 @@ ls -l /dev/disk/by-partlabel/disk-main-ESP
 
 # Mount ESP at the target root
 sudo mkdir -p /mnt/boot
-sudo mount /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
+sudo mount -o umask=0077 /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
 ```
 
 5) Re-run the install:
