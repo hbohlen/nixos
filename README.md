@@ -1,5 +1,9 @@
 # NixOS Configuration
 
+`sudo nix run github:nix-community/disko -- --mode disko ./hosts/desktop/disko-zfs.nix`
+
+`nixos-install --flake .#desktop`
+
 A modern, declarative, and ephemeral NixOS system with ZFS, Impermanence, and Hyprland.
 
 ## Architecture Overview
