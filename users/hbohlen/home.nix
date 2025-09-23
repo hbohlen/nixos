@@ -3,7 +3,7 @@
 
 {
 	imports = [
-		../../modules/home-manager/desktop.nix
+		# ../../modules/home-manager/desktop.nix  # Temporarily disabled for ISO install
 		../../modules/home-manager/opnix.nix
 	];
 
@@ -16,25 +16,25 @@
 	# Let Home Manager install and manage itself.
 	programs.home-manager.enable = true;
 
-	# Packages specific to this user
+	# Packages specific to this user (minimal set for ISO install)
 	home.packages = with pkgs; [
-		# Development tools
-		vscode
-		zed-editor
-		nodejs
-		python3
-		uv
+		# Development tools (temporarily disabled for ISO install)
+		# vscode
+		# zed-editor
+		# nodejs
+		# python3
+		# uv
 		git
 		gh
     
-		# Applications
-		affine
-	_1password-cli
-	_1password-gui
-		opencode
-		podman
-		podman-desktop
-	vivaldi
+		# Applications (minimal set)
+		# affine          # Temporarily disabled
+		_1password-cli
+		_1password-gui
+		# opencode        # Temporarily disabled
+		# podman          # Temporarily disabled
+		# podman-desktop  # Temporarily disabled
+		# vivaldi         # Temporarily disabled
     
 		# Add more packages specific to this user
 	];
