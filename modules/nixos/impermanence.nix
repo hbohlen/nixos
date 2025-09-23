@@ -74,7 +74,7 @@
       fsType = "zfs";
     };
     "/boot" = {
-      device = "/dev/disk/by-partlabel/ESP";
+      device = "/dev/disk/by-partlabel/disk-main-ESP";
       fsType = "vfat";
       options = [ "umask=0077" ];
       neededForBoot = true;

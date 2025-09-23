@@ -54,15 +54,15 @@ findmnt -R /mnt | grep -E '/mnt$|/mnt/(boot|nix|persist|home)'
 4) If `/mnt/boot` is still missing, mount ESP manually (careful: format only if needed):
 
 ```bash
-# Identify the ESP by GPT partlabel "ESP"
-ls -l /dev/disk/by-partlabel/ESP
+# Identify the ESP by GPT partlabel created by Disko
+ls -l /dev/disk/by-partlabel/disk-main-ESP
 
 # If not formatted (only do this on the correct ESP; data loss otherwise)
-# sudo mkfs.vfat -F32 -n ESP /dev/disk/by-partlabel/ESP
+# sudo mkfs.vfat -F32 -n ESP /dev/disk/by-partlabel/disk-main-ESP
 
 # Mount ESP at the target root
 sudo mkdir -p /mnt/boot
-sudo mount /dev/disk/by-partlabel/ESP /mnt/boot
+sudo mount /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
 ```
 
 5) Re-run the install:
