@@ -14,24 +14,6 @@
   boot.initrd.systemd.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # NVIDIA driver configuration - blacklist nouveau and load nvidia early
-  boot = {
-    # Blacklist nouveau to prevent conflicts with proprietary NVIDIA drivers
-    blacklistedKernelModules = [ "nouveau" ];
-    
-    # Load nvidia drivers early in the boot process
-    initrd.kernelModules = [ "nvidia" "nvidia_drm" "nvidia_modeset" ];
-    
-    # Additional kernel parameters for NVIDIA and system stability
-    kernelParams = [
-      "nvidia-drm.modeset=1"  # Enable DRM modesetting for NVIDIA
-      "nvidia-drm.fbdev=1"    # Enable framebuffer device
-      "nvidia.NVreg_PreserveVideoMemoryAllocations=1"  # Preserve video memory allocations
-      "mem_sleep_default=deep"  # Deep sleep for better power management
-      "pcie_aspm.policy=powersupersave"  # PCIe power management
-    ];
-  };
-
   # Move ZFS rollback to initrd stage where it belongs
   boot.initrd.systemd.services.zfs-rollback = {
     description = "Rollback ZFS root dataset to a blank snapshot";
@@ -142,56 +124,7 @@
     after = [ "systemd-tmpfiles-setup.service" ];
     wants = [ "systemd-tmpfiles-setup.service" ];
   };
-
-  # ASUS-specific services and configurations
-  services = {
-    asusd = {
-      enable = true;
-      enableUserService = true;
-    };
-    supergfxd.enable = true;
-  };
-
-  # NVIDIA configuration for ASUS ROG laptops
-  hardware = {
-    # Enable graphics with 32-bit support
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-    };
-
-    # NVIDIA proprietary driver configuration
-    nvidia = {
-      # Modesetting is required for proper NVIDIA functionality
-      modesetting.enable = true;
-      
-      # Enable NVIDIA settings
-      nvidiaSettings = true;
-      
-      # Power management for better battery life
-      powerManagement = {
-        enable = true;
-        finegrained = true;
-      };
-      
-      # Dynamic boost for better performance
-      dynamicBoost.enable = true;
-      
-      # Prime configuration for hybrid graphics
-      prime = {
-        offload = {
-          enable = true;
-          enableOffloadCmd = true;
-        };
-        # These will be set by the hardware module, but we can override if needed
-        # intelBusId = "PCI:0:2:0";
-        # nvidiaBusId = "PCI:1:0:0";
-      };
-      
-      # Force the use of the proprietary driver
-      forceFullCompositionPipeline = true;
-    };
-  };
+}
 
   # Additional udev rules for NVIDIA and ASUS devices
   services.udev.extraRules = ''
