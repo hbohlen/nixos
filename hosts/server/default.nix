@@ -23,6 +23,17 @@
     };
   };
 
+  # User configuration for hbohlen
+  users.users.hbohlen = {
+    isNormalUser = true;
+    extraGroups = [ "wheel" "networkmanager" ];
+    initialPassword = "changeme"; # Replace with secure method in production
+    group = "hbohlen";
+    createHome = true;
+    home = "/home/hbohlen";
+  };
+  users.groups.hbohlen = {};
+
   # Additional server-specific packages
   environment.systemPackages = with pkgs; [
     # Server tools
