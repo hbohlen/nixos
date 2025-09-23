@@ -58,7 +58,7 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               # Pass the user's specific home.nix configuration.
-              home-manager.users.${username} = import ./users/${username};
+              home-manager.users.${username} = import ./users/${username}/home.nix;
               # Pass specialArgs to home-manager modules as well.
               home-manager.extraSpecialArgs = { inherit inputs hostname username; };
             }
