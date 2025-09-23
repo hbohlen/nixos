@@ -1,80 +1,82 @@
 # Minimal Disko layout for CLI usage
 {
-	disk = {
-		main = {
-			device = "/dev/nvme0n1";
-			type = "disk";
-			content = {
-				type = "gpt";
-				partitions = {
-					ESP = {
-						size = "1G";
-						type = "EF00";
-						content = {
-							type = "filesystem";
-							format = "vfat";
-							mountpoint = "/boot";
-						};
-					};
-					swap = {
-						size = "8G";
-						content = {
-							type = "swap";
-							randomEncryption = true;
-						};
-					};
-					luks = {
-						size = "100%";
-						content = {
-							type = "luks";
-							name = "cryptroot";
-							settings = {
-								allowDiscards = true;
-							};
+	disko.devices = {
+		disk = {
+			main = {
+				device = "/dev/nvme0n1";
+				type = "disk";
+				content = {
+					type = "gpt";
+					partitions = {
+						ESP = {
+							size = "1G";
+							type = "EF00";
 							content = {
-								type = "zfs";
-								pool = "rpool";
+								type = "filesystem";
+								format = "vfat";
+								mountpoint = "/boot";
+							};
+						};
+						swap = {
+							size = "8G";
+							content = {
+								type = "swap";
+								randomEncryption = true;
+							};
+						};
+						luks = {
+							size = "100%";
+							content = {
+								type = "luks";
+								name = "cryptroot";
+								settings = {
+									allowDiscards = true;
+								};
+								content = {
+									type = "zfs";
+									pool = "rpool";
+								};
 							};
 						};
 					};
 				};
 			};
 		};
-	};
-	zpool = {
-		rpool = {
-			type = "zpool";
-			options = {
-				ashift = "12";
-				autotrim = "on";
-			};
-			rootFsOptions = {
-				compression = "zstd";
-				acltype = "posixacl";
-				xattr = "sa";
-				relatime = "on";
-				mountpoint = "none";
-			};
-			datasets = {
-				"local/root" = {
-					type = "zfs_fs";
-					mountpoint = "/";
-					postCreateHook = ''
-						zfs snapshot rpool/local/root@blank
-					'';
+		zpool = {
+			rpool = {
+				type = "zpool";
+				options = {
+					ashift = "12";
+					autotrim = "on";
 				};
-				"local/nix" = {
-					type = "zfs_fs";
-					mountpoint = "/nix";
-					options."com.sun:auto-snapshot" = "false";
+				rootFsOptions = {
+					compression = "zstd";
+					acltype = "posixacl";
+					xattr = "sa";
+					relatime = "on";
+					mountpoint = "none";
 				};
-				"safe/persist" = {
-					type = "zfs_fs";
-					mountpoint = "/persist";
-				};
-				"safe/home" = {
-					type = "zfs_fs";
-					mountpoint = "/home";
+				datasets = {
+					"local/root" = {
+						type = "zfs_fs";
+						mountpoint = "/";
+						postCreateHook = ''
+							zfs snapshot rpool/local/root@blank
+						'';
+					};
+					"local/nix" = {
+						type = "zfs_fs";
+						mountpoint = "/nix";
+						options."com.sun:auto-snapshot" = "false";
+					};
+					"safe/persist" = {
+						type = "zfs_fs";
+						mountpoint = "/persist";
+					};
+					"safe/home" = {
+						type = "zfs_fs";
+						mountpoint = "/home";
+					};
 				};
 			};
 		};
