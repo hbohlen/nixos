@@ -35,6 +35,8 @@
     "steam"
     "vscode"
     "vivaldi"
+    "nvidia-x11"
+    "nvidia-settings"
   ];
   programs._1password-gui = {
     enable = true;
