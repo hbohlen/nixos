@@ -29,12 +29,30 @@
   # These are bind-mounted from the `/persist` dataset.
   environment.persistence."/persist" = {
     hideMounts = true; # Hides the bind mounts from appearing in file managers.
-    directories = [
+  directories = [
       # System-level directories that need persistence
       "/var/lib/nixos"
       "/var/log"
       "/var/lib/systemd/coredump"
-      # Add more directories as needed
+      "/var/lib/AccountsService"
+      "/var/cache"
+      "/var/lib"
+      "/etc/X11"
+      "/etc/NetworkManager/system-connections"
+      "/var/spool"
+      "/var/lib/colord"
+      "/var/lib/flatpak"
+      "/var/lib/systemd/timers"
+      "/var/mail"
+      "/root"
+  # 1Password CLI and GUI (user-specific)
+  "/home/${username}/.config/op"
+  "/home/${username}/.config/1Password"
+  "/home/${username}/.cache/1Password"
+  "/home/${username}/.config/1Password-Beta"
+  # 1Password system-wide (rare)
+  "/var/lib/1password"
+  # Add more directories as needed
     ];
     files = [
       # System-level files that need persistence
@@ -43,6 +61,13 @@
       "/etc/ssh/ssh_host_ed25519_key.pub"
       "/etc/ssh/ssh_host_rsa_key"
       "/etc/ssh/ssh_host_rsa_key.pub"
+      "/etc/passwd"
+      "/etc/group"
+      "/etc/shadow"
+      "/etc/gshadow"
+      "/etc/nsswitch.conf"
+      "/etc/hostname"
+      "/etc/localtime"
       # Add more files as needed
     ];
   };
