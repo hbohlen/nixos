@@ -11,17 +11,42 @@
   services.zfs.autoScrub.enable = true;
 
   # This systemd service executes the ZFS rollback at boot, wiping the root filesystem.
+  # Ensure /persist is available (so persisted files like SSH host keys exist)
+  # before the rollback runs. Also wait for zfs-mount so datasets are mounted.
   systemd.services.zfs-rollback = {
     description = "Rollback ZFS root dataset to a blank snapshot";
     wantedBy = [ "multi-user.target" ];
-    # Must run before filesystems are mounted but after the zpool is imported.
+    # Must run before filesystems are remounted by systemd, but after the zpool
+    # is imported and ZFS datasets are mounted under /persist.
     before = [ "systemd-remount-fs.service" ];
-    after = [ "zfs-import.service" ];
+    after = [ "zfs-import.service" "zfs-mount.service" ];
+    # Require /persist to be mounted so persisted files are present when other
+    # units (sshd, display-manager, etc.) start.
     serviceConfig = {
       Type = "oneshot";
+      RequiresMountsFor = "/persist";
       # The -r flag recursively destroys any snapshots newer than @blank.
       # The -f flag is needed if the dataset is mounted, which it may be.
       ExecStart = "${pkgs.zfs}/bin/zfs rollback -r -f rpool/local/root@blank";
+    };
+  };
+
+  # Ensure SSH host keys exist in /persist before sshd starts. This oneshot
+  # is idempotent and will only generate keys if they are missing.
+  systemd.services.persist-ensure-ssh-keys = {
+    description = "Ensure SSH host keys exist in /persist/etc/ssh";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "zfs-mount.service" "zfs-rollback.service" ];
+    # Run before sshd so the daemon finds keys when it starts
+    before = [ "sshd.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RequiresMountsFor = "/persist";
+      ExecStart = ''
+        if [ ! -e /etc/ssh/ssh_host_ed25519_key ] && [ ! -e /persist/etc/ssh/ssh_host_ed25519_key ]; then
+          ${pkgs.openssh}/bin/ssh-keygen -A || true
+        fi
+      '';
     };
   };
 
