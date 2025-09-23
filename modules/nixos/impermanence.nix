@@ -58,26 +58,23 @@
       "/etc/ssh/ssh_host_rsa_key"
       "/etc/ssh/ssh_host_rsa_key.pub"
     ];
+    users.${username} = {
+      directories = [
+        ".config/op"
+        ".config/1Password"
+        ".cache/1Password"
+        ".config/1Password-Beta"
+        "Documents"
+        "Downloads"
+        "Pictures"
+        "Music"
+        "Videos"
+        ".local/share"
+      ];
+    };
   };
 
-  # User-specific persistence (separate from system persistence)
-  environment.persistence."/persist/home/${username}" = {
-    hideMounts = true;
-    directories = [
-      # 1Password CLI and GUI (user-specific)
-      ".config/op"
-      ".config/1Password"
-      ".cache/1Password"
-      ".config/1Password-Beta"
-      # Add more user directories as needed
-      "Documents"
-      "Downloads"
-      "Pictures"
-      "Music"
-      "Videos"
-      ".local/share"
-    ];
-  };
+  # User-specific persistence now declared under /persist.users.${username}
 
   # Explicitly define the filesystem mounts.
   fileSystems = {
