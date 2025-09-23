@@ -1,21 +1,179 @@
 # NixOS Configuration
 
-Find your target disk id (recommended):
+A modern, declarative NixOS system configuration built on the "Erase Your Darlings" philosophy, featuring ephemeral root filesystem with selective persistence.
 
-```
-ls -l /dev/disk/by-id/
-```
+## Repository Overview
 
-Run Disko, passing the disk by-id value (safer than /dev/nvme0n1):
+This repository provides a comprehensive NixOS configuration that combines several advanced technologies to create a robust, reproducible, and secure computing environment:
 
-```
-sudo nix run --extra-experimental-features 'nix-command flakes' \
-  github:nix-community/disko -- --mode disko \
-  --argstr device /dev/disk/by-id/nvme-CT2000P310SSD8_24514D0F486C \
-  ./disko-layout.nix
-```
+- **Ephemeral Root**: The root filesystem is reset to a pristine state on each boot
+- **Selective Persistence**: Only explicitly chosen files and directories survive reboots
+- **Declarative Everything**: From disk partitioning to application themes, everything is defined as code
+- **Multi-Host Support**: Configurations for desktop, laptop, and server environments
+- **Modern Desktop**: Hyprland Wayland compositor with integrated theming
+- **Secret Management**: Runtime secret injection via 1Password integration
 
-`nixos-install --flake .#desktop`
+## Prerequisites
+
+### Required NixOS Version
+- NixOS 23.11 or later (configuration targets 25.05)
+- Nix with flakes experimental feature enabled
+
+### Required System Dependencies
+- UEFI-compatible system (not BIOS/Legacy)
+- At least 8GB RAM (for ZFS and desktop environment)
+- Modern CPU with hardware encryption support (recommended)
+- Internet connection for initial setup and package downloads
+
+### Hardware Compatibility
+- Works best with modern hardware that has good Linux support
+- Special configurations available for ASUS ROG laptops and NVIDIA graphics
+- ZFS requires adequate RAM (minimum 2GB recommended for ZFS ARC)
+
+## Installation/Usage
+
+### Initial Setup
+
+1. **Find Your Target Disk**:
+   ```bash
+   ls -l /dev/disk/by-id/
+   ```
+
+2. **Partition and Format with Disko**:
+   ```bash
+   sudo nix run --extra-experimental-features 'nix-command flakes' \
+     github:nix-community/disko -- --mode disko \
+     --argstr device /dev/disk/by-id/YOUR_DISK_ID \
+     ./disko-layout.nix
+   ```
+
+3. **Install NixOS**:
+   ```bash
+   sudo nixos-install --flake .#desktop
+   ```
+
+### Making Changes
+
+1. **Clone this repository**:
+   ```bash
+   git clone https://github.com/hbohlen/nixos.git
+   cd nixos
+   ```
+
+2. **Test your changes**:
+   ```bash
+   nixos-rebuild build --flake .#hostname
+   ```
+
+3. **Apply changes**:
+   ```bash
+   sudo nixos-rebuild switch --flake .#hostname
+   ```
+   Or use the convenient script:
+   ```bash
+   ./scripts/rebuild.sh
+   ```
+
+## Structure Overview
+
+This configuration follows a modular architecture that promotes reusability and maintainability:
+
+### Directory Structure
+
+- **`flake.nix`** - Central entry point defining all inputs, outputs, and host configurations
+- **`hosts/`** - Machine-specific configurations
+  - `desktop/` - High-performance desktop with gaming support
+  - `laptop/` - Power-optimized portable configuration  
+  - `server/` - Minimal headless server configuration
+- **`modules/`** - Reusable configuration modules
+  - `nixos/` - System-level modules (disk, impermanence, hardware)
+  - `home-manager/` - User-level modules (desktop, applications)
+- **`users/`** - Individual user account and Home Manager configurations
+- **`scripts/`** - Utility scripts for system management and formatting
+- **`secrets/`** - Placeholder for runtime secret injection (never commit actual secrets)
+- **`docs/`** - Comprehensive documentation and troubleshooting guides
+
+### Key Components
+
+- **Disko Integration**: Declarative disk partitioning with ZFS on LUKS
+- **Impermanence System**: Ephemeral root with selective persistence
+- **Home Manager**: Declarative user environment management
+- **Hyprland Desktop**: Modern Wayland compositor with integrated theming
+- **Secret Management**: Runtime injection via Opnix and 1Password
+
+## Customization Guide
+
+### Adding a New Host
+
+1. **Create host directory**:
+   ```bash
+   mkdir -p hosts/new-hostname
+   ```
+
+2. **Generate hardware configuration**:
+   ```bash
+   nixos-generate-config --dir hosts/new-hostname
+   ```
+
+3. **Create host configuration**:
+   ```nix
+   # hosts/new-hostname/default.nix
+   { config, pkgs, lib, inputs, ... }:
+   {
+     imports = [
+       ./hardware-configuration.nix
+       ../../modules/nixos/common.nix
+       ../../modules/nixos/impermanence.nix
+       ../../modules/nixos/disko-zfs.nix
+     ];
+     
+     networking.hostName = "new-hostname";
+     networking.hostId = "12345678"; # Unique 8-character hex
+     
+     # Add host-specific configuration here
+   }
+   ```
+
+4. **Add to flake.nix**:
+   ```nix
+   nixosConfigurations = {
+     # ... existing hosts ...
+     "new-hostname" = mkSystem {
+       hostname = "new-hostname";
+       username = "your-username";
+     };
+   };
+   ```
+
+### Adding New Modules
+
+1. **System modules** go in `modules/nixos/`
+2. **User modules** go in `modules/home-manager/`
+3. **Follow existing patterns** for options and configuration structure
+4. **Import modules** in appropriate host or user configurations
+
+### Customizing Persistence
+
+Edit `modules/nixos/impermanence.nix` to add files or directories that should survive reboots:
+
+```nix
+environment.persistence."/persist" = {
+  directories = [
+    # Add system directories here
+    "/var/lib/your-service"
+  ];
+  files = [
+    # Add system files here
+    "/etc/your-config-file"
+  ];
+  users.username = {
+    directories = [
+      # Add user directories here
+      ".config/your-app"
+    ];
+  };
+};
+```
 
 ## Troubleshooting
 
@@ -359,6 +517,110 @@ This is a modern, declarative NixOS system built on the "Erase Your Darlings" ph
 - Extend functionality with new modules in the `modules/` directory
 - Adjust the disk layout in `modules/nixos/disko-zfs.nix`
 - Modify persistence rules in `modules/nixos/impermanence.nix`
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### Boot Failures
+- **Symptom**: System fails to boot or drops to emergency shell
+- **Solution**: Boot from an older generation in GRUB menu, check `/var/log/boot.log`
+- **Prevention**: Always test with `nixos-rebuild build` before `switch`
+
+#### ZFS Import Failures
+- **Symptom**: `failed to import pool 'rpool'`
+- **Solution**: Check disk connections, verify pool status with `zpool status`
+- **Prevention**: Use stable `/dev/disk/by-id/` paths instead of `/dev/sdX`
+
+#### SSH Service Failures
+- **Symptom**: SSH host keys missing or service won't start
+- **Solution**: Ensure SSH host keys are in persistence configuration
+- **Check**: Verify `/etc/ssh/ssh_host_*` files are persisted in `impermanence.nix`
+
+#### Home Manager Build Failures
+- **Symptom**: `collision between` package conflicts
+- **Solution**: Check for duplicate package definitions between system and user configs
+- **Fix**: Use `programs.package.enable = true` instead of adding to `home.packages`
+
+#### Package Not Found Errors
+- **Symptom**: `attribute 'package' does not exist`
+- **Solution**: Check package name in [NixOS Search](https://search.nixos.org/)
+- **Alternative**: Use `nix-env -qaP package-name` to find correct attribute path
+
+### Debug Commands
+
+```bash
+# Check configuration syntax
+nix flake check
+
+# Build without switching
+nixos-rebuild build --flake .#hostname
+
+# Show what would change
+nixos-rebuild dry-activate --flake .#hostname
+
+# Check system status
+systemctl status
+journalctl -f
+
+# ZFS status
+zpool status
+zfs list
+```
+
+## Contributing
+
+### Guidelines for Contributing
+
+1. **Follow existing patterns** - Study the current structure before making changes
+2. **Test thoroughly** - Always build and test configurations before submitting
+3. **Document changes** - Update documentation for any new features or significant changes
+4. **Use proper formatting** - Run `npm run fmt` to format all files consistently
+
+### Testing Changes
+
+1. **Syntax validation**:
+   ```bash
+   nix flake check
+   ```
+
+2. **Build test**:
+   ```bash
+   nixos-rebuild build --flake .#hostname
+   ```
+
+3. **Dry run**:
+   ```bash
+   nixos-rebuild dry-activate --flake .#hostname
+   ```
+
+4. **Test on appropriate hardware** - Don't test GPU configurations without GPU hardware
+
+### Code Style Guidelines
+
+- **Nix files**: 2-space indentation, trailing commas, descriptive comments
+- **Module structure**: Use standard `{ config, pkgs, lib, ... }:` signature
+- **Naming**: kebab-case for files, camelCase for options, snake_case for string variables
+- **Imports**: Use relative paths, group by type
+- **Security**: Never commit secrets, use runtime injection instead
+
+### Pull Request Process
+
+1. Fork the repository
+2. Create a feature branch from `main`
+3. Make your changes following the guidelines above
+4. Test your changes thoroughly
+5. Update documentation if needed
+6. Submit a pull request with clear description of changes
+
+### Reporting Issues
+
+When reporting issues, please include:
+- Host configuration affected (desktop/laptop/server)
+- Steps to reproduce the problem
+- Error messages or logs
+- System information (`nixos-version`, hardware details)
+- Whether the issue occurs on fresh install or after changes
 
 ## References
 

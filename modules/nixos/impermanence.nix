@@ -68,10 +68,7 @@
       "/etc/ssh/ssh_host_rsa_key"
       "/etc/ssh/ssh_host_rsa_key.pub"
     ];
-  };
-
-  # User-specific persistence (separate from system persistence)
-  environment.persistence."/persist" = {
+    # User-specific persistence
     users.${username} = {
       directories = [
         # 1Password CLI and GUI (user-specific)

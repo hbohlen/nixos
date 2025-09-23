@@ -2,10 +2,6 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ 
-    "vscode" "1password-cli" "1password" "vivaldi" "steam" "steam-unwrapped" "discord" 
-    "nvidia-x11" "nvidia-settings" "nvidia-persistenced" "libnvidia-ml"
-  ];
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/disko-zfs.nix

@@ -2,10 +2,6 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ 
-    "vscode" "1password-cli" "1password" "nvidia-x11" "nvidia-settings" "nvidia-persistenced" "libnvidia-ml"
-  ];
-
   # Import the modules that define the core architecture of the system.
   imports = [
     ./hardware-configuration.nix

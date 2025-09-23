@@ -30,15 +30,28 @@
   #   extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
   # };
 
-  # Enable the unfree packages we need (minimal set for ISO install).
+  # Enable unfree packages - comprehensive list for all hosts
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    # 1Password family
     "1password"
     "1password-cli"
-    # "steam"          # Temporarily disabled
-    "vscode"         # Re-enabled for laptop configuration
-    # "vivaldi"        # Temporarily disabled
-    # "nvidia-x11"     # Temporarily disabled
-    # "nvidia-settings" # Temporarily disabled
+    "1password-gui"
+    # Development tools
+    "vscode"
+    "code"
+    # Gaming (for desktop)
+    "steam"
+    "steam-unwrapped"
+    "discord"
+    # Browsers
+    "vivaldi"
+    "chrome"
+    # NVIDIA drivers
+    "nvidia-x11"
+    "nvidia-settings"
+    "nvidia-persistenced" 
+    "libnvidia-ml"
+    # Add more as needed
   ];
   programs._1password-gui = {
     enable = true;
