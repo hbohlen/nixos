@@ -25,9 +25,9 @@
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   # Graphics hardware
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport32Bit = true;
+    enable32Bit = true;
   };
 
   # Placeholder for filesystem mounts (these will be managed by Disko and impermanence modules)
