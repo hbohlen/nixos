@@ -36,10 +36,13 @@
       url = "github:brizzbuzz/opnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # nixos-hardware: Community hardware profiles for various devices
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
   };
 
   # Define the outputs of the flake (e.g., NixOS configurations).
-  outputs = { self, nixpkgs, home-manager, disko, impermanence, hyprland, opnix, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, disko, impermanence, hyprland, opnix, nixos-hardware, ... }@inputs:
     let
       # Define a helper function to build a NixOS system configuration.
       # This pattern reduces boilerplate and enforces a consistent structure.
