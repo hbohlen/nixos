@@ -82,24 +82,25 @@
   };
 
   # User-specific persistence (separate from system persistence)
-  environment.persistence."/persist/home/${username}" = {
-    hideMounts = true;
-    directories = [
-      # 1Password CLI and GUI (user-specific)
-      ".config/op"
-      ".config/1Password"
-      ".cache/1Password"
-      ".config/1Password-Beta"
-      # ASUS-specific user directories
-      ".config/asusd"
-      # Add more user directories as needed
-      "Documents"
-      "Downloads"
-      "Pictures"
-      "Music"
-      "Videos"
-      ".local/share"
-    ];
+  environment.persistence."/persist" = {
+    users.${username} = {
+      directories = [
+        # 1Password CLI and GUI (user-specific)
+        ".config/op"
+        ".config/1Password"
+        ".cache/1Password"
+        ".config/1Password-Beta"
+        # ASUS-specific user directories
+        ".config/asusd"
+        # Add more user directories as needed
+        "Documents"
+        "Downloads"
+        "Pictures"
+        "Music"
+        "Videos"
+        ".local/share"
+      ];
+    };
   };
 
   # Explicitly define the filesystem mounts.
