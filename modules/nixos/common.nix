@@ -31,6 +31,7 @@
     "1password"
     "1password-cli"
     "steam"
+    "vscode"
   ];
   programs._1password-gui = {
     enable = true;

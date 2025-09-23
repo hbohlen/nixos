@@ -47,7 +47,219 @@ sudo nix run --extra-experimental-features 'nix-command flakes' \
 
 3) Verify mounts (you should see `/mnt/boot`):
 
-```bash
+NixOS Root on ZFS
+
+Customization
+
+Unless stated otherwise, it is not recommended to customize system configuration before reboot.
+
+UEFI support only
+
+Only UEFI is supported by this guide. Make sure your computer is booted in UEFI mode.
+Preparation
+
+    Download NixOS Live Image and boot from it.
+
+    sha256sum -c ./nixos-*.sha256
+
+    dd if=input-file of=output-file bs=1M
+
+    Connect to the Internet.
+
+    Set root password or /root/.ssh/authorized_keys.
+
+    Start SSH server
+
+    systemctl restart sshd
+
+    Connect from another computer
+
+    ssh root@192.168.1.91
+
+    Target disk
+
+    List available disks with
+
+    find /dev/disk/by-id/
+
+    If virtio is used as disk bus, power off the VM and set serial numbers for disk. For QEMU, use -drive format=raw,file=disk2.img,serial=AaBb. For libvirt, edit domain XML. See this page for examples.
+
+    Declare disk array
+
+    DISK='/dev/disk/by-id/ata-FOO /dev/disk/by-id/nvme-BAR'
+
+    For single disk installation, use
+
+    DISK='/dev/disk/by-id/disk1'
+
+    Set a mount point
+
+    MNT=$(mktemp -d)
+
+    Set partition size:
+
+    Set swap size in GB, set to 1 if you don’t want swap to take up too much space
+
+    SWAPSIZE=4
+
+    Set how much space should be left at the end of the disk, minimum 1GB
+
+    RESERVE=1
+
+System Installation
+
+    Partition the disks.
+
+    Note: you must clear all existing partition tables and data structures from target disks.
+
+    For flash-based storage, this can be done by the blkdiscard command below:
+
+    partition_disk () {
+     local disk="${1}"
+     blkdiscard -f "${disk}" || true
+
+     parted --script --align=optimal  "${disk}" -- \
+     mklabel gpt \
+     mkpart EFI 1MiB 4GiB \
+     mkpart rpool 4GiB -$((SWAPSIZE + RESERVE))GiB \
+     mkpart swap  -$((SWAPSIZE + RESERVE))GiB -"${RESERVE}"GiB \
+     set 1 esp on \
+
+     partprobe "${disk}"
+    }
+
+    for i in ${DISK}; do
+       partition_disk "${i}"
+    done
+
+    Setup temporary encrypted swap for this installation only. This is useful if the available memory is small:
+
+    for i in ${DISK}; do
+       cryptsetup open --type plain --key-file /dev/random "${i}"-part3 "${i##*/}"-part3
+       mkswap /dev/mapper/"${i##*/}"-part3
+       swapon /dev/mapper/"${i##*/}"-part3
+    done
+
+    LUKS only: Setup encrypted LUKS container for root pool:
+
+    for i in ${DISK}; do
+       # see PASSPHRASE PROCESSING section in cryptsetup(8)
+       printf "YOUR_PASSWD" | cryptsetup luksFormat --type luks2 "${i}"-part2 -
+       printf "YOUR_PASSWD" | cryptsetup luksOpen "${i}"-part2 luks-rpool-"${i##*/}"-part2 -
+    done
+
+    Create root pool
+
+        Unencrypted
+
+        # shellcheck disable=SC2046
+        zpool create \
+            -o ashift=12 \
+            -o autotrim=on \
+            -R "${MNT}" \
+            -O acltype=posixacl \
+            -O canmount=off \
+            -O dnodesize=auto \
+            -O normalization=formD \
+            -O relatime=on \
+            -O xattr=sa \
+            -O mountpoint=none \
+            rpool \
+            mirror \
+           $(for i in ${DISK}; do
+              printf '%s ' "${i}-part2";
+             done)
+
+        LUKS encrypted
+
+        # shellcheck disable=SC2046
+        zpool create \
+            -o ashift=12 \
+            -o autotrim=on \
+            -R "${MNT}" \
+            -O acltype=posixacl \
+            -O canmount=off \
+            -O dnodesize=auto \
+            -O normalization=formD \
+            -O relatime=on \
+            -O xattr=sa \
+            -O mountpoint=none \
+            rpool \
+            mirror \
+           $(for i in ${DISK}; do
+              printf '/dev/mapper/luks-rpool-%s ' "${i##*/}-part2";
+             done)
+
+    If not using a multi-disk setup, remove mirror.
+
+    Create root system container:
+
+        zfs create -o canmount=noauto -o mountpoint=legacy rpool/root
+
+    Create system datasets, manage mountpoints with mountpoint=legacy
+
+    zfs create -o mountpoint=legacy rpool/home
+    mount -o X-mount.mkdir -t zfs rpool/root "${MNT}"
+    mount -o X-mount.mkdir -t zfs rpool/home "${MNT}"/home
+
+    Format and mount ESP. Only one of them is used as /boot, you need to set up mirroring afterwards
+
+    for i in ${DISK}; do
+     mkfs.vfat -n EFI "${i}"-part1
+    done
+
+    for i in ${DISK}; do
+     mount -t vfat -o fmask=0077,dmask=0077,iocharset=iso8859-1,X-mount.mkdir "${i}"-part1 "${MNT}"/boot
+     break
+    done
+
+System Configuration
+
+    Generate system configuration:
+
+    nixos-generate-config --root "${MNT}"
+
+    Edit system configuration:
+
+    nano "${MNT}"/etc/nixos/hardware-configuration.nix
+
+    Set networking.hostId:
+
+    networking.hostId = "abcd1234";
+
+    If using LUKS, add the output from following command to system configuration
+
+    tee <<EOF
+      boot.initrd.luks.devices = {
+    EOF
+
+    for i in ${DISK}; do echo \"luks-rpool-"${i##*/}-part2"\".device = \"${i}-part2\"\; ; done
+
+    tee <<EOF
+    };
+    EOF
+
+    Install system and apply configuration
+
+    nixos-install  --root "${MNT}"
+
+    Wait for the root password reset prompt to appear.
+
+    Unmount filesystems
+
+    cd /
+    umount -Rl "${MNT}"
+    zpool export -a
+
+    Reboot
+
+    reboot
+
+    Set up networking, desktop and swap.
+
+    Mount other EFI system partitions then set up a service for syncing their contents.
+
+
 findmnt -R /mnt | grep -E '/mnt$|/mnt/(boot|nix|persist|home)'
 ```
 
