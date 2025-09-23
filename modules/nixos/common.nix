@@ -35,7 +35,7 @@
     "1password"
     "1password-cli"
     # "steam"          # Temporarily disabled
-    # "vscode"         # Temporarily disabled
+    "vscode"         # Re-enabled for laptop configuration
     # "vivaldi"        # Temporarily disabled
     # "nvidia-x11"     # Temporarily disabled
     # "nvidia-settings" # Temporarily disabled
