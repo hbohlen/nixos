@@ -50,7 +50,7 @@
   clang
   python3
   nodejs
-  make
+  gnumake
   cmake
   docker
   podman
