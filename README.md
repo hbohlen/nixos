@@ -36,6 +36,34 @@ This repository provides a comprehensive NixOS configuration that combines sever
 
 ## Installation from LiveISO
 
+### Quick Installation (Recommended)
+
+For a fully automated installation, use the provided installation script:
+
+```bash
+# Boot from NixOS LiveISO and run:
+sudo -i
+nix-shell -p git
+cd /tmp
+git clone https://github.com/hbohlen/nixos
+cd nixos
+./scripts/install.sh
+```
+
+The script will:
+- Prompt for hostname, username, and target disk
+- Handle disko partitioning with ZFS+LUKS
+- Set up impermanence with persistent directories  
+- Mount all filesystems correctly
+- Install NixOS with your configuration
+- Provide comprehensive error handling and cleanup
+
+⚠️ **Warning**: This will destroy all data on the target disk!
+
+### Manual Installation (Advanced)
+
+For manual installation or troubleshooting, follow the detailed steps below.
+
 ### Prerequisites
 - NixOS LiveISO (latest stable version)
 - Internet connection  
