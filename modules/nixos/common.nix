@@ -70,7 +70,6 @@
     nodejs
     gnumake
     cmake
-    docker
     podman
     go
     rustc
@@ -115,5 +114,10 @@
   services.blueman.enable = true;
 
   # Podman container support
-  virtualisation.podman.enable = true;
+  virtualisation.podman = {
+    enable = true;
+    dockerCompat = true;
+    defaultNetwork.settings.dns_enabled = true;
+  };
+  virtualisation.oci-containers.backend = "podman";
 }
