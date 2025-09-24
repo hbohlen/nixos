@@ -3,7 +3,7 @@
 
 {
   imports = [
-    # ../../modules/home-manager/desktop.nix  # Temporarily disabled for ISO install
+    ../../modules/home-manager/desktop.nix
     ../../modules/home-manager/opnix.nix
   ];
 
@@ -24,13 +24,13 @@
   nodejs
   python3
   uv
-    git
-    gh
+  git
+  gh
     
   # Applications
   affine
-    _1password-cli
-    _1password-gui
+  _1password-cli
+  _1password-gui
   opencode
   podman
   podman-desktop
