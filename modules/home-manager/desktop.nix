@@ -139,9 +139,14 @@
         "$mainMod SHIFT, 9, movetoworkspace, 9"
         "$mainMod SHIFT, 0, movetoworkspace, 10"
 
-        # Screenshot bindings
-        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
-        "SHIFT, Print, exec, grim - | wl-copy"
+  # Screenshot bindings
+  ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
+  "SHIFT, Print, exec, grim - | wl-copy"
+
+  # Custom: Launch Alacritty with mainMod+Shift+Return
+  "$mainMod SHIFT, Return, exec, alacritty"
+
+  # Add more custom keybindings below as needed
       ];
     };
   };
