@@ -41,8 +41,6 @@
       separator-color = "#cdd6f4";
     };
   };
-
-{
   imports = [
     # Import the official Hyprland Home Manager module.
     inputs.hyprland.homeManagerModules.default
