@@ -115,6 +115,9 @@
     wifi.powersave = true;
   };
 
+  # Disable systemd-networkd wait online since NetworkManager manages connectivity
+  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
+
   # Configure locale and timezone
   time.timeZone = config.common.timezone;
   i18n = {
