@@ -19,12 +19,13 @@
   # Packages specific to this user (minimal set for ISO install)
   home.packages = with pkgs; [
    # Development tools
-   zed-editor
-  nodejs
-  python3
-  uv
-  git
-  gh
+    zed-editor
+    vscode
+   nodejs
+   python3
+   uv
+   git
+   gh
     
   # Applications
   affine

@@ -48,6 +48,8 @@
     "nvidia-settings"
     "nvidia-persistenced"
     "libnvidia-ml"
+    # Development tools
+    "vscode"
   ];
 
   # Common packages for all systems

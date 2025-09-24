@@ -29,6 +29,14 @@
     };
   };
 
+  # Ensure directories exist before secrets are written.
+  home.activation.ensureOnePasswordDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p "${config.home.homeDirectory}/.ssh"
+    chmod 700 "${config.home.homeDirectory}/.ssh"
+    mkdir -p "${config.home.homeDirectory}/.config/op"
+    chmod 700 "${config.home.homeDirectory}/.config/op"
+  '';
+
   # Configure the SSH client to use the 1Password SSH agent for authentication.
   # This requires enabling the SSH agent in the 1Password desktop app settings.
   programs.ssh = {
