@@ -10,6 +10,7 @@
   # Enable the 1Password secrets management program.
   programs.onepassword-secrets = {
     enable = true;
+    tokenFile = "${config.home.homeDirectory}/.config/op/opnix-token";
     # Define secrets to be provisioned at runtime.
     secrets = {
       "sshKey" = {
