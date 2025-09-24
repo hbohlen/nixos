@@ -15,13 +15,14 @@
       "sshKey" = {
         path = ".ssh/id_ed25519";
         # Format: op://<vault>/<item>/<field>
-        reference = "op://Personal/SSH Private Key/private key";
+        reference = "op://hbohlen/SSH Private Key/private key";
         # Set appropriate file permissions.
         mode = "0600";
       };
-      "apiToken" = {
-        path = ".config/my-app/api.token";
-        reference = "op://Work/API Tokens/My App Token";
+      "serviceAccountToken" = {
+        path = ".config/op/service-account-token";
+        # Reference the service account token stored in your vault
+        reference = "op://hbohlen/Service Account Token/credential";
         mode = "0600";
       };
       # Add more secrets as needed
@@ -41,10 +42,10 @@
   # Setup Git with 1Password
   programs.git = {
     enable = true;
-    userName = "Your Name";
-    userEmail = "your.email@example.com";
+    userName = "Hayden Bohlen";
+    userEmail = "bohlenhayden@gmail.com";
     signing = {
-      key = "ssh-ed25519 AAAAC3NzaC1..."; # Replace with your SSH key
+      key = "ssh-ed25519 AAAAC3NzaC1..."; # Replace with your SSH key from 1Password
       signByDefault = true;
       # Use SSH key from 1Password for signing
     };
@@ -53,4 +54,15 @@
       gpg.format = "ssh";
     };
   };
+
+  # Configure shell environment for 1Password service account
+  home.sessionVariables = {
+    # This will be set after the service account token is provisioned
+    OP_SERVICE_ACCOUNT_TOKEN = "$(cat ~/.config/op/service-account-token 2>/dev/null || echo '')";
+  };
+
+  # Ensure the 1Password CLI is available
+  home.packages = with pkgs; [
+    _1password-cli
+  ];
 }
