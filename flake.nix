@@ -92,6 +92,13 @@
         };
       };
 
+      # Disko configurations for disk partitioning
+      diskoConfigurations = {
+        desktop = import ./hosts/desktop/hardware/disko-layout.nix;
+        laptop = import ./hosts/laptop/hardware/disko-layout.nix;
+        server = import ./hosts/server/hardware/disko-layout.nix;
+      };
+
       # Provide a formatter so `nix fmt` works
       formatter = {
         x86_64-linux = (pkgsFor "x86_64-linux").nixfmt-rfc-style;
@@ -108,6 +115,20 @@
               statix
               deadnix
             ];
+          };
+        };
+      };
+
+      # Disko apps for direct disk partitioning from the flake
+      apps = {
+        x86_64-linux = {
+          disko = {
+            type = "app";
+            program = "${disko.packages.x86_64-linux.disko}/bin/disko";
+          };
+          disko-desktop = {
+            type = "app";
+            program = "${disko.packages.x86_64-linux.disko}/bin/disko --flake .#desktop";
           };
         };
       };
