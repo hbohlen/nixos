@@ -48,10 +48,9 @@
     podman-compose
     
     # CLI tools for development
-    # Note: rovodev-cli and gemini-cli may need to be added as custom packages
-    # if not available in nixpkgs - for now commenting out until verified
-    # rovodev-cli
-    # gemini-cli
+    # TODO: Add these tools if/when they become available in nixpkgs or as custom packages
+    # rovodev-cli  # Rovo CLI tool (may need custom package)
+    # gemini-cli   # Gemini CLI tool (may need custom package)
     
     # Additional development tools
     npm
