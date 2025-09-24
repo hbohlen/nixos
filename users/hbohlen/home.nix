@@ -147,8 +147,6 @@
     };
   };
 
-  services.greetd.enable = true;
-  services.greetd.settings.default_session.command = "Hyprland";
 
   # Example: Manage dotfiles with a bare git repo ("dotfiles" pattern)
   # To use, run:
