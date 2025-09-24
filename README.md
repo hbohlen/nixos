@@ -38,8 +38,16 @@ This repository provides a comprehensive NixOS configuration that combines sever
 
 ### Quick Installation (Recommended)
 
-For a fully automated installation, use the provided installation script:
+For a fully automated installation, you can use either method:
 
+**Option 1: One-line web install**
+```bash
+# Boot from NixOS LiveISO and run:
+sudo -i
+curl -L https://raw.githubusercontent.com/hbohlen/nixos/main/scripts/bootstrap.sh | bash
+```
+
+**Option 2: Clone and install**
 ```bash
 # Boot from NixOS LiveISO and run:
 sudo -i
@@ -50,7 +58,7 @@ cd nixos
 ./scripts/install.sh
 ```
 
-The script will:
+Both methods will:
 - Prompt for hostname, username, and target disk
 - Handle disko partitioning with ZFS+LUKS
 - Set up impermanence with persistent directories  

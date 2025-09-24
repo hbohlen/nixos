@@ -189,12 +189,12 @@ run_disko() {
     # Enable experimental features for this session
     export NIX_CONFIG="experimental-features = nix-command flakes"
     
-    # Run disko with the host-specific configuration
-    print_status "Partitioning disk with disko..."
+    # Run disko with the host-specific configuration using the flake's disko configuration
+    print_status "Partitioning disk with disko for host: $HOSTNAME..."
     nix --experimental-features 'nix-command flakes' run github:nix-community/disko -- \
         --mode zap_create_mount \
-        --flake ".#$HOSTNAME" \
-        --disk main "$DISK_DEVICE" || \
+        --disk main "$DISK_DEVICE" \
+        ./hosts/"$HOSTNAME"/hardware/disko-layout.nix || \
         handle_error "Disko partitioning failed"
     
     print_success "Disko partitioning completed successfully"
