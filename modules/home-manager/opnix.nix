@@ -1,5 +1,5 @@
 # /modules/home-manager/opnix.nix
-{ pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   imports = [
