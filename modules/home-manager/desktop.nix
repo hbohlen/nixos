@@ -13,17 +13,21 @@
     alacritty
     # File manager
     kdePackages.dolphin
+    nnn
+    ranger
     # Browser
     firefox
     # Screenshot tool
     grim
     slurp
+    swappy
     # Image viewer
     imv
     # Wallpaper
     swaybg
     # Clipboard manager
     wl-clipboard
+    cliphist
     # Notification daemon (configured below)
     libnotify
     # Terminal utilities
@@ -33,6 +37,14 @@
     eza
     zoxide
     fzf
+    tmux
+    zellij
+    lazygit
+    # Dev environment tools
+    direnv
+    nix-direnv
+    # Fonts
+    nerdfonts
     # Add more packages as needed
   ];
 
