@@ -24,7 +24,7 @@
 
   # Enable Hyprland-specific services.
   # Temporarily disabled for ISO install to save space
-  # programs.hyprland.enable = true;
+  programs.hyprland.enable = true;
   # xdg.portal = {
   #   enable = true;
   #   extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
