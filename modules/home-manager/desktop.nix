@@ -8,8 +8,8 @@
   gtk = {
     enable = true;
     theme = {
-      name = "Catppuccin-Mocha-Compact-Lavender-Dark";
-      package = pkgs.catppuccin-gtk-theme;
+      name = "adw-gtk3";
+      package = pkgs.adw-gtk3;
     };
     iconTheme = {
       name = "Papirus-Dark";
@@ -86,7 +86,7 @@
   nerd-fonts.jetbrains-mono
   swww # Animated wallpaper daemon
   swaylock-effects # Stylish lock screen
-  catppuccin-gtk-theme # GTK theme
+  adw-gtk3 # GTK theme
   catppuccin-cursors # Cursor theme
   cava # Audio visualizer (optional, for terminal)
     # Add more packages as needed
