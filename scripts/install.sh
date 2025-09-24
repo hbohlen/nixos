@@ -29,7 +29,7 @@ readonly NC='\033[0m' # No Color
 # Configuration variables - modify these as needed
 readonly DEFAULT_HOSTNAME="desktop"
 readonly DEFAULT_USERNAME="hbohlen"
-readonly DEFAULT_DISK="/dev/nvme1n1"
+readonly TARGET_DISK_SIZE="2T"  # Change this to match your target disk size
 readonly REPO_URL="https://github.com/hbohlen/nixos"
 readonly MOUNT_POINT="/mnt"
 
@@ -143,6 +143,102 @@ install_tools() {
     print_success "Tools installed successfully"
 }
 
+# Function to find the target disk by size
+find_target_disk() {
+    print_step "Searching for ${TARGET_DISK_SIZE} disk..."
+    
+    # Get all disks with their sizes
+    local disk_info
+    disk_info=$(lsblk -d -o NAME,SIZE -b | grep -E "(nvme|sd)" | grep -v "^loop")
+    
+    # Convert target size to bytes for comparison
+    local target_size_bytes
+    case "$TARGET_DISK_SIZE" in
+        *T) target_size_bytes=$(echo "${TARGET_DISK_SIZE%T} * 1024 * 1024 * 1024 * 1024" | bc) ;;
+        *G) target_size_bytes=$(echo "${TARGET_DISK_SIZE%G} * 1024 * 1024 * 1024" | bc) ;;
+        *M) target_size_bytes=$(echo "${TARGET_DISK_SIZE%M} * 1024 * 1024" | bc) ;;
+        *K) target_size_bytes=$(echo "${TARGET_DISK_SIZE%K} * 1024" | bc) ;;
+        *) target_size_bytes="$TARGET_DISK_SIZE" ;;
+    esac
+    
+    # Find disks that match the target size (with some tolerance)
+    local tolerance=1073741824  # 1GB tolerance in bytes
+    local candidate_disks=()
+    
+    while IFS= read -r line; do
+        if [[ $line =~ ^([^[:space:]]+)[[:space:]]+([0-9]+) ]]; then
+            local disk_name="/dev/${BASH_REMATCH[1]}"
+            local disk_size="${BASH_REMATCH[2]}"
+            
+            # Check if disk size is within tolerance of target
+            local size_diff=$((disk_size - target_size_bytes))
+            size_diff=${size_diff#-}  # Absolute value
+            
+            if [ "$size_diff" -le "$tolerance" ]; then
+                candidate_disks+=("$disk_name:$disk_size")
+            fi
+        fi
+    done <<< "$disk_info"
+    
+    if [ ${#candidate_disks[@]} -eq 0 ]; then
+        print_error "No disks matching ${TARGET_DISK_SIZE} found!"
+        print_status "Available disks:"
+        lsblk -d -o NAME,SIZE,MODEL | grep -E "(nvme|sd)" | grep -v "^loop" || true
+        return 1
+    fi
+    
+    # Format disk sizes for display
+    print_status "Found ${#candidate_disks[@]} disk(s) matching ${TARGET_DISK_SIZE}:"
+    
+    local disk_options=()
+    for i in "${!candidate_disks[@]}"; do
+        local disk_info="${candidate_disks[i]}"
+        local disk_path="${disk_info%%:*}"
+        local disk_size_bytes="${disk_info#*:}"
+        
+        # Convert bytes to human readable format
+        local disk_size_hr
+        if [ "$disk_size_bytes" -ge $((1024 * 1024 * 1024 * 1024)) ]; then
+            disk_size_hr=$(echo "scale=1; $disk_size_bytes / (1024^4)" | bc)"T"
+        elif [ "$disk_size_bytes" -ge $((1024 * 1024 * 1024)) ]; then
+            disk_size_hr=$(echo "scale=1; $disk_size_bytes / (1024^3)" | bc)"G"
+        elif [ "$disk_size_bytes" -ge $((1024 * 1024)) ]; then
+            disk_size_hr=$(echo "scale=1; $disk_size_bytes / (1024^2)" | bc)"M"
+        else
+            disk_size_hr=$(echo "scale=1; $disk_size_bytes / 1024" | bc)"K"
+        fi
+        
+        # Get disk model if available
+        local disk_model
+        disk_model=$(lsblk -d -o MODEL "$disk_path" | tail -n 1 | xargs)
+        
+        disk_options+=("$disk_path")
+        echo "  $((i+1)). $disk_path (${disk_size_hr}) - $disk_model"
+    done
+    
+    # If only one candidate, use it
+    if [ ${#candidate_disks[@]} -eq 1 ]; then
+        DISK_DEVICE="${disk_options[0]}"
+        print_success "Automatically selected: $DISK_DEVICE"
+        return 0
+    fi
+    
+    # If multiple candidates, ask user to choose
+    local choice
+    while true; do
+        echo -ne "${YELLOW}Select disk (1-${#candidate_disks[@]}):${NC} "
+        read -r choice
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#candidate_disks[@]}" ]; then
+            DISK_DEVICE="${disk_options[$((choice-1))]}"
+            break
+        else
+            print_error "Invalid selection"
+        fi
+    done
+    
+    return 0
+}
+
 # Function to collect user configuration
 collect_configuration() {
     print_step "Collecting installation configuration..."
@@ -153,11 +249,48 @@ collect_configuration() {
     # Get username
     USERNAME=$(prompt_user "Enter username" "$DEFAULT_USERNAME")
     
-    # Get disk device
+    # Find the target disk
     print_status "Available disk devices:"
-    lsblk -d -o NAME,SIZE,MODEL | grep -E "(nvme|sd)" || true
+    lsblk -d -o NAME,SIZE,MODEL | grep -E "(nvme|sd)" | grep -v "^loop" || true
     echo
-    DISK_DEVICE=$(prompt_user "Enter target disk device" "$DEFAULT_DISK")
+    
+    if ! find_target_disk; then
+        # Fallback to manual selection if automatic detection fails
+        print_warning "Automatic detection failed. Please select disk manually."
+        
+        local available_disks=()
+        while IFS= read -r line; do
+            if [[ $line =~ ^([nvme|sd]+[a-z0-9]+) ]]; then
+                available_disks+=("/dev/${BASH_REMATCH[1]}")
+            fi
+        done < <(lsblk -d -o NAME,SIZE,MODEL | grep -E "(nvme|sd)" | grep -v "^loop")
+        
+        if [ ${#available_disks[@]} -eq 0 ]; then
+            handle_error "No suitable disk devices found"
+        fi
+        
+        echo "Available disks:"
+        for i in "${!available_disks[@]}"; do
+            local disk_path="${available_disks[i]}"
+            local disk_size
+            disk_size=$(lsblk -d -o SIZE "$disk_path" | tail -n 1 | xargs)
+            local disk_model
+            disk_model=$(lsblk -d -o MODEL "$disk_path" | tail -n 1 | xargs)
+            echo "  $((i+1)). $disk_path (${disk_size}) - $disk_model"
+        done
+        
+        local choice
+        while true; do
+            echo -ne "${YELLOW}Select disk (1-${#available_disks[@]}):${NC} "
+            read -r choice
+            if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#available_disks[@]}" ]; then
+                DISK_DEVICE="${available_disks[$((choice-1))]}"
+                break
+            else
+                print_error "Invalid selection"
+            fi
+        done
+    fi
     
     # Validate disk device exists
     if [[ ! -b "$DISK_DEVICE" ]]; then
