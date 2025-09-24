@@ -146,12 +146,66 @@ install_tools() {
     print_success "Tools installed successfully"
 }
 
+# Function to list available host configurations
+list_available_hosts() {
+    print_status "Available host configurations:"
+    
+    # Check if hosts directory exists
+    if [[ ! -d "hosts" ]]; then
+        print_error "No 'hosts' directory found in current location"
+        return 1
+    fi
+    
+    # List all directories in hosts/ that contain hardware/disko-layout.nix
+    local available_hosts=()
+    for host_dir in hosts/*/; do
+        if [[ -d "$host_dir" ]]; then
+            local host_name=$(basename "$host_dir")
+            if [[ -f "${host_dir}hardware/disko-layout.nix" ]]; then
+                available_hosts+=("$host_name")
+                echo "  - $host_name"
+            fi
+        fi
+    done
+    
+    if [ ${#available_hosts[@]} -eq 0 ]; then
+        print_error "No valid host configurations found"
+        print_status "Expected structure: hosts/<hostname>/hardware/disko-layout.nix"
+        return 1
+    fi
+    
+    return 0
+}
+
 # Function to collect user configuration
 collect_configuration() {
     print_step "Collecting installation configuration..."
     
-    # Get hostname
-    HOSTNAME=$(prompt_user "Enter hostname" "$DEFAULT_HOSTNAME")
+    # List available hosts first
+    if ! list_available_hosts; then
+        print_error "Cannot proceed without valid host configurations"
+        exit 1
+    fi
+    
+    # Get hostname with validation
+    while true; do
+        HOSTNAME=$(prompt_user "Enter hostname" "$DEFAULT_HOSTNAME")
+        
+        # Check if hostname configuration exists
+        if [[ ! -d "hosts/$HOSTNAME" ]]; then
+            print_error "Host configuration for '$HOSTNAME' not found in hosts/ directory"
+            print_status "Please choose from the available hosts listed above"
+            continue
+        fi
+        
+        if [[ ! -f "hosts/$HOSTNAME/hardware/disko-layout.nix" ]]; then
+            print_error "Hardware configuration not found for '$HOSTNAME'"
+            print_status "Expected: hosts/$HOSTNAME/hardware/disko-layout.nix"
+            continue
+        fi
+        
+        break
+    done
     
     # Get username
     USERNAME=$(prompt_user "Enter username" "$DEFAULT_USERNAME")
@@ -167,11 +221,6 @@ collect_configuration() {
     # Validate disk device exists
     if [[ ! -b "$DISK_DEVICE" ]]; then
         handle_error "Disk device '$DISK_DEVICE' does not exist"
-    fi
-    
-    # Check if hostname configuration exists
-    if [[ ! -d "hosts/$HOSTNAME" ]]; then
-        handle_error "Host configuration for '$HOSTNAME' not found in hosts/ directory"
     fi
     
     print_success "Configuration collected:"
