@@ -78,6 +78,7 @@
     unzip
     zip
     tree
+    _1password-cli
     # Add more packages as needed
   ];
 

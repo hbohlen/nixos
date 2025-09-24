@@ -15,14 +15,14 @@
       "sshKey" = {
         path = ".ssh/id_ed25519";
         # Format: op://<vault>/<item>/<field>
-        reference = "op://hbohlen/SSH Private Key/private key";
+        reference = "op://Private/SSH Key/private key";
         # Set appropriate file permissions.
         mode = "0600";
       };
       "serviceAccountToken" = {
         path = ".config/op/service-account-token";
         # Reference the service account token stored in your vault
-        reference = "op://hbohlen/Service Account Token/credential";
+        reference = "op://Private/Service Account Token/credential";
         mode = "0600";
       };
       # Add more secrets as needed
@@ -45,7 +45,7 @@
     userName = "Hayden Bohlen";
     userEmail = "bohlenhayden@gmail.com";
     signing = {
-      key = "ssh-ed25519 AAAAC3NzaC1..."; # Replace with your SSH key from 1Password
+      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqnk8Q2ZJ4KkHhT7gQJ8vX9zY2WxLmNpOqRtUvWxY";
       signByDefault = true;
       # Use SSH key from 1Password for signing
     };
