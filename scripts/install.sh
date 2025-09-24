@@ -33,6 +33,9 @@ readonly TARGET_DISK_SIZE="2T"  # Change this to match your target disk size
 readonly REPO_URL="https://github.com/hbohlen/nixos"
 readonly MOUNT_POINT="/mnt"
 
+# Global variable for disk device
+DISK_DEVICE=""
+
 # Function to print colored output
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -161,6 +164,8 @@ find_target_disk() {
         *) target_size_bytes="$TARGET_DISK_SIZE" ;;
     esac
     
+    print_status "Target size in bytes: $target_size_bytes"
+    
     # Find disks that match the target size (with some tolerance)
     local tolerance=1073741824  # 1GB tolerance in bytes
     local candidate_disks=()
@@ -170,12 +175,15 @@ find_target_disk() {
             local disk_name="/dev/${BASH_REMATCH[1]}"
             local disk_size="${BASH_REMATCH[2]}"
             
+            print_status "Checking disk: $disk_name with size: $disk_size bytes"
+            
             # Check if disk size is within tolerance of target
             local size_diff=$((disk_size - target_size_bytes))
             size_diff=${size_diff#-}  # Absolute value
             
             if [ "$size_diff" -le "$tolerance" ]; then
                 candidate_disks+=("$disk_name:$disk_size")
+                print_status "Found matching disk: $disk_name"
             fi
         fi
     done <<< "$disk_info"
@@ -230,6 +238,7 @@ find_target_disk() {
         read -r choice
         if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "${#candidate_disks[@]}" ]; then
             DISK_DEVICE="${disk_options[$((choice-1))]}"
+            print_success "Selected: $DISK_DEVICE"
             break
         else
             print_error "Invalid selection"
@@ -255,7 +264,6 @@ collect_configuration() {
     echo
     
     if ! find_target_disk; then
-        # Fallback to manual selection if automatic detection fails
         print_warning "Automatic detection failed. Please select disk manually."
         
         local available_disks=()
