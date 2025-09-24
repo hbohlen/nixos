@@ -12,7 +12,7 @@
   # Placeholder for desktop hardware configuration
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-amd" ];
+  boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   # Blacklist nouveau driver to prevent conflicts with NVIDIA proprietary driver
@@ -25,6 +25,6 @@
   # Networking
   networking.useDHCP = lib.mkDefault true;
 
-  # CPU
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  # CPU - Intel
+  hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }

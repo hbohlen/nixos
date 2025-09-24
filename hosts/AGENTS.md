@@ -4,7 +4,7 @@
 This directory contains host-specific NixOS configurations for different types of machines (desktop, laptop, server). Each subdirectory represents a distinct host with its own hardware configuration and specific system settings.
 
 ## Files in This Directory
-- `desktop/` - Desktop computer configuration with gaming support and full desktop environment
+- `desktop/` - Desktop computer configuration with Intel CPU + Nvidia GPU support and full desktop environment
 - `laptop/` - Laptop configuration with power management and portable device optimizations  
 - `server/` - Server configuration focused on minimal overhead and service hosting
 

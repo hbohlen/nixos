@@ -26,31 +26,205 @@ This repository provides a comprehensive NixOS configuration that combines sever
 - Internet connection for initial setup and package downloads
 
 ### Hardware Compatibility
-- Works best with modern hardware that has good Linux support
-- Special configurations available for ASUS ROG laptops and NVIDIA graphics
-- ZFS requires adequate RAM (minimum 2GB recommended for ZFS ARC)
+- **CPU**: Intel processors (with latest microcode updates)
+- **GPU**: Nvidia graphics cards (with proprietary driver support)
+- **Laptop**: ASUS ROG Zephyrus M16 GU603ZW (or similar models)
+- **Desktop**: MSI motherboards with Intel CPU + Nvidia GPU combinations
+- **Memory**: Minimum 8GB RAM (ZFS ARC cache requires adequate memory)
+- **Storage**: NVMe SSD recommended for optimal ZFS performance
+- Works best with modern UEFI systems that have good Linux hardware support
 
-## Installation/Usage
+## Installation from LiveISO
 
-### Initial Setup
+### Prerequisites
+- NixOS LiveISO (latest stable version)
+- Internet connection  
+- Target system with Intel CPU and Nvidia GPU
+- At least 8GB RAM (for ZFS and desktop environment)
+- UEFI-compatible system (not BIOS/Legacy)
 
-1. **Find Your Target Disk**:
-   ```bash
-   ls -l /dev/disk/by-id/
-   ```
+### Step-by-Step Installation
 
-2. **Partition and Format with Disko**:
+#### 1. Boot from LiveISO
+- Boot the target system from the NixOS LiveISO
+- Select "NixOS" from the boot menu
+- Wait for the system to reach the command line
+
+#### 2. Setup Network and Tools
+```bash
+# Connect to internet (if needed)
+sudo systemctl start wpa_supplicant
+# OR for ethernet: sudo dhcpcd
+
+# Install git for cloning the repository
+nix-shell -p git
+
+# Enable experimental features for flakes
+export NIX_CONFIG="experimental-features = nix-command flakes"
+```
+
+#### 3. Identify Target Disk
+```bash
+# List available disks - use by-id paths for stability
+ls -l /dev/disk/by-id/
+
+# Example output shows stable identifiers:
+# /dev/disk/by-id/nvme-Micron_2450_MTFDKBA1T0TFK_ABC123
+# /dev/disk/by-id/ata-Samsung_SSD_870_QVO_1TB_S5XYYYY
+
+# Set your target disk (replace with your actual disk ID)
+export DISK=/dev/disk/by-id/nvme-YOUR_DISK_ID
+```
+
+#### 4. Clone Configuration Repository  
+```bash
+# Clone this repository
+git clone https://github.com/hbohlen/nixos.git /tmp/nixos-config
+cd /tmp/nixos-config
+```
+
+#### 5. Partition and Setup ZFS with Disko
+```bash
+# IMPORTANT: This will DESTROY all data on the target disk
+# Double-check the device path before proceeding
+
+# Run Disko to partition disk and create ZFS pool
+sudo nix run --extra-experimental-features 'nix-command flakes' \
+  github:nix-community/disko -- --mode disko \
+  --argstr device "$DISK" \
+  ./disko-layout.nix
+```
+
+#### 6. Verify ZFS Setup
+```bash
+# Verify the ZFS pool was created correctly
+zpool status rpool
+zfs list
+
+# Check that filesystems are mounted
+findmnt -t zfs
+# You should see:
+# /mnt                    rpool/local/root
+# /mnt/nix               rpool/local/nix  
+# /mnt/persist           rpool/safe/persist
+# /mnt/home              rpool/safe/home
+# /mnt/boot              /dev/disk/by-partlabel/disk-main-ESP (vfat)
+```
+
+#### 7. Copy Configuration to Target
+```bash
+# Copy the configuration to the target system
+sudo cp -r /tmp/nixos-config/* /mnt/etc/nixos/
+sudo chown -R root:root /mnt/etc/nixos
+```
+
+#### 8. Generate and Update Hardware Configuration
+```bash
+# Generate hardware configuration for your specific hardware
+sudo nixos-generate-config --root /mnt --dir /tmp/hardware
+
+# Copy relevant hardware details (but keep our custom configs)
+# You may need to merge some hardware-specific settings
+```
+
+#### 9. Install NixOS
+```bash
+# Install the system (choose your hostname: desktop, laptop, or server)
+sudo nixos-install --flake .#desktop
+
+# If you see bootloader installation errors, ensure /mnt/boot is properly mounted:
+# sudo mount /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
+
+# Set root password when prompted, then reboot
+sudo reboot
+```
+
+#### 10. Post-Installation Verification
+```bash
+# After reboot, verify the ephemeral root system is working
+# Root should be mounted from tmpfs or ZFS dataset
+mount | grep "on / "
+
+# Verify ZFS mounts are correct
+zfs list
+mount | grep zfs
+
+# Check that persistent directories exist
+ls -la /persist
+ls -la /persist/etc/ssh  # SSH keys should be here
+
+# Verify impermanence is working - root filesystem changes don't persist
+sudo touch /test-file
+sudo reboot
+# After reboot, /test-file should be gone but /persist data remains
+```
+
+### Troubleshooting Installation
+
+#### Common Issues and Solutions
+
+**Bootloader Install Failed: `efiSysMountPoint = '/boot' is not a mounted partition`**
+1. Re-run Disko to ensure partitions are created and mounted:
    ```bash
    sudo nix run --extra-experimental-features 'nix-command flakes' \
      github:nix-community/disko -- --mode disko \
-     --argstr device /dev/disk/by-id/YOUR_DISK_ID \
-     ./disko-layout.nix
+     --argstr device "$DISK" ./disko-layout.nix
    ```
 
-3. **Install NixOS**:
+2. If already partitioned, just mount everything:
    ```bash
-   sudo nixos-install --flake .#desktop
+   sudo nix run --extra-experimental-features 'nix-command flakes' \
+     github:nix-community/disko -- --mode mount \
+     --argstr device "$DISK" ./disko-layout.nix
    ```
+
+3. Verify mounts (you should see /mnt/boot):
+   ```bash
+   findmnt -R /mnt | grep -E '/mnt$|/mnt/(boot|nix|persist|home)'
+   ```
+
+4. If /mnt/boot is missing, mount ESP manually:
+   ```bash
+   sudo mkdir -p /mnt/boot
+   sudo mount -o umask=0077 /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
+   ```
+
+**ZFS Pool Import Failed**
+```bash
+# Force import the pool if it exists
+sudo zpool import -f rpool
+
+# If pool is degraded, check disk connections
+zpool status rpool
+```
+
+**Build Failures**
+```bash
+# Check flake configuration
+nix flake check
+
+# Test build without installing
+nixos-rebuild build --flake .#hostname
+
+# For debugging, add --show-trace to see full error details
+nixos-rebuild build --flake .#hostname --show-trace
+```
+
+### Hardware-Specific Notes
+
+**For ASUS ROG Zephyrus M16 GU603ZW:**
+- The configuration automatically imports nixos-hardware profile for gu603h (closest match)
+- Nvidia/Intel hybrid graphics are configured
+- ROG-specific features (keyboard backlight, power management) are enabled
+
+**For MSI Desktop Systems:**
+- Intel CPU microcode updates are enabled
+- Nvidia proprietary drivers are configured
+- General desktop hardware optimizations applied
+
+## Installation/Usage (Alternative Quick Setup)
+
+If you already have a working NixOS system, you can also use the simpler approach:
 
 ### Making Changes
 
@@ -82,7 +256,7 @@ This configuration follows a modular architecture that promotes reusability and 
 
 - **`flake.nix`** - Central entry point defining all inputs, outputs, and host configurations
 - **`hosts/`** - Machine-specific configurations
-  - `desktop/` - High-performance desktop with gaming support
+  - `desktop/` - High-performance desktop with Intel/Nvidia hardware support
   - `laptop/` - Power-optimized portable configuration  
   - `server/` - Minimal headless server configuration
 - **`modules/`** - Reusable configuration modules
