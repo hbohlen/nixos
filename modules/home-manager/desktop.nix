@@ -55,6 +55,8 @@
     extraConfig = ''
       # Set a background image.
       exec-once = swaybg -i ~/.config/wallpaper.png
+      # Start Waybar
+      exec-once = waybar
 
       # Source a file for colors and themes.
       source = ~/.config/hypr/theme.conf
