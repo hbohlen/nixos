@@ -1,3 +1,9 @@
+
+{ pkgs, inputs, ... }:
+
+{
+  # ...existing code...
+
   # GTK and cursor theme
   gtk = {
     enable = true;
@@ -35,8 +41,6 @@
       separator-color = "#cdd6f4";
     };
   };
-# /modules/home-manager/desktop.nix
-{ pkgs, inputs, ... }:
 
 {
   imports = [
