@@ -29,7 +29,7 @@ readonly NC='\033[0m' # No Color
 # Configuration variables - modify these as needed
 readonly DEFAULT_HOSTNAME="desktop"
 readonly DEFAULT_USERNAME="hbohlen"
-readonly DEFAULT_DISK="/dev/nvme0n1"
+readonly DEFAULT_DISK="/dev/nvme1n1"
 readonly REPO_URL="https://github.com/hbohlen/nixos"
 readonly MOUNT_POINT="/mnt"
 
