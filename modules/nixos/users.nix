@@ -18,7 +18,9 @@
       description = "Hans Bohlen";
       extraGroups = [ "wheel" "networkmanager" ]
         ++ lib.optionals (config.users.hostType != "server") [ "video" "audio" ];
-      initialPassword = "changeme"; # Replace with secure method in production
+      # SECURITY: Use SSH keys instead of passwords for production
+      # Replace with: openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... your-key" ];
+      initialPassword = "changeme"; # TODO: Remove after setting up SSH keys
       group = username;
       createHome = true;
       home = "/home/${username}";
