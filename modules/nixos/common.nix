@@ -30,6 +30,26 @@
     ];
   };
 
+  # Allow essential unfree packages
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+    # 1Password
+    "1password"
+    "1password-cli"
+    "1password-gui"
+    # Browsers
+    "vivaldi"
+    "chrome"
+    # Archive tools
+    "rar"
+    # Fingerprint reader
+    "libfprint-2-tod1-goodix"
+    # NVIDIA drivers
+    "nvidia-x11"
+    "nvidia-settings"
+    "nvidia-persistenced"
+    "libnvidia-ml"
+  ];
+
   # Common packages for all systems
   environment.systemPackages = with pkgs; [
     # Basic utilities
@@ -161,7 +181,7 @@
 
   # Enable zsh completion
   programs.zsh.enable = true;
-  programs.zsh.completion.enable = true;
+  programs.zsh.enableCompletion = true;
 
   # Enable man pages
   documentation = {
@@ -208,8 +228,7 @@
     
     # Enable kernel hardening
     protectKernelImage = true;
-    protectKernelTunables = true;
-    protectKernelModules = true;
+    lockKernelModules = true;
     
     # Enable memory protection
     unprivilegedUsernsClone = false;
@@ -270,9 +289,6 @@
   systemd = {
     # Enable emergency mode
     enableEmergencyMode = true;
-
-    # Enable system rescue
-    enableUnifiedCgroupHierarchy = true;
 
     # Enable system-wide services
     services = {

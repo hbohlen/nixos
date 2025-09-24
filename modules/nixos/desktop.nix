@@ -22,7 +22,7 @@
     noto-fonts-emoji
     nerd-fonts.jetbrains-mono
     nerd-fonts.fira-code
-    nerd-fonts.source-code-pro
+    source-code-pro
   ];
 
   # Font configuration
@@ -84,6 +84,10 @@
     "nvidia-settings"
     "nvidia-persistenced"
     "libnvidia-ml"
+    # Archive tools
+    "rar"
+    # Fingerprint reader
+    "libfprint-2-tod1-goodix"
   ];
 
   # 1Password GUI configuration
@@ -116,7 +120,7 @@
     pavucontrol
     easyeffects
     # File management
-    gnome.nautilus
+    nautilus
     # System monitoring
     gnome-system-monitor
     # Screenshot tools
@@ -140,16 +144,13 @@
     geoclue2.enable = true;
 
     # User directories
-    xserver.desktopManager.gnome.extraGSettingsOverridePackages = [ pkgs.gnome.gnome-settings-daemon ];
+    desktopManager.gnome.extraGSettingsOverridePackages = [ pkgs.gnome-settings-daemon ];
   };
 
   # Enable desktop user services
   programs = {
     # DConf for GNOME settings
     dconf.enable = true;
-
-    # SSH agent for key management
-    ssh.startAgent = true;
   };
 
   # Desktop-specific security
@@ -160,4 +161,5 @@
     # AppArmor for application sandboxing
     apparmor.enable = true;
   };
+};
 }

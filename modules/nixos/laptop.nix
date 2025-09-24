@@ -88,13 +88,11 @@
 
   # Enable laptop-specific services
   services.acpid.enable = true;
-  services.upower.enable = true;
 
   # Power management
   powerManagement = {
     enable = true;
     powertop.enable = true;
-    cpuFreqGovernor = lib.mkDefault "ondemand";
   };
 
   # Enable fingerprint reader if available
@@ -117,7 +115,6 @@
     
     # Battery monitoring
     upower
-    battop
     
     # Laptop utilities
     brightnessctl
@@ -126,7 +123,6 @@
     
     # Thermal management
     thermald
-    fancontrol
     
     # Network management
     networkmanagerapplet
@@ -147,7 +143,6 @@
     
     # Laptop-specific hardware tools
     intel-gpu-tools
-    nvtop
     pciutils
     usbutils
     
@@ -177,12 +172,6 @@
     
     # Enable CPU frequency scaling
     cpu.intel.updateMicrocode = true;
-    
-    # Enable sensor monitoring
-    sensor = {
-      enable = true;
-      hddtemp.enable = true;
-    };
   };
 
   # Enable laptop-specific services
@@ -213,12 +202,16 @@
     
     # Enable logind power management
     logind = {
-      lidSwitch = "suspend";
-      lidSwitchDocked = "ignore";
-      lidSwitchExternalPower = "ignore";
-      powerKey = "suspend";
-      suspendKey = "suspend";
-      hibernateKey = "hibernate";
+      settings = {
+        Login = {
+          HandleLidSwitch = "suspend";
+          HandleLidSwitchDocked = "ignore";
+          HandleLidSwitchExternalPower = "ignore";
+          HandlePowerKey = "suspend";
+          HandleSuspendKey = "suspend";
+          HandleHibernateKey = "hibernate";
+        };
+      };
     };
   };
 
@@ -268,18 +261,12 @@
     "i915.enable_guc=2"
   ];
 
-  # Enable laptop-specific filesystem optimizations
-  fileSystems = lib.mkIf (config.fileSystems ? "/") {
-    "/".options = [ "noatime" "nodiratime" "data=writeback" ];
-  };
+
 
   # Enable laptop-specific security
   security = {
     # Enable TPM2 support
     tpm2.enable = true;
-    
-    # Enable secure boot support
-    tpm2-abrmd.enable = true;
   };
 
   # Enable laptop-specific networking optimizations

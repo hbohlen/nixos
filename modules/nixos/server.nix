@@ -105,8 +105,6 @@
     
     # Security tools
     fail2ban
-    rkhunter
-    chkrootkit
     
     # Backup tools
     borgbackup
@@ -134,21 +132,7 @@
   ];
 
   # Enable fail2ban for SSH protection
-  services.fail2ban = {
-    enable = true;
-    maxretry = 3;
-    bantime = "1h";
-    bantime-increment.enable = true;
-    jails = {
-      sshd = ''
-        enabled = true
-        filter = sshd
-        port = ssh
-        maxretry = 3
-        bantime = 1h
-      '';
-    };
-  };
+  services.fail2ban.enable = true;
 
   # System monitoring
   services = {
@@ -161,13 +145,6 @@
     
     # Enable log rotation
     logrotate.enable = true;
-    
-    # Enable automatic updates
-    auto-update = {
-      enable = true;
-      dates = "daily";
-      allowReboot = false;
-    };
   };
 
   # Security hardening
@@ -180,10 +157,9 @@
     
     # Kernel hardening
     protectKernelImage = true;
-    
+
     # Memory protection
-    protectKernelTunables = true;
-    protectKernelModules = true;
+    lockKernelModules = true;
     
     # Filesystem protection
     unprivilegedUsernsClone = false;
@@ -212,12 +188,12 @@
   system = {
     # Disable unused services
     disableInstallerTools = true;
-    
-    # Enable automatic cleanup
-    autoCleanup = {
+
+    # Enable automatic updates
+    autoUpgrade = {
       enable = true;
-      dates = "weekly";
-      flags = [ "--delete-older-than 30d" ];
+      dates = "daily";
+      allowReboot = false;
     };
   };
 
@@ -237,10 +213,10 @@
   };
 
   # Resource limits
-  systemd.extraConfig = ''
-    DefaultLimitNOFILE=65536
-    DefaultLimitNPROC=32768
-  '';
+  systemd.settings.Manager = {
+    DefaultLimitNOFILE = 65536;
+    DefaultLimitNPROC = 32768;
+  };
 
   # Enable journald persistence and limits
   services.journald = {

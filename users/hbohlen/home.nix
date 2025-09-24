@@ -18,9 +18,8 @@
 
   # Packages specific to this user (minimal set for ISO install)
   home.packages = with pkgs; [
-  # Development tools
-  vscode
-  zed-editor
+   # Development tools
+   zed-editor
   nodejs
   python3
   uv
@@ -101,25 +100,7 @@
     };
   };
 
-  # VSCode configuration
-  programs.vscode = {
-    enable = true;
-    profiles.default = {
-      extensions = with pkgs.vscode-extensions; [
-        vscodevim.vim
-        ms-python.python
-        rust-lang.rust-analyzer
-        # Add more extensions as needed
-      ];
-      userSettings = {
-        "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'monospace'";
-        "editor.fontSize" = 14;
-        "editor.lineNumbers" = "relative";
-        "workbench.colorTheme" = "Catppuccin Mocha";
-        # Add more settings as needed
-      };
-    };
-  };
+
 
   # Firefox configuration
   programs.firefox = {
