@@ -78,9 +78,7 @@
           size = 3;
           passes = 1;
         };
-        drop_shadow = true;
-        shadow_range = 4;
-  shadow_render_power = 3;
+  # drop_shadow, shadow_range, and shadow_render_power removed (deprecated in recent Hyprland)
   # col.shadow removed (deprecated in recent Hyprland)
       };
 
