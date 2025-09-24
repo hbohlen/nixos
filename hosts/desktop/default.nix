@@ -4,12 +4,13 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./hardware/disko-zfs.nix  # Host-specific disko configuration
     ../../modules/nixos/common.nix
     ../../modules/nixos/users.nix
     ../../modules/nixos/boot.nix
     ../../modules/nixos/desktop.nix
+    ../../modules/nixos/development.nix  # Development tools for desktop
     ../../modules/nixos/impermanence.nix
-    ../../modules/nixos/disko-zfs.nix
     ../../modules/nixos/nvidia-rog.nix
     # Intel CPU and desktop PC hardware support
     inputs.nixos-hardware.nixosModules.common-cpu-intel
@@ -24,8 +25,20 @@
   # Set host type for user management
   users.hostType = "desktop";
 
+  # SSH Key Configuration (Security)
+  # To set up SSH keys and disable password authentication:
+  # 1. Generate SSH key: ssh-keygen -t ed25519 -C "your-email@example.com"
+  # 2. Add your public key here:
+  # users.sshKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... your-key" ];
+  # 3. Disable password auth: users.enablePasswordAuth = false;
+  # users.sshKeys = [];  # Add your SSH public keys here
+  # users.enablePasswordAuth = true;  # Set to false when SSH keys are configured
+
   # Enable desktop environment
   desktop.enable = true;
+
+  # Enable development tools for desktop use
+  development.enable = true;
 
   # This value determines the NixOS release with which your system is to be compatible.
   # You should change this only after NixOS release notes indicate you should.

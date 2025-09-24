@@ -4,12 +4,12 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./hardware/disko-zfs.nix  # Host-specific disko configuration
     ../../modules/nixos/common.nix
     ../../modules/nixos/users.nix
     ../../modules/nixos/boot.nix
     ../../modules/nixos/server.nix
     ../../modules/nixos/impermanence.nix
-    ../../modules/nixos/disko-zfs.nix
   ];
 
   # Basic server configuration
@@ -18,6 +18,15 @@
   
   # Set host type for user management
   users.hostType = "server";
+  
+  # SSH Key Configuration (Security - CRITICAL for servers)
+  # To set up SSH keys and disable password authentication:
+  # 1. Generate SSH key: ssh-keygen -t ed25519 -C "your-email@example.com"
+  # 2. Add your public key here:
+  # users.sshKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... your-key" ];
+  # 3. Disable password auth: users.enablePasswordAuth = false;
+  # users.sshKeys = [];  # Add your SSH public keys here
+  # users.enablePasswordAuth = true;  # Set to false when SSH keys are configured
   
   # This value determines the NixOS release with which your system is to be compatible.
   # You should change this only after NixOS release notes indicate you should.

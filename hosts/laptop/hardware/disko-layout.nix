@@ -1,21 +1,18 @@
-# /disko-layout.nix
-# ⚠️  DEPRECATED: This file is no longer used ⚠️
+# /hosts/laptop/hardware/disko-layout.nix
+# Laptop-specific disk layout configuration
+# 
+# IMPORTANT: Update the device path to match your actual hardware!
+# 
+# To find your device path, run:
+#   lsblk -f
+#   ls -la /dev/disk/by-id/
+# 
+# Examples of common device paths:
+#   NVMe: /dev/nvme0n1 or /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_...
+#   SATA SSD: /dev/sda or /dev/disk/by-id/ata-Samsung_SSD_860_EVO_500GB_...
 #
-# Hardware-specific disk layouts have been moved to per-host configurations:
-# - hosts/desktop/hardware/disko-layout.nix
-# - hosts/laptop/hardware/disko-layout.nix  
-# - hosts/server/hardware/disko-layout.nix
-#
-# This file is kept for reference but should not be imported.
-# Each host now uses its own hardware/disko-layout.nix file.
-#
-# MIGRATION: Update your host imports from:
-#   ../../modules/nixos/disko-zfs.nix
-# TO:
-#   ./hardware/disko-zfs.nix
-#
-# TODO: Remove this file after confirming all hosts use the new structure
-{ device ? "/dev/disk/by-id/nvme-Micron_2450_MTFDKBA1T0TFK_2146334B7D47", ... }:
+# Using by-id paths is preferred for stability across reboots
+{ device ? "/dev/nvme0n1", ... }:
 {
   disko.devices = {
     disk = {
@@ -37,7 +34,7 @@
               };
             };
             swap = {
-              size = "8G";
+              size = "8G"; # Laptop: smaller swap for battery life
               content = {
                 type = "swap";
                 randomEncryption = true;

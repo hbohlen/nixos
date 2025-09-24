@@ -46,29 +46,26 @@
 - Added dry-run support and garbage collection options
 - Added better error messages and status reporting
 
-## Remaining Critical Issues ❌
+## Resolved Critical Issues ✅
 
-### 1. Hardcoded Device Paths
-**Issue**: Hardcoded disk device path in disko configuration
-- **Location**: `disko-layout.nix:2`
-- **Risk**: Won't work on different hardware without modification
-- **Impact**: Configuration not portable across different machines
-- **Priority**: HIGH
+### 1. Hardcoded Device Paths - FIXED ✅
+~~**Issue**: Hardcoded disk device path in disko configuration~~
+- **Status**: ✅ RESOLVED - Moved to per-host hardware configurations
+- **Change**: Created host-specific `hardware/disko-layout.nix` files with configurable device paths
+- **Impact**: Configuration now portable across different machines
 
-### 2. Excessive System Packages
-**Issue**: Large number of development packages installed system-wide
-- **Location**: `common.nix:56-109`
-- **Impact**: Slower rebuilds, larger system closure, unnecessary packages on servers
-- **Fix**: Move development tools to user-specific packages or dev shells
-- **Priority**: MEDIUM
+### 2. Excessive System Packages - FIXED ✅
+~~**Issue**: Large number of development packages installed system-wide~~
+- **Status**: ✅ RESOLVED - Moved to conditional development module
+- **Change**: Created `modules/nixos/development.nix` with `development.enable` option
+- **Impact**: Cleaner server configurations, faster rebuilds, smaller system closure
 
-## Security Concerns Remaining 🔐
+## Security Improvements Completed 🔐
 
-### 1. SSH Key Permissions
-**Issue**: SSH host keys may not be properly protected during impermanence rollback
-- **Risk**: SSH host keys could have incorrect permissions after rollback
-- **Fix**: Add explicit permission setting in impermanence configuration
-- **Priority**: MEDIUM
+### 1. SSH Key Permissions - IMPROVED ✅
+~~**Issue**: SSH host keys may not be properly protected during impermanence rollback~~
+- **Status**: ✅ IMPROVED - Added activation script for SSH permission management
+- **Change**: Added `fixSSHPermissions` activation script to handle both system and user SSH keys
 
 ### 2. Kernel Hardening Balance
 **Issue**: Some kernel hardening parameters may be too restrictive
@@ -77,12 +74,25 @@
 - **Fix**: Consider making hardening conditional based on host type
 - **Priority**: LOW
 
-## Configuration Improvements Still Needed 🔧
+## Remaining Optimizations 🔧
 
-### 1. Hardware Configuration Portability
-**Issue**: Need per-host hardware configurations
-- **Fix**: Create hardware-specific configs for each host
-- **Priority**: HIGH
+### 1. User Action Required Items
+**Status**: Framework implemented, user configuration needed:
+- Set up actual SSH keys in host configurations
+- Configure device paths for specific hardware  
+- Customize development package selections
+
+### 2. Optional Enhancements
+- Make additional services conditional by host type
+- Review kernel hardening parameters for performance balance
+- Add configuration validation and automated testing
+
+## Configuration Improvements Completed 🔧
+
+### 1. Hardware Configuration Portability - FIXED ✅
+~~**Issue**: Need per-host hardware configurations~~
+- **Status**: ✅ RESOLVED - Created per-host hardware configurations
+- **Change**: Each host now has its own `hardware/` directory with device-specific settings
 
 ### 2. Conditional Services
 **Issue**: Some services enabled that may not be needed on all hosts
@@ -119,30 +129,33 @@
 3. **Enhanced user persistence** - Added missing critical directories
 4. **Improved ZFS performance** - Added recordsize optimizations
 5. **Enhanced rebuild script** - Added comprehensive error handling and validation
+6. **Fixed hardware configuration portability** - Per-host hardware configurations created
+7. **Organized development packages** - Conditional development module by host type
+8. **Improved SSH key framework** - Added SSH key options and permission handling
+9. **Enhanced documentation** - Comprehensive setup guides and comments
 
 ### 🔄 Next Priority Actions
 
-1. **Create per-host hardware configurations**:
+1. **Set up actual SSH keys** (User Action Required):
 ```bash
-# Create hardware-specific configs for each host
-mkdir -p hosts/{desktop,laptop,server}/hardware
-# Move disko device path to per-host configs
+# Generate SSH key pair
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+# Add public key to host configuration
+# users.sshKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... your-key" ];
+# users.enablePasswordAuth = false;
 ```
 
-2. **Move development packages to user space**:
+2. **Update hardware device paths** (Per-Host Action Required):
 ```nix
-# Remove from common.nix system packages:
-gcc clang python3 nodejs gnumake cmake go rustc cargo
-# Add to user packages or dev shells instead
+# In hosts/{hostname}/hardware/disko-layout.nix
+{ device ? "/dev/disk/by-id/your-actual-disk-id", ... }:
 ```
 
-3. **Add SSH key authentication setup**:
+3. **Review and customize development packages**:
 ```nix
-# In users.nix, replace password with:
-openssh.authorizedKeys.keys = [
-  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... your-key-here"
-];
-hashedPassword = null; # Disable password auth
+# Adjust development.nix module for your specific needs
+# Consider adding user-specific packages via Home Manager
 ```
 
 ## Updated Recommendations
@@ -150,16 +163,16 @@ hashedPassword = null; # Disable password auth
 ### High Priority (Do First)
 1. ✅ **Fix stateVersion conflicts** - COMPLETED
 2. ✅ **Consolidate unfree packages** - COMPLETED  
-3. **Create per-host hardware configs** - TODO
-4. **Set up SSH key authentication** - TODO
-5. **Move dev tools to user packages** - TODO
+3. ✅ **Create per-host hardware configs** - COMPLETED
+4. **Set up SSH key authentication** - FRAMEWORK READY (requires user action)
+5. ✅ **Move dev tools to user packages** - COMPLETED
 
 ### Medium Priority  
 6. ✅ **Enhanced user persistence** - COMPLETED
 7. ✅ **Improve ZFS configuration** - COMPLETED
 8. ✅ **Enhance script error handling** - COMPLETED
-9. **Add SSH key permissions handling** - TODO
-10. **Make services conditional by host type** - TODO
+9. ✅ **Add SSH key permissions handling** - COMPLETED
+10. **Make services conditional by host type** - PARTIALLY DONE (development module)
 
 ### Low Priority
 11. **Review kernel hardening parameters** - TODO

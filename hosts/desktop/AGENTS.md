@@ -9,7 +9,7 @@ This directory contains the desktop host configuration, optimized for a full des
 
 ## Dependencies
 - Imports common system modules from `/modules/nixos/common.nix`
-- Imports ZFS and disk configuration from `/modules/nixos/disko-zfs.nix`  
+- Imports ZFS and disk configuration from `./hardware/disko-zfs.nix` (host-specific)  
 - Imports impermanence configuration from `/modules/nixos/impermanence.nix`
 - Imports NVIDIA-specific configuration from `/modules/nixos/nvidia-rog.nix`
 - References user configurations through Home Manager integration
