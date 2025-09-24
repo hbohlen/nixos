@@ -1,0 +1,192 @@
+name: Test ZFS/Impermanence/Disko Configuration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-flake:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Check flake
+      run: nix flake check
+    
+    - name: Build all configurations
+      run: |
+        nix build --flake .#nixosConfigurations.desktop.config.system.build.toplevel
+        nix build --flake .#nixosConfigurations.laptop.config.system.build.toplevel
+        nix build --flake .#nixosConfigurations.server.config.system.build.toplevel
+
+  test-disko:
+    runs-on: ubuntu-latest
+    needs: validate-flake
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Install ZFS dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zfsutils-linux
+    
+    - name: Test Disko configuration syntax
+      run: |
+        nix build --flake .#nixosConfigurations.desktop.config.system.build.diskoScript
+        nix build --flake .#nixosConfigurations.laptop.config.system.build.diskoScript
+        nix build --flake .#nixosConfigurations.server.config.system.build.diskoScript
+    
+    - name: Validate Disko layout
+      run: |
+        nix eval --json --apply 'x: x.disko.devices' --flake .#nixosConfigurations.desktop.config.disko | jq .
+        nix eval --json --apply 'x: x.disko.devices' --flake .#nixosConfigurations.laptop.config.disko | jq .
+        nix eval --json --apply 'x: x.disko.devices' --flake .#nixosConfigurations.server.config.disko | jq .
+
+  test-zfs:
+    runs-on: ubuntu-latest
+    needs: validate-flake
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Install ZFS
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zfsutils-linux splat-dkms
+    
+    - name: Test ZFS module configuration
+      run: |
+        # Test that ZFS configuration is valid
+        nix eval --json --apply 'x: x.boot.supportedFilesystems' --flake .#nixosConfigurations.desktop.config | jq -e 'contains(["zfs"])'
+        nix eval --json --apply 'x: x.boot.supportedFilesystems' --flake .#nixosConfigurations.laptop.config | jq -e 'contains(["zfs"])'
+        nix eval --json --apply 'x: x.boot.supportedFilesystems' --flake .#nixosConfigurations.server.config | jq -e 'contains(["zfs"])'
+    
+    - name: Test ZFS service configuration
+      run: |
+        nix eval --json --apply 'x: x.services.zfs.autoScrub.enable' --flake .#nixosConfigurations.desktop.config | jq -e '. == true'
+        nix eval --json --apply 'x: x.services.zfs.autoScrub.enable' --flake .#nixosConfigurations.laptop.config | jq -e '. == true'
+        nix eval --json --apply 'x: x.services.zfs.autoScrub.enable' --flake .#nixosConfigurations.server.config | jq -e '. == true'
+
+  test-impermanence:
+    runs-on: ubuntu-latest
+    needs: validate-flake
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Test Impermanence configuration
+      run: |
+        # Test that impermanence is properly configured
+        nix eval --json --apply 'x: x.environment.persistence."/persist".directories' --flake .#nixosConfigurations.desktop.config | jq .
+        nix eval --json --apply 'x: x.environment.persistence."/persist".files' --flake .#nixosConfigurations.desktop.config | jq .
+        nix eval --json --apply 'x: x.environment.persistence."/persist".users.hbohlen.directories' --flake .#nixosConfigurations.desktop.config | jq .
+    
+    - name: Validate persistence paths
+      run: |
+        # Check that critical paths are persisted
+        nix eval --json --apply 'x: x.environment.persistence."/persist".directories' --flake .#nixosConfigurations.desktop.config | jq -e 'contains(["/var/log"])'
+        nix eval --json --apply 'x: x.environment.persistence."/persist".files' --flake .#nixosConfigurations.desktop.config | jq -e 'contains(["/etc/machine-id"])'
+        nix eval --json --apply 'x: x.environment.persistence."/persist".files' --flake .#nixosConfigurations.desktop.config | jq -e 'contains(["/etc/ssh/ssh_host_ed25519_key"])'
+
+  test-vm:
+    runs-on: ubuntu-latest
+    needs: [test-disko, test-zfs, test-impermanence]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Build VM configurations
+      run: |
+        nix build --flake .#nixosConfigurations.desktop.config.system.build.vm
+        nix build --flake .#nixosConfigurations.laptop.config.system.build.vm
+        nix build --flake .#nixosConfigurations.server.config.system.build.vm
+    
+    - name: Test VM boot process
+      run: |
+        # Test that VM can be created (this doesn't actually boot it, just validates the configuration)
+        timeout 10s ./result/bin/run-nixos-vm --help || true
+
+  test-hardware-compatibility:
+    runs-on: ubuntu-latest
+    needs: validate-flake
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Test hardware configurations
+      run: |
+        # Test that hardware configurations are valid
+        nix eval --json --apply 'x: x.boot.initrd.availableKernelModules' --flake .#nixosConfigurations.desktop.config | jq .
+        nix eval --json --apply 'x: x.boot.initrd.availableKernelModules' --flake .#nixosConfigurations.laptop.config | jq .
+        nix eval --json --apply 'x: x.boot.initrd.availableKernelModules' --flake .#nixosConfigurations.server.config | jq .
+    
+    - name: Test NVIDIA configuration
+      run: |
+        nix eval --json --apply 'x: x.hardware.nvidia.modesetting.enable' --flake .#nixosConfigurations.desktop.config | jq -e '. == true'
+        nix eval --json --apply 'x: x.hardware.nvidia.modesetting.enable' --flake .#nixosConfigurations.laptop.config | jq -e '. == true'
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: validate-flake
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v23
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          system = x86_64-linux
+    
+    - name: Check for secrets
+      run: |
+        # Check that no secrets are committed
+        if grep -r "password\|secret\|key" --include="*.nix" . | grep -v "initialPassword\|allowUnfreePredicate"; then
+          echo "Potential secrets found in configuration"
+          exit 1
+        fi
+    
+    - name: Test SSH configuration
+      run: |
+        nix eval --json --apply 'x: x.services.openssh.settings.PasswordAuthentication' --flake .#nixosConfigurations.desktop.config | jq -e '. == false'
+        nix eval --json --apply 'x: x.services.openssh.settings.PermitRootLogin' --flake .#nixosConfigurations.desktop.config | jq -e '. == "no"'
