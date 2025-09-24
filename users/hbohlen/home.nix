@@ -18,23 +18,23 @@
 
   # Packages specific to this user (minimal set for ISO install)
   home.packages = with pkgs; [
-    # Development tools (temporarily disabled for ISO install)
-    # vscode
-    # zed-editor
-    # nodejs
-    # python3
-    # uv
+  # Development tools
+  vscode
+  zed-editor
+  nodejs
+  python3
+  uv
     git
     gh
     
-    # Applications (minimal set)
-    # affine          # Temporarily disabled
+  # Applications
+  affine
     _1password-cli
     _1password-gui
-    # opencode        # Temporarily disabled
-    # podman          # Temporarily disabled
-    # podman-desktop  # Temporarily disabled
-    # vivaldi         # Temporarily disabled
+  opencode
+  podman
+  podman-desktop
+  vivaldi
     
     # Add more packages specific to this user
   ];
@@ -147,6 +147,8 @@
     };
   };
 
+  services.greetd.enable = true;
+  services.greetd.settings.default_session.command = "Hyprland";
 
   # Example: Manage dotfiles with a bare git repo ("dotfiles" pattern)
   # To use, run:
