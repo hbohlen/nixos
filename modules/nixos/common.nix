@@ -46,19 +46,8 @@
     unzip
     zip
     
-    # Development tools
-    gcc
-    clang
-    python3
-    nodejs
-    gnumake
-    cmake
-    go
-    rustc
-    cargo
-    
-    # Container runtime
-    podman
+    # Note: Development tools moved to development.nix module
+    # Import and enable development.nix in host configs that need dev tools
     
     # Security tools
     _1password-cli

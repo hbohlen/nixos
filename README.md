@@ -257,10 +257,13 @@ This configuration follows a modular architecture that promotes reusability and 
 - **`flake.nix`** - Central entry point defining all inputs, outputs, and host configurations
 - **`hosts/`** - Machine-specific configurations
   - `desktop/` - High-performance desktop with Intel/Nvidia hardware support
+    - `hardware/` - Hardware-specific disk and device configurations
   - `laptop/` - Power-optimized portable configuration  
+    - `hardware/` - Hardware-specific disk and device configurations
   - `server/` - Minimal headless server configuration
+    - `hardware/` - Hardware-specific disk and device configurations
 - **`modules/`** - Reusable configuration modules
-  - `nixos/` - System-level modules (disk, impermanence, hardware)
+  - `nixos/` - System-level modules (disk, impermanence, hardware, development)
   - `home-manager/` - User-level modules (desktop, applications)
 - **`users/`** - Individual user account and Home Manager configurations
 - **`scripts/`** - Utility scripts for system management and formatting
@@ -276,6 +279,32 @@ This configuration follows a modular architecture that promotes reusability and 
 - **Secret Management**: Runtime injection via Opnix and 1Password
 
 ## Customization Guide
+
+### Hardware Configuration
+
+Each host now has hardware-specific configurations in the `hardware/` subdirectory:
+
+- **`disko-layout.nix`**: Host-specific disk partitioning and ZFS layout
+- **`disko-zfs.nix`**: Disko module integration
+
+**Important**: Update the device path in each host's `hardware/disko-layout.nix`:
+```nix
+{ device ? "/dev/disk/by-id/your-actual-disk-id", ... }:
+```
+
+Find your device ID with:
+```bash
+lsblk -f
+ls -la /dev/disk/by-id/
+```
+
+### Development Tools
+
+Development packages are now organized by host type:
+- **Desktop/Laptop**: Include development tools via `development.enable = true`
+- **Server**: No development tools by default (cleaner system)
+
+The development module includes: gcc, clang, python3, nodejs, go, rust, and container support.
 
 ### Adding a New Host
 

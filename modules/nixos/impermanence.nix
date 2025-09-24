@@ -116,7 +116,29 @@
     };
   };
 
-  # Explicitly define the filesystem mounts.
+  # Fix SSH host key permissions after rollback
+  system.activationScripts.fixSSHPermissions = {
+    text = ''
+      # Ensure SSH host keys have correct permissions after impermanence rollback
+      if [ -d "/persist/etc/ssh" ]; then
+        chown -R root:root /persist/etc/ssh
+        chmod 755 /persist/etc/ssh
+        chmod 600 /persist/etc/ssh/ssh_host_*_key
+        chmod 644 /persist/etc/ssh/ssh_host_*_key.pub
+      fi
+      
+      # Ensure user SSH directory has correct permissions
+      if [ -d "/persist/home/${username}/.ssh" ]; then
+        chown -R ${username}:${username} /persist/home/${username}/.ssh
+        chmod 700 /persist/home/${username}/.ssh
+        chmod 600 /persist/home/${username}/.ssh/id_* 2>/dev/null || true
+        chmod 644 /persist/home/${username}/.ssh/id_*.pub 2>/dev/null || true
+        chmod 644 /persist/home/${username}/.ssh/authorized_keys 2>/dev/null || true
+        chmod 644 /persist/home/${username}/.ssh/known_hosts* 2>/dev/null || true
+      fi
+    '';
+    deps = [ "users" ];
+  };
   fileSystems = {
     "/" = {
       device = "rpool/local/root";
