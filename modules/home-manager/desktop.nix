@@ -43,8 +43,8 @@
     # Dev environment tools
     direnv
     nix-direnv
-    # Fonts
-    nerdfonts
+  # Fonts
+  nerd-fonts.jetbrains-mono
     # Add more packages as needed
   ];
 
