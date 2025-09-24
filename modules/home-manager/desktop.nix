@@ -83,12 +83,11 @@
     direnv
     nix-direnv
     # Fonts
-  nerd-fonts.jetbrains-mono
-  swww # Animated wallpaper daemon
-  swaylock-effects # Stylish lock screen
-  adw-gtk3 # GTK theme
-  catppuccin-cursors # Cursor theme
-  cava # Audio visualizer (optional, for terminal)
+    nerd-fonts.jetbrains-mono
+    swww # Animated wallpaper daemon
+    swaylock-effects # Stylish lock screen
+    adw-gtk3 # GTK theme
+    catppuccin-cursors # Cursor theme
     # Add more packages as needed
   ];
 
@@ -239,7 +238,7 @@
         height = 30;
         modules-left = [ "hyprland/workspaces" "hyprland/window" ];
         modules-center = [ "clock" ];
-        modules-right = [ "battery" "disk" "weather" "pulseaudio" "network" "cpu" "memory" "tray" ];
+        modules-right = [ "battery" "disk" "pulseaudio" "network" "cpu" "memory" "tray" ];
 
         "hyprland/workspaces" = {
           format = "{icon}";
@@ -267,11 +266,6 @@
         disk = {
           format = "{free} free";
           path = "/";
-        };
-        weather = {
-          format = "{temperature}°C {icon}";
-          format-icons = [ "☀️" "⛅" "☁️" "🌧️" "⛈️" "❄️" ];
-          # You may need to set your location in the Waybar config or via env vars
         };
         pulseaudio = {
           format = "{volume}% {icon}";

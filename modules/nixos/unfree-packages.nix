@@ -25,25 +25,12 @@
     "nvidia-persistenced"
     "libnvidia-ml"
     
-    # Gaming
-    "steam"
-    "steam-unwrapped"
-    "discord"
-    
     # Archive tools
     "rar"
     "unrar"
     
     # Fingerprint reader
     "libfprint-2-tod1-goodix"
-    
-    # Communication
-    "slack"
-    "zoom"
-    "teams"
-    
-    # Media
-    "spotify"
     
     # Other common unfree packages
     "nvidia-vaapi-driver"

@@ -33,6 +33,16 @@
     ];
   };
 
+  # Automatic garbage collection
+  nix.gc = {
+    automatic = true;
+    dates = "daily";
+    options = "--delete-older-than 30d";
+  };
+
+  # Keep only 7 most recent NixOS generations  
+  boot.loader.systemd-boot.configurationLimit = 7;
+
   # Common packages for all systems
   environment.systemPackages = with pkgs; [
     # Basic utilities

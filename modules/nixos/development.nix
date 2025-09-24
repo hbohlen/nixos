@@ -25,15 +25,20 @@
       # Version control
       git
       
-      # Programming languages (basic)
+      # Programming languages and package managers
       python3
       nodejs
+      npm
       go
       rustc
       cargo
       
+      # Python package management
+      uv # Modern Python package management
+      
       # Container runtime for development
       podman
+      podman-compose
     ];
 
     # Enable container support

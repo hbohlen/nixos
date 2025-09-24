@@ -85,29 +85,36 @@
 
   # Desktop-specific packages
   environment.systemPackages = with pkgs; [
-    # Desktop utilities
+    # Browsers
     firefox
-    thunderbird
-    gimp
-    libreoffice
-    vlc
-    # Audio/video tools
-    pavucontrol
-    easyeffects
+    
+    # Development IDEs and editors
+    zed-editor
+    vscode
+    
+    # Productivity and office
+    affine
+    
     # File management
     nautilus
+    
     # System monitoring
     gnome-system-monitor
+    
     # Screenshot tools
     flameshot
+    
     # Archive tools
     zip
     unzip
     rar
+    
     # Document viewers
     evince
-    # Image viewers
-    eog
+    
+    # Audio tools (essential for desktop)
+    pavucontrol
+    easyeffects
   ];
 
   # Enable desktop services
