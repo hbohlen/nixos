@@ -1,3 +1,40 @@
+  # GTK and cursor theme
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Catppuccin-Mocha-Compact-Lavender-Dark";
+      package = pkgs.catppuccin-gtk-theme;
+    };
+    iconTheme = {
+      name = "Papirus-Dark";
+      package = pkgs.papirus-icon-theme;
+    };
+    cursorTheme = {
+      name = "Catppuccin-Mocha-Lavender-Cursors";
+      package = pkgs.catppuccin-cursors;
+      size = 24;
+    };
+  };
+
+  # Swaylock-effects configuration
+  programs.swaylock = {
+    enable = true;
+    package = pkgs.swaylock-effects;
+    settings = {
+      clock = true;
+      indicator = true;
+      screenshots = true;
+      effect-blur = "7x5";
+      effect-vignette = "0.5:0.5";
+      color = "#1e1e2e";
+      font = "JetBrainsMono Nerd Font";
+      font-size = 16;
+      ring-color = "#cba6f7";
+      key-hl-color = "#f38ba8";
+      inside-color = "#313244";
+      separator-color = "#cdd6f4";
+    };
+  };
 # /modules/home-manager/desktop.nix
 { pkgs, inputs, ... }:
 
@@ -44,7 +81,12 @@
     direnv
     nix-direnv
     # Fonts
-    nerd-fonts.jetbrains-mono
+  nerd-fonts.jetbrains-mono
+  swww # Animated wallpaper daemon
+  swaylock-effects # Stylish lock screen
+  catppuccin-gtk-theme # GTK theme
+  catppuccin-cursors # Cursor theme
+  cava # Audio visualizer (optional, for terminal)
     # Add more packages as needed
   ];
 
@@ -53,8 +95,9 @@
     enable = true;
     # extraConfig allows for raw hyprland.conf syntax.
     extraConfig = ''
-      # Set a background image.
-      exec-once = swaybg -i ~/.config/wallpaper.png
+      # Start swww for animated/rotating wallpapers
+      exec-once = swww-daemon &
+      exec-once = swww img ~/.config/wallpaper.png
       # Start Waybar
       exec-once = waybar
 
@@ -194,7 +237,7 @@
         height = 30;
         modules-left = [ "hyprland/workspaces" "hyprland/window" ];
         modules-center = [ "clock" ];
-        modules-right = [ "pulseaudio" "network" "cpu" "memory" "tray" ];
+        modules-right = [ "battery" "disk" "weather" "pulseaudio" "network" "cpu" "memory" "tray" ];
 
         "hyprland/workspaces" = {
           format = "{icon}";
@@ -214,6 +257,19 @@
         clock = {
           format = "{:%Y-%m-%d %H:%M:%S}";
           interval = 1;
+        };
+        battery = {
+          format = "{capacity}% {icon}";
+          format-icons = [ "" "" "" "" "" ];
+        };
+        disk = {
+          format = "{free} free";
+          path = "/";
+        };
+        weather = {
+          format = "{temperature}°C {icon}";
+          format-icons = [ "☀️" "⛅" "☁️" "🌧️" "⛈️" "❄️" ];
+          # You may need to set your location in the Waybar config or via env vars
         };
         pulseaudio = {
           format = "{volume}% {icon}";
