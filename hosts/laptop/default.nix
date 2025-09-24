@@ -2,69 +2,28 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  # Import the modules that define the core architecture of the system.
   imports = [
     ./hardware-configuration.nix
-    ../../modules/nixos/disko-zfs.nix
-    ../../modules/nixos/impermanence.nix
     ../../modules/nixos/common.nix
+    ../../modules/nixos/users.nix
+    ../../modules/nixos/boot.nix
+    ../../modules/nixos/desktop.nix
+    ../../modules/nixos/laptop.nix
+    ../../modules/nixos/impermanence.nix
+    ../../modules/nixos/disko-zfs.nix
     ../../modules/nixos/nvidia-rog.nix
     inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
   ];
 
-  # Host-specific settings.
+  # Host-specific settings
   networking.hostName = "laptop"; # Must match the name in flake.nix
   networking.hostId = "cafebabe"; # Required for ZFS, must be unique 8-character hex
-
-  # Boot loader configuration (use systemd-boot with EFI)
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  # Define the user account for this machine.
-  users.users.hbohlen = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ]; # Sudo and network access.
-    # The password should be set via a secure, declarative method.
-    # For an impermanent system, this is critical, as imperative password setting
-    # will be lost on reboot. Here we use a placeholder.
-    # In a real system, this could be managed by sops-nix or agenix.
-    initialPassword = "changeme";
-    createHome = true;
-    home = "/home/hbohlen";
-  };
-
-  # Hardware-specific configurations for laptop
-  services.tlp = {
-    enable = true;
-    settings = {
-      # CPU frequency scaling governor settings
-      CPU_SCALING_GOVERNOR_ON_AC = "performance";
-      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      
-      # Power saving settings
-      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
-      
-      # Battery charge thresholds (only for ThinkPads)
-      # START_CHARGE_THRESH_BAT0 = 75;
-      # STOP_CHARGE_THRESH_BAT0 = 80;
-    };
-  };
-
-  # Enable brightness control for laptop
-  programs.light.enable = true;
-
-  # Enable laptop-specific services
-  services.acpid.enable = true;
   
-  # Power management
-  powerManagement = {
-    enable = true;
-    powertop.enable = true;
-  };
+  # Set host type for user management
+  users.hostType = "laptop";
 
-  # Enable fingerprint reader if available
-  # services.fprintd.enable = true;
+  # Enable desktop environment
+  desktop.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions,
