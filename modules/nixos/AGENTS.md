@@ -5,13 +5,17 @@ This directory contains system-level NixOS modules that configure core system fu
 
 ## Files in This Directory
 - `common.nix` - Shared system configurations used across all hosts including base packages and services
-- `disko-zfs.nix` - Declarative disk partitioning and ZFS filesystem configuration using Disko
+- `disko-zfs.nix` - ⚠️ DEPRECATED: Now moved to per-host hardware/ directories
+- `development.nix` - Development tools and environments (conditional by host type)
 - `impermanence.nix` - Ephemeral root filesystem configuration with selective persistence using the impermanence module
 - `nvidia-rog.nix` - NVIDIA graphics and ROG (Republic of Gamers) hardware-specific configuration
+- `unfree-packages.nix` - Centralized unfree package allowances
+- `users.nix` - User account management with SSH key support
 
 ## Dependencies
-- `disko-zfs.nix` depends on the disko flake input for declarative partitioning
+- ⚠️ Hardware configurations now use per-host `hardware/disko-zfs.nix` files
 - `impermanence.nix` depends on the impermanence flake input for ephemeral root functionality
+- `development.nix` provides optional development tools for desktop/laptop hosts
 - `nvidia-rog.nix` depends on NVIDIA proprietary drivers and ROG-specific kernel modules
 - All modules may import and use nixpkgs packages and NixOS system options
 

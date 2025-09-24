@@ -9,7 +9,7 @@ This directory contains the server host configuration, optimized for headless op
 
 ## Dependencies
 - Imports common system modules from `/modules/nixos/common.nix`
-- Imports ZFS and disk configuration from `/modules/nixos/disko-zfs.nix`
+- Imports ZFS and disk configuration from `./hardware/disko-zfs.nix` (host-specific)
 - Imports impermanence configuration from `/modules/nixos/impermanence.nix`
 - May have minimal or no Home Manager integration compared to desktop/laptop hosts
 - Uses root-level flake.nix for system definition

@@ -1,6 +1,20 @@
 # /disko-layout.nix
-# TODO: Make device path configurable per host to avoid hardware coupling
-# Consider moving this to per-host hardware-configuration.nix files
+# ⚠️  DEPRECATED: This file is no longer used ⚠️
+#
+# Hardware-specific disk layouts have been moved to per-host configurations:
+# - hosts/desktop/hardware/disko-layout.nix
+# - hosts/laptop/hardware/disko-layout.nix  
+# - hosts/server/hardware/disko-layout.nix
+#
+# This file is kept for reference but should not be imported.
+# Each host now uses its own hardware/disko-layout.nix file.
+#
+# MIGRATION: Update your host imports from:
+#   ../../modules/nixos/disko-zfs.nix
+# TO:
+#   ./hardware/disko-zfs.nix
+#
+# TODO: Remove this file after confirming all hosts use the new structure
 { device ? "/dev/disk/by-id/nvme-Micron_2450_MTFDKBA1T0TFK_2146334B7D47", ... }:
 {
   disko.devices = {

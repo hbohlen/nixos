@@ -34,7 +34,7 @@ This repository implements a modern, reproducible NixOS system using Nix Flakes,
 - See `modules/impermanence.nix` for what is persisted
 
 ### Disko & ZFS
-- Disk layout and ZFS pools are defined declaratively (see `modules/nixos/disko-zfs.nix`)
+- Disk layout and ZFS pools are defined declaratively (see per-host `hardware/disko-zfs.nix` files)
 - Update device paths as needed for new hardware
 
 ### Home Manager
