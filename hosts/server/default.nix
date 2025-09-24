@@ -36,13 +36,13 @@
 
   # Additional server-specific packages
   environment.systemPackages = with pkgs; [
-    # Server tools
-    tmux
-    htop
-    git
-    vim
-    curl
-    wget
+    # Minimal for test install
+    # tmux
+    # htop
+    # git
+    # vim
+    # curl
+    # wget
   ];
   
   # This value determines the NixOS release with which your system is to be compatible.

@@ -1,0 +1,29 @@
+{
+  "name": "NixOS QEMU Test Devcontainer",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+    "--privileged",
+    "--device=/dev/kvm",
+    "--device=/dev/net/tun",
+    "--cap-add=NET_ADMIN",
+    "--cap-add=SYS_ADMIN"
+  ],
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspaces/nixos,type=bind,consistency=cached"
+  ],
+  "postCreateCommand": "sudo usermod -aG kvm,vboxusers $(whoami)",
+  "features": {},
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "arrterian.nix-env-selector",
+        "bbenoist.Nix"
+      ]
+    }
+  }
+}

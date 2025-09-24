@@ -46,12 +46,12 @@
 
   # Additional desktop-specific packages
   environment.systemPackages = with pkgs; [
-    # GUI applications
-    firefox
-    thunderbird
-    gimp
-    libreoffice
-    vlc
+    # Minimal for test install
+    # firefox
+    # thunderbird
+    # gimp
+    # libreoffice
+    # vlc
   ];
   
   # This value determines the NixOS release with which your system is to be compatible.
