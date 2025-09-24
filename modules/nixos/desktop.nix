@@ -63,32 +63,7 @@
     extraPortals = [ pkgs.xdg-desktop-portal-hyprland ];
   };
 
-  # Desktop-specific unfree packages
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    # 1Password family
-    "1password"
-    "1password-cli"
-    "1password-gui"
-    # Development tools
-    "vscode"
-    "code"
-    # Gaming
-    "steam"
-    "steam-unwrapped"
-    "discord"
-    # Browsers
-    "vivaldi"
-    "chrome"
-    # NVIDIA drivers
-    "nvidia-x11"
-    "nvidia-settings"
-    "nvidia-persistenced"
-    "libnvidia-ml"
-    # Archive tools
-    "rar"
-    # Fingerprint reader
-    "libfprint-2-tod1-goodix"
-  ];
+  # Desktop-specific unfree packages are now handled in unfree-packages.nix
 
   # 1Password GUI configuration
   programs._1password-gui = {

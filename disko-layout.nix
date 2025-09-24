@@ -1,4 +1,6 @@
 # /disko-layout.nix
+# TODO: Make device path configurable per host to avoid hardware coupling
+# Consider moving this to per-host hardware-configuration.nix files
 { device ? "/dev/disk/by-id/nvme-Micron_2450_MTFDKBA1T0TFK_2146334B7D47", ... }:
 {
   disko.devices = {
@@ -62,23 +64,35 @@
         datasets = {
           "local/root" = {
             type = "zfs_fs";
-            options.mountpoint = "legacy";
+            options = {
+              mountpoint = "legacy";
+              recordsize = "1M"; # Optimize for system files
+            };
             postCreateHook = ''
               zfs snapshot rpool/local/root@blank
             '';
           };
           "local/nix" = {
             type = "zfs_fs";
-            options.mountpoint = "legacy";
-            options."com.sun:auto-snapshot" = "false";
+            options = {
+              mountpoint = "legacy";
+              recordsize = "1M"; # Optimize for large files (nix store)
+              "com.sun:auto-snapshot" = "false";
+            };
           };
           "safe/persist" = {
             type = "zfs_fs";
-            options.mountpoint = "legacy";
+            options = {
+              mountpoint = "legacy";
+              recordsize = "128K"; # Mixed workload optimization
+            };
           };
           "safe/home" = {
             type = "zfs_fs";
-            options.mountpoint = "legacy";
+            options = {
+              mountpoint = "legacy";
+              recordsize = "128K"; # User files mixed workload
+            };
           };
         };
       };

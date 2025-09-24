@@ -2,6 +2,9 @@
 { config, pkgs, lib, username, ... }:
 
 {
+  imports = [
+    ./unfree-packages.nix
+  ];
   # Define common module options
   options = {
     common = {
@@ -29,28 +32,6 @@
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
   };
-
-  # Allow essential unfree packages
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    # 1Password
-    "1password"
-    "1password-cli"
-    "1password-gui"
-    # Browsers
-    "vivaldi"
-    "chrome"
-    # Archive tools
-    "rar"
-    # Fingerprint reader
-    "libfprint-2-tod1-goodix"
-    # NVIDIA drivers
-    "nvidia-x11"
-    "nvidia-settings"
-    "nvidia-persistenced"
-    "libnvidia-ml"
-    # Development tools
-    "vscode"
-  ];
 
   # Common packages for all systems
   environment.systemPackages = with pkgs; [
@@ -318,9 +299,6 @@
       allowReboot = false;
       operation = "boot";
     };
-
-    # Enable system state version
-    stateVersion = "25.05";
   };
   };
 }

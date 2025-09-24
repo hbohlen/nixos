@@ -71,20 +71,47 @@
     # User-specific persistence
     users.${username} = {
       directories = [
+        # Essential user directories
+        ".ssh" # SSH keys and config
+        ".gnupg" # GPG keys and configuration
+        
         # 1Password CLI and GUI (user-specific)
         ".config/op"
         ".config/1Password"
         ".cache/1Password"
         ".config/1Password-Beta"
+        
+        # Development and configuration
+        ".config/git"
+        ".config/gh" # GitHub CLI
+        ".local/share/zsh" # Zsh history and completions
+        ".cache" # General cache directory
+        ".local/state" # Application state
+        
         # ASUS-specific user directories
         ".config/asusd"
-        # Add more user directories as needed
+        
+        # User data directories
         "Documents"
         "Downloads"
         "Pictures"
         "Music"
         "Videos"
         ".local/share"
+        
+        # Development directories (optional)
+        ".cargo" # Rust cargo cache
+        ".npm" # npm cache
+        "Development" # Project workspace
+      ];
+      files = [
+        # Shell history files
+        ".bash_history"
+        ".zsh_history"
+        
+        # Git configuration
+        ".gitconfig"
+        ".gitconfig.local"
       ];
     };
   };
