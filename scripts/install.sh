@@ -26,15 +26,12 @@ readonly BLUE='\033[0;34m'
 readonly CYAN='\033[0;36m'
 readonly NC='\033[0m' # No Color
 
-# Configuration variables - modify these as needed
-readonly DEFAULT_HOSTNAME="desktop"
+# Configuration variables - hardcoded for this installation
+readonly HOSTNAME="desktop"
 readonly DEFAULT_USERNAME="hbohlen"
-readonly TARGET_DISK="/dev/nvme1n1"  # Your 2TB SSD (CT2000P310SSD8)
+readonly DISK_DEVICE="/dev/nvme1n1"  # Your 2TB SSD (CT2000P310SSD8)
 readonly REPO_URL="https://github.com/hbohlen/nixos"
 readonly MOUNT_POINT="/mnt"
-
-# Global variable for disk device
-DISK_DEVICE=""
 
 # Function to print colored output
 print_status() {
@@ -124,6 +121,15 @@ check_prerequisites() {
         handle_error "flake.nix not found. Please run this script from the repository root."
     fi
     
+    # Check if hostname configuration exists
+    if [[ ! -d "hosts/$HOSTNAME" ]]; then
+        handle_error "Host configuration for '$HOSTNAME' not found in hosts/ directory"
+    fi
+    
+    if [[ ! -f "hosts/$HOSTNAME/hardware/disko-layout.nix" ]]; then
+        handle_error "Hardware configuration not found for '$HOSTNAME'"
+    fi
+    
     # Check for required commands
     local required_commands=("git" "nixos-generate-config" "cryptsetup" "zpool" "zfs")
     for cmd in "${required_commands[@]}"; do
@@ -146,74 +152,22 @@ install_tools() {
     print_success "Tools installed successfully"
 }
 
-# Function to list available host configurations
-list_available_hosts() {
-    print_status "Available host configurations:"
-    
-    # Check if hosts directory exists
-    if [[ ! -d "hosts" ]]; then
-        print_error "No 'hosts' directory found in current location"
-        return 1
-    fi
-    
-    # List all directories in hosts/ that contain hardware/disko-layout.nix
-    local available_hosts=()
-    for host_dir in hosts/*/; do
-        if [[ -d "$host_dir" ]]; then
-            local host_name=$(basename "$host_dir")
-            if [[ -f "${host_dir}hardware/disko-layout.nix" ]]; then
-                available_hosts+=("$host_name")
-                echo "  - $host_name"
-            fi
-        fi
-    done
-    
-    if [ ${#available_hosts[@]} -eq 0 ]; then
-        print_error "No valid host configurations found"
-        print_status "Expected structure: hosts/<hostname>/hardware/disko-layout.nix"
-        return 1
-    fi
-    
-    return 0
-}
-
 # Function to collect user configuration
 collect_configuration() {
     print_step "Collecting installation configuration..."
     
-    # List available hosts first
-    if ! list_available_hosts; then
-        print_error "Cannot proceed without valid host configurations"
-        exit 1
-    fi
-    
-    # Get hostname with validation
-    while true; do
-        HOSTNAME=$(prompt_user "Enter hostname" "$DEFAULT_HOSTNAME")
-        
-        # Check if hostname configuration exists
-        if [[ ! -d "hosts/$HOSTNAME" ]]; then
-            print_error "Host configuration for '$HOSTNAME' not found in hosts/ directory"
-            print_status "Please choose from the available hosts listed above"
-            continue
-        fi
-        
-        if [[ ! -f "hosts/$HOSTNAME/hardware/disko-layout.nix" ]]; then
-            print_error "Hardware configuration not found for '$HOSTNAME'"
-            print_status "Expected: hosts/$HOSTNAME/hardware/disko-layout.nix"
-            continue
-        fi
-        
-        break
-    done
-    
-    # Get username
+    # Get username (only prompt)
     USERNAME=$(prompt_user "Enter username" "$DEFAULT_USERNAME")
     
-    # Set the target disk
-    DISK_DEVICE="$TARGET_DISK"
+    # Show configuration for confirmation
+    print_status "Installation configuration:"
+    print_status "  Hostname: $HOSTNAME"
+    print_status "  Username: $USERNAME"
+    print_status "  Disk: $DISK_DEVICE"
+    print_status "  Mount point: $MOUNT_POINT"
+    echo
     
-    # Show disk information for confirmation
+    # Show disk information
     print_status "Target disk information:"
     lsblk -d -o NAME,SIZE,MODEL "$DISK_DEVICE" || handle_error "Cannot access disk $DISK_DEVICE"
     echo
@@ -222,12 +176,6 @@ collect_configuration() {
     if [[ ! -b "$DISK_DEVICE" ]]; then
         handle_error "Disk device '$DISK_DEVICE' does not exist"
     fi
-    
-    print_success "Configuration collected:"
-    print_status "  Hostname: $HOSTNAME"
-    print_status "  Username: $USERNAME"
-    print_status "  Disk: $DISK_DEVICE"
-    print_status "  Mount point: $MOUNT_POINT"
     
     # Final confirmation
     if ! confirm_action "⚠️  WARNING: This will DESTROY all data on $DISK_DEVICE. Continue?"; then
@@ -488,10 +436,12 @@ display_final_instructions() {
     print_status "5. Consider changing the initial password: passwd"
     echo
     print_status "The system is configured with:"
+    print_status "  • Hostname: $HOSTNAME"
+    print_status "  • Username: $USERNAME"
+    print_status "  • Disk: $DISK_DEVICE"
     print_status "  • ZFS with LUKS encryption"
     print_status "  • Impermanence (ephemeral root)"
     print_status "  • Persistent data in /persist"
-    print_status "  • Host configuration: $HOSTNAME"
     echo
     print_warning "Remember: The root filesystem is ephemeral!"
     print_warning "Only data in /persist and /home will survive reboots."
@@ -499,7 +449,7 @@ display_final_instructions() {
 
 # Main installation function
 main() {
-    print_status "🚀 Starting NixOS installation with disko-ZFS-impermanence setup"
+    print_status "🚀 Starting NixOS installation for $HOSTNAME on $DISK_DEVICE"
     echo
     
     # Step 1: Preliminary checks
