@@ -293,12 +293,7 @@ setup_zfs() {
 create_mount_directories() {
     print_step "Creating mount directories..."
     
-    local directories=("$MOUNT_POINT" "$MOUNT_POINT/boot" "$MOUNT_POINT/nix" 
-                      "$MOUNT_POINT/persist" "$MOUNT_POINT/home")
-    
-    for dir in "${directories[@]}"; do
-        mkdir -p "$dir" || handle_error "Failed to create directory $dir"
-    done
+    mkdir -p "$MOUNT_POINT" || handle_error "Failed to create directory $MOUNT_POINT"
     
     print_success "Mount directories created"
 }
@@ -311,6 +306,17 @@ mount_filesystems() {
     print_status "Mounting root dataset..."
     mount -t zfs rpool/local/root "$MOUNT_POINT" || \
         handle_error "Failed to mount root dataset"
+
+    # Ensure additional mountpoints exist inside the target root
+    local subdirectories=(
+        "$MOUNT_POINT/boot"
+        "$MOUNT_POINT/nix"
+        "$MOUNT_POINT/persist"
+        "$MOUNT_POINT/home"
+    )
+    for dir in "${subdirectories[@]}"; do
+        mkdir -p "$dir" || handle_error "Failed to create directory $dir"
+    done
     
     # Mount nix dataset
     print_status "Mounting nix dataset..."
