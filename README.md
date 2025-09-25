@@ -777,9 +777,11 @@ This is a modern, declarative NixOS system built on the "Erase Your Darlings" ph
 - **Check**: Verify `/etc/ssh/ssh_host_*` files are persisted in `impermanence.nix`
 
 #### Home Manager Build Failures
-- **Symptom**: `collision between` package conflicts
+- **Symptom**: `collision between` package conflicts or `buildEnv error: two given paths contain a conflicting subpath`
 - **Solution**: Check for duplicate package definitions between system and user configs
 - **Fix**: Use `programs.package.enable = true` instead of adding to `home.packages`
+- **Example**: For Node.js conflicts, centralize to system development module instead of duplicating in user config
+- **See**: `docs/package-conflicts.md` for detailed resolution examples
 
 #### Package Not Found Errors
 - **Symptom**: `attribute 'package' does not exist`

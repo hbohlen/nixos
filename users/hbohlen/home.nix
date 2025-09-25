@@ -21,7 +21,7 @@
     # Development tools and IDEs
     zed-editor
     vscode
-    nodejs
+    # nodejs - provided by system-level development module to avoid conflicts
     python3
     uv
     git

@@ -127,7 +127,7 @@
     # Development tools (minimal)
     gcc
     python3
-    nodejs
+    # nodejs - removed to avoid conflicts, use development module if needed
     go
   ];
 
