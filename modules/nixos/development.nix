@@ -28,7 +28,7 @@
       # Programming languages and package managers
       python3
       nodejs
-      npm
+      nodePackages.npm
       go
       rustc
       cargo

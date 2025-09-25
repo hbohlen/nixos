@@ -53,7 +53,7 @@
     # gemini-cli   # Gemini CLI tool (may need custom package)
     
     # Additional development tools
-    npm
+    nodePackages.npm
   ];
 
   # Shell configuration
