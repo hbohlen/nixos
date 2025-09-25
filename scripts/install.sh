@@ -116,6 +116,15 @@ check_root() {
     print_success "Running as root"
 }
 
+# Function to ensure TTY is available for interactive input
+check_tty() {
+    if [[ ! -t 0 ]]; then
+        print_warning "No TTY detected for stdin. Attempting to redirect from /dev/tty"
+        # This helps ensure interactive prompts work even when piped
+        exec < /dev/tty
+    fi
+}
+
 # Function to validate prerequisites
 check_prerequisites() {
     print_step "Checking prerequisites..."
@@ -219,15 +228,35 @@ run_disko() {
     # Enable experimental features for this session
     export NIX_CONFIG="experimental-features = nix-command flakes"
     
-    # Run disko with the host-specific configuration using the flake's disko configuration
+    # Ensure we have a proper TTY for interactive input (LUKS password)
     print_status "Partitioning disk with disko for host: $HOSTNAME..."
-    nix --experimental-features 'nix-command flakes' run github:nix-community/disko -- \
+    print_status "You will be prompted to enter the LUKS encryption password..."
+    
+    # Create a temporary script to run disko with proper TTY handling
+    local disko_script="/tmp/run_disko.sh"
+    cat > "$disko_script" << 'EOF'
+#!/bin/bash
+# Ensure we have proper TTY access
+exec < /dev/tty
+exec > /dev/tty
+exec 2> /dev/tty
+
+# Run disko with the arguments passed to this script
+nix --experimental-features 'nix-command flakes' run github:nix-community/disko -- "$@"
+EOF
+    chmod +x "$disko_script"
+    
+    # Run the disko script with our configuration
+    "$disko_script" \
         --mode destroy,format,mount \
         --root-mountpoint "$MOUNT_POINT" \
         --yes-wipe-all-disks \
         --argstr device "$DISK_DEVICE" \
         ./hosts/"$HOSTNAME"/hardware/disko-layout.nix || \
         handle_error "Disko partitioning failed"
+    
+    # Clean up the temporary script
+    rm -f "$disko_script"
     
     print_success "Disko partitioning completed successfully"
 }
@@ -489,6 +518,7 @@ main() {
     echo
     
     # Step 1: Preliminary checks
+    check_tty
     check_root
     check_prerequisites
     

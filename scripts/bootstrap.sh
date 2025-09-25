@@ -55,6 +55,7 @@ chmod +x scripts/install.sh
 
 print_success "Bootstrap complete! Now running the installation script..."
 print_status "You will be prompted for hostname, username, and target disk..."
+print_status "During disk partitioning, you will also be prompted for LUKS encryption password..."
 
-# Run the main installation script
-exec ./scripts/install.sh
+# Run the main installation script with proper TTY inheritance
+exec ./scripts/install.sh < /dev/tty
