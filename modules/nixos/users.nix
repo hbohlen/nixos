@@ -28,7 +28,7 @@
     # Define the main user account
     users.users.${username} = {
       isNormalUser = true;
-      description = "Hayden Bohlen";
+      description = "Primary User Account";
       extraGroups = [ "wheel" "networkmanager" ]
         ++ lib.optionals (config.users.hostType != "server") [ "video" "audio" ];
       
