@@ -2,6 +2,13 @@
 { config, lib, ... }:
 
 {
+  # Tell the initrd to unlock the LUKS encrypted partition at boot
+  boot.initrd.luks.devices."cryptroot" = { # <- Move the block here, outside of boot.loader
+    device = "/dev/disk/by-partlabel/luks";
+    preLVM = true;
+    allowDiscards = true;
+  };
+
   # Boot loader configuration using systemd-boot with EFI
   boot.loader = {
     systemd-boot = {
@@ -9,11 +16,7 @@
       # Enable editor for emergency recovery (set to false for security)
       editor = false;
     };
-  boot.initrd.luks.devices."cryptroot" = {
-    device = "/dev/disk/by-partlabel/luks";
-    preLVM = true;
-    allowDiscards = true;
-  };
+    # The luks block does not go here
     efi = {
       canTouchEfiVariables = true;
       # Enable EFI boot manager integration
