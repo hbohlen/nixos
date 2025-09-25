@@ -26,6 +26,8 @@
       git
       
       # Programming languages and package managers
+      # NOTE: nodejs and npm are provided system-wide here to avoid conflicts
+      # with user-level Home Manager packages
       python3
       nodejs
       nodePackages.npm
