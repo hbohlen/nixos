@@ -219,6 +219,113 @@ nslookup github.com
    - Clean up old generations (if configured)
    - Update system state tracking
 
+**Rebuild Process Flow Diagram**:
+
+```mermaid
+flowchart TD
+    Start([User runs rebuild.sh]) --> DetectMode{Mode specified?}
+    DetectMode -->|No| DefaultMode[Set mode = switch]
+    DetectMode -->|Yes| ParseArgs[Parse command arguments]
+    DefaultMode --> DetectHost
+    ParseArgs --> DetectHost[Detect hostname]
+    
+    DetectHost --> ValidateEnv[Validate Environment<br/>- Check flake.nix exists<br/>- Validate repository structure<br/>- Check Nix installation]
+    ValidateEnv -->|Failed| ErrorEnv[Exit: Invalid environment]
+    ValidateEnv -->|Success| CheckFlake[Check flake syntax<br/>nix flake check]
+    
+    CheckFlake -->|Failed| ErrorFlake[Exit: Flake syntax error]
+    CheckFlake -->|Success| UpdateFlake{Update flake?}
+    UpdateFlake -->|Yes| RunUpdate[nix flake update]
+    UpdateFlake -->|No| BuildConfig
+    RunUpdate --> BuildConfig[Build Configuration<br/>nixos-rebuild build --flake .#hostname]
+    
+    BuildConfig -->|Failed| ErrorBuild[Exit: Build failed]
+    BuildConfig -->|Success| CheckMode{What mode?}
+    
+    CheckMode -->|build| VerifyBuild[Verify build result]
+    CheckMode -->|dry-run| ShowChanges[Show what would be built]
+    CheckMode -->|test| ActivateTemp[Activate temporarily<br/>nixos-rebuild test]
+    CheckMode -->|switch| ActivateSwitch[Activate and make persistent<br/>nixos-rebuild switch]
+    CheckMode -->|boot| SetNextBoot[Set for next boot<br/>nixos-rebuild boot]
+    
+    VerifyBuild --> Complete
+    ShowChanges --> Complete
+    ActivateTemp --> VerifyServices[Verify services started]
+    ActivateSwitch --> VerifyServices
+    SetNextBoot --> VerifyBootloader[Update bootloader entries]
+    
+    VerifyServices -->|Failed| ServiceError[Services failed to start<br/>Check systemctl status]
+    VerifyServices -->|Success| CleanupGens{Cleanup old generations?}
+    VerifyBootloader -->|Failed| BootError[Bootloader update failed]
+    VerifyBootloader -->|Success| CleanupGens
+    
+    CleanupGens -->|Yes| RunCleanup[nix-collect-garbage<br/>nixos-rebuild --delete-older-than]
+    CleanupGens -->|No| Complete[Rebuild Complete<br/>Display success message]
+    RunCleanup --> Complete
+    
+    %% Error paths
+    ErrorEnv --> End([Exit])
+    ErrorFlake --> End
+    ErrorBuild --> End
+    ServiceError --> RollbackPrompt{Rollback?}
+    BootError --> RollbackPrompt
+    RollbackPrompt -->|Yes| DoRollback[nixos-rebuild --rollback]
+    RollbackPrompt -->|No| End
+    DoRollback --> End
+    Complete --> End
+    
+    %% Styling
+    style Start fill:#c8e6c9
+    style Complete fill:#c8e6c9
+    style End fill:#ffecb3
+    style ErrorEnv fill:#ffcdd2
+    style ErrorFlake fill:#ffcdd2
+    style ErrorBuild fill:#ffcdd2
+    style ServiceError fill:#ffcdd2
+    style BuildConfig fill:#e1f5fe
+    style ActivateSwitch fill:#f3e5f5
+```
+
+**Rebuild Detection and Configuration Selection**:
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Script as rebuild.sh
+    participant System as System Detection
+    participant Nix as Nix Build System
+    participant NixOS as NixOS Rebuild
+    
+    User->>Script: Execute rebuild.sh [options]
+    Script->>Script: Parse command line arguments
+    Script->>System: Detect current hostname
+    System-->>Script: Return hostname (e.g., "desktop")
+    
+    Script->>Script: Map hostname to flake config (.#desktop)
+    Script->>Script: Validate repository structure
+    Script->>Nix: nix flake check
+    Nix-->>Script: Syntax validation result
+    
+    alt Flake update requested
+        Script->>Nix: nix flake update
+        Nix-->>Script: Updated lock file
+    end
+    
+    Script->>NixOS: nixos-rebuild <mode> --flake .#<hostname>
+    NixOS->>Nix: Build configuration
+    Nix-->>NixOS: Build result
+    
+    alt Mode is switch or test
+        NixOS->>System: Activate new configuration
+        System-->>NixOS: Services status
+        NixOS-->>Script: Activation result
+    else Mode is build
+        NixOS-->>Script: Build-only result
+    end
+    
+    Script->>User: Display completion status
+```
+
 **Troubleshooting Rebuild Issues**:
 
 ##### Build Failures

@@ -271,3 +271,123 @@ The complete installation process follows this high-level workflow:
    - Prepare system for first boot
 
 This design provides a robust, automated installation process that creates a modern NixOS system with ephemeral root, encrypted storage, and declarative configuration management.
+
+## Installation Workflow Diagram
+
+### Complete Installation Process Flow
+
+```mermaid
+flowchart TD
+    Start([User runs bootstrap.sh]) --> CheckRoot{Running as root?}
+    CheckRoot -->|No| ErrorRoot[Exit with error:<br/>Must run as root]
+    CheckRoot -->|Yes| InstallGit[Install git via nix-shell]
+    
+    InstallGit --> CloneRepo[Clone repository to /tmp/nixos]
+    CloneRepo --> MakeExec[Make install.sh executable]
+    MakeExec --> SourceNix[Source Nix daemon profile]
+    SourceNix --> RunInstall[Execute install.sh with TTY]
+    
+    RunInstall --> CheckTTY{TTY available?}
+    CheckTTY -->|No| ErrorTTY[Exit: Interactive TTY required]
+    CheckTTY -->|Yes| CheckPrereq[Check prerequisites]
+    
+    CheckPrereq --> CollectConfig[Collect configuration<br/>- Username<br/>- Hostname<br/>- Disk device]
+    CollectConfig --> InstallTools[Install tools via nix-shell<br/>- disko<br/>- ZFS<br/>- cryptsetup]
+    
+    InstallTools --> RunDisko[Run disko partitioning<br/>Creates GPT + EFI + LUKS]
+    RunDisko --> SetupLUKS[Setup LUKS encryption<br/>Open encrypted device]
+    SetupLUKS --> SetupZFS[Setup ZFS<br/>- Import rpool<br/>- Verify datasets<br/>- Create @blank snapshot]
+    
+    SetupZFS --> CreateMountDirs[Create mount directories]
+    CreateMountDirs --> MountFilesystems[Mount filesystems<br/>- rpool/local/root → /<br/>- rpool/local/nix → /nix<br/>- rpool/safe/persist → /persist<br/>- rpool/safe/home → /home<br/>- EFI → /boot]
+    
+    MountFilesystems --> VerifyMounts[Verify all mounts successful]
+    VerifyMounts -->|Failed| ErrorMount[Error: Mount verification failed]
+    VerifyMounts -->|Success| CreatePersist[Create persistent directories<br/>in /mnt/persist]
+    
+    CreatePersist --> GenHardware[Generate hardware configuration<br/>nixos-generate-config]
+    GenHardware --> CopyConfig[Copy NixOS configuration<br/>to /mnt/persist/nixos]
+    CopyConfig --> InstallNixOS[Install NixOS<br/>nixos-install --flake]
+    
+    InstallNixOS --> CleanupInstall[Cleanup installation<br/>- Unmount filesystems<br/>- Close LUKS<br/>- Export ZFS pool]
+    CleanupInstall --> DisplayInstructions[Display final instructions<br/>- Reboot command<br/>- Post-install setup]
+    DisplayInstructions --> End([Installation Complete])
+    
+    %% Error handling paths
+    ErrorRoot --> End
+    ErrorTTY --> End
+    ErrorMount --> CleanupError[Emergency cleanup<br/>- Unmount<br/>- Close LUKS<br/>- Export ZFS]
+    CleanupError --> End
+    
+    %% Styling
+    style Start fill:#c8e6c9
+    style End fill:#ffcdd2
+    style ErrorRoot fill:#ffcdd2
+    style ErrorTTY fill:#ffcdd2
+    style ErrorMount fill:#ffcdd2
+    style RunDisko fill:#e1f5fe
+    style SetupZFS fill:#fff3e0
+    style InstallNixOS fill:#f3e5f5
+```
+
+### Bootstrap vs Install Script Relationship
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Bootstrap as bootstrap.sh
+    participant System as Live ISO System
+    participant Git as Git Repository
+    participant Install as install.sh
+    
+    User->>Bootstrap: Execute (curl | bash or local)
+    Bootstrap->>Bootstrap: Check root privileges
+    Bootstrap->>System: nix-shell -p git
+    Bootstrap->>Git: Clone repository to /tmp
+    Bootstrap->>Install: chmod +x and execute
+    
+    Install->>Install: Validate prerequisites
+    Install->>User: Prompt for configuration
+    Install->>System: Install tools (disko, ZFS, cryptsetup)
+    Install->>System: Partition disk with disko
+    Install->>System: Setup LUKS + ZFS
+    Install->>System: Mount filesystems
+    Install->>System: nixos-install --flake
+    Install->>User: Display completion message
+```
+
+### ZFS Dataset Creation and Mount Sequence
+
+```mermaid
+sequenceDiagram
+    participant Disko as Disko Partitioner
+    participant LUKS as LUKS Container
+    participant ZFS as ZFS Pool Manager
+    participant Mount as Mount Manager
+    participant Install as Install Process
+    
+    Disko->>Disko: Create GPT partition table
+    Disko->>Disko: Create EFI system partition
+    Disko->>LUKS: Setup LUKS on main partition
+    
+    LUKS->>LUKS: Format with encryption
+    LUKS->>ZFS: Provide unlocked device
+    
+    ZFS->>ZFS: Create rpool
+    ZFS->>ZFS: Create rpool/local (ephemeral)
+    ZFS->>ZFS: Create rpool/local/root
+    ZFS->>ZFS: Create rpool/local/nix
+    ZFS->>ZFS: Create rpool/safe (persistent)
+    ZFS->>ZFS: Create rpool/safe/home
+    ZFS->>ZFS: Create rpool/safe/persist
+    ZFS->>ZFS: Create @blank snapshot
+    
+    Mount->>Mount: Mount rpool/local/root at /mnt
+    Mount->>Mount: Mount rpool/local/nix at /mnt/nix
+    Mount->>Mount: Mount rpool/safe/persist at /mnt/persist
+    Mount->>Mount: Mount rpool/safe/home at /mnt/home
+    Mount->>Mount: Mount EFI at /mnt/boot
+    
+    Install->>Install: Verify all mounts successful
+    Install->>Install: Proceed with nixos-install
+```

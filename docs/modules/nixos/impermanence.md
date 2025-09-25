@@ -56,6 +56,106 @@ fileSystems = {
 };
 ```
 
+### ZFS Pool Structure and Hierarchy
+
+```mermaid
+graph TB
+    subgraph "Physical Storage"
+        Disk["/dev/nvme0n1 (or target disk)"]
+        LUKS[LUKS Encryption Layer<br/>cryptsetup]
+        
+        Disk --> LUKS
+    end
+    
+    subgraph "ZFS Pool: rpool"
+        Pool[rpool<br/>ZFS Pool Root]
+        
+        subgraph "local (Ephemeral Data)"
+            Local[rpool/local<br/>Non-persistent datasets]
+            Root[rpool/local/root<br/>Root filesystem /]
+            Nix[rpool/local/nix<br/>Nix store /nix]
+            
+            Local --> Root
+            Local --> Nix
+        end
+        
+        subgraph "safe (Persistent Data)"  
+            Safe[rpool/safe<br/>Persistent datasets]
+            Persist[rpool/safe/persist<br/>System persistence /persist]
+            Home[rpool/safe/home<br/>User home /home]
+            
+            Safe --> Persist
+            Safe --> Home
+        end
+        
+        Pool --> Local
+        Pool --> Safe
+    end
+    
+    subgraph "Mount Points"
+        MountRoot[/ → rpool/local/root]
+        MountNix[/nix → rpool/local/nix] 
+        MountPersist[/persist → rpool/safe/persist]
+        MountHome[/home → rpool/safe/home]
+        MountBoot[/boot → EFI partition]
+    end
+    
+    LUKS --> Pool
+    Root --> MountRoot
+    Nix --> MountNix
+    Persist --> MountPersist
+    Home --> MountHome
+    
+    %% Styling
+    style Root fill:#ffcdd2
+    style Nix fill:#ffcdd2  
+    style Persist fill:#c8e6c9
+    style Home fill:#c8e6c9
+    style Pool fill:#e1f5fe
+```
+
+### Boot Process with Impermanence Flow
+
+```mermaid
+sequenceDiagram
+    participant UEFI as UEFI Firmware
+    participant Boot as systemd-boot
+    participant Initrd as Initial RAM Disk
+    participant ZFS as ZFS Services
+    participant Rollback as ZFS Rollback Service
+    participant Mount as Mount Services
+    participant System as NixOS System
+    participant Impermanence as Impermanence Module
+    
+    UEFI->>Boot: Load bootloader
+    Boot->>Initrd: Load kernel + initrd
+    
+    note over Initrd: systemd in initrd starts
+    Initrd->>ZFS: Start zfs-import-rpool.service
+    ZFS->>ZFS: Import ZFS pool 'rpool'
+    ZFS-->>Initrd: Pool imported successfully
+    
+    Initrd->>Rollback: Start zfs-rollback.service
+    note over Rollback: CRITICAL: Reset root to clean state
+    Rollback->>Rollback: zfs rollback -r -f rpool/local/root@blank
+    Rollback-->>Initrd: Root filesystem reset complete
+    
+    Initrd->>Mount: Mount rpool/local/root as /sysroot
+    Mount->>Mount: Mount other required datasets
+    Mount-->>Initrd: All mounts ready
+    
+    Initrd->>System: Switch to real root (switch-root)
+    System->>System: Continue systemd boot process
+    
+    System->>Impermanence: Activate impermanence module
+    Impermanence->>Impermanence: Create bind mounts from /persist
+    note over Impermanence: Restore persistent files and directories
+    Impermanence-->>System: Persistence restored
+    
+    System->>System: Start remaining services
+    System-->>UEFI: System fully booted
+```
+
 ## Features
 
 ### Ephemeral Root Rollback
@@ -79,6 +179,54 @@ The rollback service:
 - Requires ZFS pool to be imported first
 - Recursively rolls back to `@blank` snapshot
 - Ensures clean state on every boot
+
+### Impermanence Bind Mount Process
+
+```mermaid
+flowchart TD
+    Boot[System Boot Complete] --> CheckPersist{/persist mounted?}
+    CheckPersist -->|No| ErrorMount[Error: Persistent storage unavailable]
+    CheckPersist -->|Yes| ReadConfig[Read impermanence configuration]
+    
+    ReadConfig --> ProcessDirs[Process persistent directories]
+    ProcessDirs --> CreateDir{Directory exists<br/>in /persist?}
+    CreateDir -->|No| MkDir[mkdir -p /persist/path]
+    CreateDir -->|Yes| CheckEmpty{Directory empty<br/>on ephemeral root?}
+    MkDir --> CheckEmpty
+    
+    CheckEmpty -->|Yes| BindMount[Create bind mount<br/>mount --bind /persist/path /path]
+    CheckEmpty -->|No| BackupEphemeral[Backup ephemeral content<br/>to /persist if needed]
+    BackupEphemeral --> BindMount
+    
+    BindMount --> NextDir{More directories?}
+    NextDir -->|Yes| ProcessDirs
+    NextDir -->|No| ProcessFiles[Process persistent files]
+    
+    ProcessFiles --> CheckFile{File exists<br/>in /persist?}
+    CheckFile -->|No| CopyDefault[Copy default file to /persist<br/>if available]
+    CheckFile -->|Yes| CreateSymlink[Create symlink<br/>ln -sf /persist/file /file]
+    CopyDefault --> CreateSymlink
+    
+    CreateSymlink --> NextFile{More files?}
+    NextFile -->|Yes| ProcessFiles
+    NextFile -->|No| ProcessUsers[Process user-specific persistence]
+    
+    ProcessUsers --> UserDirs[Process user directories<br/>/home/user/.config, etc.]
+    UserDirs --> UserBinds[Create user bind mounts]
+    UserBinds --> Complete[Impermanence setup complete]
+    
+    ErrorMount --> Fallback[System runs without persistence<br/>Warning logged]
+    Fallback --> Complete
+    Complete --> Ready[System ready for use]
+    
+    %% Styling
+    style Boot fill:#c8e6c9
+    style Complete fill:#c8e6c9
+    style Ready fill:#e8f5e8
+    style ErrorMount fill:#ffcdd2
+    style BindMount fill:#e1f5fe
+    style CreateSymlink fill:#fff3e0
+```
 
 ### Persistence Configuration
 
