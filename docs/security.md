@@ -157,6 +157,45 @@ services.openssh = {
 };
 ```
 
+#### Enhanced Server SSH Configuration
+
+The server module (`modules/nixos/server.nix`) includes additional SSH hardening:
+
+```nix
+services.openssh = {
+  enable = true;
+  settings = {
+    # Enhanced security settings
+    MaxAuthTries = 3;              # Limit authentication attempts
+    MaxSessions = 10;              # Limit concurrent sessions
+    ClientAliveInterval = 300;      # Keep-alive interval
+    ClientAliveCountMax = 3;        # Max missed keep-alives
+    
+    # Logging configuration
+    LogLevel = "VERBOSE";           # Detailed logging
+    SyslogFacility = "AUTHPRIV";    # Use auth facility
+    
+    # Disable additional authentication methods
+    ChallengeResponseAuthentication = false;
+    KerberosAuthentication = false;
+    GSSAPIAuthentication = false;
+  };
+  
+  # Specify host key types and sizes
+  hostKeys = [
+    {
+      path = "/etc/ssh/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+    {
+      path = "/etc/ssh/ssh_host_rsa_key"; 
+      type = "rsa";
+      bits = 4096;
+    }
+  ];
+};
+```
+
 ### Key Management Strategy
 
 #### SSH Key Types and Recommendations
@@ -535,10 +574,40 @@ networking.firewall = {
 2. **Service-Specific**: Only required ports are opened
 3. **Protocol Filtering**: Separate TCP/UDP port management
 4. **ICMP Control**: Configurable ping response
+5. **Connection Logging**: Failed connection attempts are logged
+6. **Packet Analysis**: Detailed packet logging for security analysis
+
+#### Advanced Firewall Configuration
+
+The server module includes enhanced logging and monitoring:
+
+```nix
+networking.firewall = {
+  enable = true;
+  allowPing = false;                    # Disable ping response
+  logRefusedConnections = true;         # Log blocked connections
+  logRefusedPackets = true;             # Log dropped packets  
+  logRefusedUnicastsOnly = false;       # Log all refused traffic
+  
+  # Essential services only
+  allowedTCPPorts = [ 22 ];             # SSH
+  allowedUDPPorts = [ ];
+  
+  # Define trusted interfaces
+  trustedInterfaces = [ ];              # Configure per host
+};
+```
 
 ### Intrusion Detection
 
-Consider adding Fail2Ban for automated intrusion prevention:
+The server configuration includes Fail2Ban for automated intrusion prevention:
+
+```nix
+# Enabled in server.nix module
+services.fail2ban.enable = true;
+```
+
+For custom configuration, you can extend this with:
 
 ```nix
 services.fail2ban = {
@@ -550,6 +619,18 @@ services.fail2ban = {
     "::1"
     # Add trusted IP ranges
   ];
+  
+  # Custom jail configuration
+  jails = {
+    ssh = ''
+      enabled = true
+      filter = sshd
+      maxretry = 3
+      findtime = 600
+      bantime = 3600
+      action = iptables[name=SSH, port=ssh, protocol=tcp]
+    '';
+  };
 };
 ```
 
@@ -670,8 +751,35 @@ environment.systemPackages = with pkgs; [
   chkrootkit     # Rootkit detection
   rkhunter       # Rootkit hunter
   aide           # File integrity monitoring
+  fail2ban       # Intrusion detection (included in server module)
 ];
 ```
+
+#### System Metrics and Monitoring
+
+The server module includes Prometheus node exporter for metrics collection:
+
+```nix
+services.prometheus.exporters.node = {
+  enable = true;
+  enabledCollectors = [ 
+    "systemd"      # SystemD service metrics
+    "processes"    # Process information
+    "diskstats"    # Disk I/O statistics
+    "filefd"       # File descriptor usage
+    "network"      # Network interface stats
+    "stat"         # CPU and kernel stats
+  ];
+  port = 9100;
+};
+```
+
+This enables comprehensive system monitoring for:
+- **Process Monitoring**: Track running processes and resource usage
+- **Network Activity**: Monitor network connections and throughput
+- **Disk I/O**: Track disk usage and performance
+- **SystemD Services**: Monitor service health and status
+- **System Resources**: CPU, memory, and file descriptor usage
 
 ## Best Practices and Recommendations
 
