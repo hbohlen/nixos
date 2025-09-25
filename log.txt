@@ -1,7 +1,7 @@
 [nix-shell:~]# curl -L https://raw.githubusercontent.com/hbohlen/nixos/main/scripts/bootstrap.sh -o /tmp/bootstrap.sh
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100  1516  100  1516    0     0  12658      0 --:--:-- --:--:-- --:--:-- 12739
+100  1516  100  1516    0     0  11606      0 --:--:-- --:--:-- --:--:-- 11661
 
 [nix-shell:~]# chmod +x /tmp/bootstrap.sh
 
@@ -11,12 +11,12 @@
 Git available
 [BOOTSTRAP] Cloning NixOS configuration repository...
 Cloning into 'nixos'...
-remote: Enumerating objects: 958, done.
-remote: Counting objects: 100% (63/63), done.
-remote: Compressing objects: 100% (55/55), done.
-remote: Total 958 (delta 28), reused 20 (delta 8), pack-reused 895 (from 1)
-Receiving objects: 100% (958/958), 14.33 MiB | 13.29 MiB/s, done.
-Resolving deltas: 100% (464/464), done.
+remote: Enumerating objects: 965, done.
+remote: Counting objects: 100% (70/70), done.
+remote: Compressing objects: 100% (61/61), done.
+remote: Total 965 (delta 33), reused 22 (delta 9), pack-reused 895 (from 1)
+Receiving objects: 100% (965/965), 14.33 MiB | 17.30 MiB/s, done.
+Resolving deltas: 100% (469/469), done.
 [SUCCESS] Bootstrap complete! Now running the installation script...
 [BOOTSTRAP] You will be prompted for hostname, username, and target disk...
 [INFO] 🚀 Starting NixOS installation for desktop on /dev/nvme1n1
@@ -48,39 +48,400 @@ Tools available in environment
 [SUCCESS] Tools installed successfully
 [STEP] Running disko to partition the disk...
 [INFO] Partitioning disk with disko for host: desktop...
-Usage: /nix/store/72n99ddyys69klyi7wqv2l79ya5immad-disko/bin/.disko-wrapped [options] disk-config.nix
-or /nix/store/72n99ddyys69klyi7wqv2l79ya5immad-disko/bin/.disko-wrapped [options] --flake github:somebody/somewhere#disk-config
-
-With flakes, disk-config is discovered first under the .diskoConfigurations top level attribute
-or else from the disko module of a NixOS configuration of that name under .nixosConfigurations.
-
-Options:
-
-* -m, --mode mode
-  set the mode, either destroy, format, mount, unmount, format,mount or destroy,format,mount
-    destroy: unmount filesystems and destroy partition tables of the selected disks
-    format: create partition tables, zpools, lvms, raids and filesystems if they don't exist yet
-    mount: mount the partitions at the specified root-mountpoint
-    format,mount: run format and mount in sequence
-    destroy,format,mount: run all three modes in sequence. Previously known as --mode disko
-* -f, --flake uri
-  fetch the disko config relative to this flake's root
-* --arg name value
-  pass value to nix-build. can be used to set disk-names for example
-* --argstr name value
-  pass value to nix-build as string
-* --root-mountpoint /some/other/mnt
-  where to mount the device tree (default: /mnt)
-* --dry-run
-  just show the path to the script instead of running it
-* --no-deps
-  avoid adding another dependency closure to an in-memory installer
-    requires all necessary dependencies to be available in the environment
-* --yes-wipe-all-disks
-  skip the safety check for destroying partitions, useful for automation
-* --debug
-  run with set -x
-* --help
-  show this help
-[ERROR] Disko partitioning failed
+disko version 1.12.0-dirty
+this derivation will be built:
+  /nix/store/a38rf6lga3dhcb1pnlf93dggkhprz02d-disko-destroy-format-mount.drv
+these 40 paths will be fetched (59.64 MiB download, 197.40 MiB unpacked):
+  /nix/store/2av7r4mkvdx0gpn25dya0ws699ww7hgi-coreutils-full-9.7
+  /nix/store/y6q8sh9jnmy0r0sfiy8n99kjjji8mics-cryptsetup-2.8.0-bin
+  /nix/store/dh2zxldxgb12cbaqzcg9bqd8v9s0iswb-cyrus-sasl-2.1.28
+  /nix/store/nxb7azldlgm3k5rby8sdfrwzq9psj1na-db-5.3.28
+  /nix/store/km00a9h3iwp0js8i4m5b2212dn5v6m6k-dosfstools-4.2
+  /nix/store/6k46cn3jbwm3vbsxr1r9fhhq0j1njgbn-e2fsprogs-1.47.2-bin
+  /nix/store/4ciq67pdwyc43a5y1h63wcipl54f938w-expat-2.7.1
+  /nix/store/aqx9win7asgf5n9sg51prhf6d7l0dw27-gdbm-1.25-lib
+  /nix/store/id01gmwjmc0a1l2m03iaa58n053fiplk-gptfdisk-1.0.10
+  /nix/store/jq1kblby1c5l1h0hx7gskc7kabwz2w4v-hostname-debian-3.25
+  /nix/store/9ba630xark94f487g7n2wi5rck8pyhx1-hostname-debian-3.25-man
+  /nix/store/gncs244f5zxv8wn4zjnsw4fkqlwjn1my-hostname-hostname-debian-3.25
+  /nix/store/8aahhc4qlkp2c3qv14wcsh6pbhnm71vp-libaio-0.3.113
+  /nix/store/713p52w7ch02mp501rfyk8rpj92ndww3-libbsd-0.12.2
+  /nix/store/j39lirgq4hp931fwn4n298d93z4vvm5n-libmd-1.1.0
+  /nix/store/gqcm71wrnfh3w5hisz7qg7xv3ww9bi1f-libtirpc-1.3.6
+  /nix/store/v948pw99ki3w2000sz33sdri8mcyjnmq-libtool-2.5.4-lib
+  /nix/store/qh5idcvxx3jx37cl80ppzlblwxc604z1-lvm2-2.03.32-bin
+  /nix/store/p9zghh1nh1i44qi2jml50ww2z2z2wvd4-mailcap-2.1.54
+  /nix/store/ldy89r84m3n13if8jysh76hymwkjksbq-mdadm-4.3
+  /nix/store/k8zna49bykvnr4qxdqzyqbhdx7bngqrz-mpdecimal-4.0.1
+  /nix/store/sdn3wkf5aq9hyi7xslymkr7flqlqycvf-nfs-utils-2.7.1
+  /nix/store/nz0nv27zhkw7ihdskk33y0iw3p25fy42-nfs-utils-2.7.1-lib
+  /nix/store/1rxbwisfwr3vf46aqb2d5q2avy9hysv8-openldap-2.6.9
+  /nix/store/3pi00hnpjr11h3b5f68fz93vc9wghdvn-parted-3.6
+  /nix/store/1zawpih5h3f2bdk5xijzhfvnczx4mrn2-popt-1.19
+  /nix/store/djck7mx6jad1w0yy6zings96dyxanls6-python3-3.13.5
+  /nix/store/3lj2vmycjz1ywzr04287va8awss3flsz-shadow-4.17.4
+  /nix/store/477ghiw5hhc2lpiwnzxam82vbmlcb34r-smartmontools-7.5
+  /nix/store/w74fil1rvah2kkxsqrqb4jngifc7a952-sysstat-12.7.7
+  /nix/store/ma9zb4s52rz1cqd9skmhs90x2i7cg6zb-system-sendmail-1.0
+  /nix/store/pbqih0cmbc4xilscj36m80ardhg6kawp-systemd-minimal-257.6
+  /nix/store/66bch992zxmfws3pdwn4rg1fggp4rihc-tcb-1.2
+  /nix/store/qsylwd42s395f5q45mh7v9jhs0qz16zh-tzdata-2025b
+  /nix/store/vfzzmay33yb0rcll76dnhlf3xhgdkfh3-util-linux-2.41-bin
+  /nix/store/qlgxk8w7ypg05cw3vz2db8z2ksz1yrmc-util-linux-2.41-lib
+  /nix/store/hncnlkppmn644nc469zzrrakbbgil85i-util-linux-2.41-login
+  /nix/store/jrjm6wsgx6z4qqqwvlmzb6xr28nzwz4s-util-linux-2.41-mount
+  /nix/store/gvj22lhh3a8qj32wa0l3smp69z9pwm4y-util-linux-2.41-swap
+  /nix/store/p38r5x4199x4ly8j0fc8vax5471dd3vi-zfs-user-2.3.3
+copying path '/nix/store/km00a9h3iwp0js8i4m5b2212dn5v6m6k-dosfstools-4.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/2av7r4mkvdx0gpn25dya0ws699ww7hgi-coreutils-full-9.7' from 'https://cache.nixos.org'...
+copying path '/nix/store/6k46cn3jbwm3vbsxr1r9fhhq0j1njgbn-e2fsprogs-1.47.2-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/p9zghh1nh1i44qi2jml50ww2z2z2wvd4-mailcap-2.1.54' from 'https://cache.nixos.org'...
+copying path '/nix/store/pbqih0cmbc4xilscj36m80ardhg6kawp-systemd-minimal-257.6' from 'https://cache.nixos.org'...
+copying path '/nix/store/qsylwd42s395f5q45mh7v9jhs0qz16zh-tzdata-2025b' from 'https://cache.nixos.org'...
+copying path '/nix/store/4ciq67pdwyc43a5y1h63wcipl54f938w-expat-2.7.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/aqx9win7asgf5n9sg51prhf6d7l0dw27-gdbm-1.25-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/9ba630xark94f487g7n2wi5rck8pyhx1-hostname-debian-3.25-man' from 'https://cache.nixos.org'...
+copying path '/nix/store/8aahhc4qlkp2c3qv14wcsh6pbhnm71vp-libaio-0.3.113' from 'https://cache.nixos.org'...
+copying path '/nix/store/gqcm71wrnfh3w5hisz7qg7xv3ww9bi1f-libtirpc-1.3.6' from 'https://cache.nixos.org'...
+copying path '/nix/store/1zawpih5h3f2bdk5xijzhfvnczx4mrn2-popt-1.19' from 'https://cache.nixos.org'...
+copying path '/nix/store/w74fil1rvah2kkxsqrqb4jngifc7a952-sysstat-12.7.7' from 'https://cache.nixos.org'...
+copying path '/nix/store/ma9zb4s52rz1cqd9skmhs90x2i7cg6zb-system-sendmail-1.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/qlgxk8w7ypg05cw3vz2db8z2ksz1yrmc-util-linux-2.41-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/k8zna49bykvnr4qxdqzyqbhdx7bngqrz-mpdecimal-4.0.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/nxb7azldlgm3k5rby8sdfrwzq9psj1na-db-5.3.28' from 'https://cache.nixos.org'...
+copying path '/nix/store/jq1kblby1c5l1h0hx7gskc7kabwz2w4v-hostname-debian-3.25' from 'https://cache.nixos.org'...
+copying path '/nix/store/j39lirgq4hp931fwn4n298d93z4vvm5n-libmd-1.1.0' from 'https://cache.nixos.org'...
+copying path '/nix/store/v948pw99ki3w2000sz33sdri8mcyjnmq-libtool-2.5.4-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/qh5idcvxx3jx37cl80ppzlblwxc604z1-lvm2-2.03.32-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/66bch992zxmfws3pdwn4rg1fggp4rihc-tcb-1.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/y6q8sh9jnmy0r0sfiy8n99kjjji8mics-cryptsetup-2.8.0-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/id01gmwjmc0a1l2m03iaa58n053fiplk-gptfdisk-1.0.10' from 'https://cache.nixos.org'...
+copying path '/nix/store/gncs244f5zxv8wn4zjnsw4fkqlwjn1my-hostname-hostname-debian-3.25' from 'https://cache.nixos.org'...
+copying path '/nix/store/djck7mx6jad1w0yy6zings96dyxanls6-python3-3.13.5' from 'https://cache.nixos.org'...
+copying path '/nix/store/713p52w7ch02mp501rfyk8rpj92ndww3-libbsd-0.12.2' from 'https://cache.nixos.org'...
+copying path '/nix/store/477ghiw5hhc2lpiwnzxam82vbmlcb34r-smartmontools-7.5' from 'https://cache.nixos.org'...
+copying path '/nix/store/3lj2vmycjz1ywzr04287va8awss3flsz-shadow-4.17.4' from 'https://cache.nixos.org'...
+copying path '/nix/store/dh2zxldxgb12cbaqzcg9bqd8v9s0iswb-cyrus-sasl-2.1.28' from 'https://cache.nixos.org'...
+copying path '/nix/store/1rxbwisfwr3vf46aqb2d5q2avy9hysv8-openldap-2.6.9' from 'https://cache.nixos.org'...
+copying path '/nix/store/3pi00hnpjr11h3b5f68fz93vc9wghdvn-parted-3.6' from 'https://cache.nixos.org'...
+copying path '/nix/store/hncnlkppmn644nc469zzrrakbbgil85i-util-linux-2.41-login' from 'https://cache.nixos.org'...
+copying path '/nix/store/jrjm6wsgx6z4qqqwvlmzb6xr28nzwz4s-util-linux-2.41-mount' from 'https://cache.nixos.org'...
+copying path '/nix/store/gvj22lhh3a8qj32wa0l3smp69z9pwm4y-util-linux-2.41-swap' from 'https://cache.nixos.org'...
+copying path '/nix/store/vfzzmay33yb0rcll76dnhlf3xhgdkfh3-util-linux-2.41-bin' from 'https://cache.nixos.org'...
+copying path '/nix/store/nz0nv27zhkw7ihdskk33y0iw3p25fy42-nfs-utils-2.7.1-lib' from 'https://cache.nixos.org'...
+copying path '/nix/store/ldy89r84m3n13if8jysh76hymwkjksbq-mdadm-4.3' from 'https://cache.nixos.org'...
+copying path '/nix/store/sdn3wkf5aq9hyi7xslymkr7flqlqycvf-nfs-utils-2.7.1' from 'https://cache.nixos.org'...
+copying path '/nix/store/p38r5x4199x4ly8j0fc8vax5471dd3vi-zfs-user-2.3.3' from 'https://cache.nixos.org'...
+building '/nix/store/a38rf6lga3dhcb1pnlf93dggkhprz02d-disko-destroy-format-mount.drv'...
+umount: /mnt: not mounted
+++ realpath /dev/nvme1n1
++ disk=/dev/nvme1n1
++ lsblk -a -f
+NAME        FSTYPE      FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+loop0       squashfs    4.0                                                    0   100% /nix/.ro-store
+loop1                                                                                   
+loop2                                                                                   
+loop3                                                                                   
+loop4                                                                                   
+loop5                                                                                   
+loop6                                                                                   
+loop7                                                                                   
+nvme0n1                                                                                 
+├─nvme0n1p1 vfat        FAT32       4925-A437                                           
+├─nvme0n1p2                                                                             
+└─nvme0n1p3 crypto_LUKS 2           212f3ca0-e6d2-4769-bd55-fd43b77a5fe5                
+nvme1n1                                                                                 
+├─nvme1n1p1                                                                             
+├─nvme1n1p2                                                                             
+└─nvme1n1p3 crypto_LUKS 2           fecb09d1-9e04-4c15-b6e4-b3ff5cac6ea2                
++ lsblk --output-all --json
++ bash -x
+++ dirname /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/disk-deactivate
++ jq -r -f /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/zfs-swap-deactivate.jq
++ lsblk --output-all --json
++ bash -x
+++ dirname /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/disk-deactivate
++ jq -r --arg disk_to_clear /dev/nvme1n1 -f /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/disk-deactivate.jq
++ set -fu
+++ type zdb
+++ zdb -l /dev/nvme1n1p1
+++ sed -nr 's/ +name: '\''(.*)'\''/\1/p'
++ zpool=
++ [[ -n '' ]]
++ unset zpool
++ wipefs --all -f /dev/nvme1n1p1
+++ type zdb
+++ zdb -l /dev/nvme1n1p2
+++ sed -nr 's/ +name: '\''(.*)'\''/\1/p'
++ zpool=
++ [[ -n '' ]]
++ unset zpool
++ wipefs --all -f /dev/nvme1n1p2
++ wipefs --all -f /dev/nvme1n1p3
+/dev/nvme1n1p3: 6 bytes were erased at offset 0x00000000 (crypto_LUKS): 4c 55 4b 53 ba be
+/dev/nvme1n1p3: 6 bytes were erased at offset 0x00004000 (crypto_LUKS): 53 4b 55 4c ba be
+++ type zdb
+++ zdb -l /dev/nvme1n1
+++ sed -nr 's/ +name: '\''(.*)'\''/\1/p'
++ zpool=
++ [[ -n '' ]]
++ unset zpool
+++ lsblk /dev/nvme1n1 -l -p -o type,name
+++ awk 'match($1,"raid.*") {print $2}'
++ md_dev=
++ [[ -n '' ]]
++ wipefs --all -f /dev/nvme1n1
+/dev/nvme1n1: 8 bytes were erased at offset 0x00000200 (gpt): 45 46 49 20 50 41 52 54
+/dev/nvme1n1: 8 bytes were erased at offset 0x1d1c1115e00 (gpt): 45 46 49 20 50 41 52 54
+/dev/nvme1n1: 2 bytes were erased at offset 0x000001fe (PMBR): 55 aa
++ dd if=/dev/zero of=/dev/nvme1n1 bs=440 count=1
+1+0 records in
+1+0 records out
+440 bytes copied, 7.6942e-05 s, 5.7 MB/s
++ lsblk -a -f
+NAME        FSTYPE      FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+loop0       squashfs    4.0                                                    0   100% /nix/.ro-store
+loop1                                                                                   
+loop2                                                                                   
+loop3                                                                                   
+loop4                                                                                   
+loop5                                                                                   
+loop6                                                                                   
+loop7                                                                                   
+nvme0n1                                                                                 
+├─nvme0n1p1 vfat        FAT32       4925-A437                                           
+├─nvme0n1p2                                                                             
+└─nvme0n1p3 crypto_LUKS 2           212f3ca0-e6d2-4769-bd55-fd43b77a5fe5                
+nvme1n1                                                                                 
+++ mktemp -d
++ disko_devices_dir=/tmp/nix-shell-25483-0/tmp.AlgfGexV8Z
++ trap 'rm -rf "$disko_devices_dir"' EXIT
++ mkdir -p /tmp/nix-shell-25483-0/tmp.AlgfGexV8Z
++ destroy=1
++ device=/dev/nvme1n1
++ imageName=main
++ imageSize=2G
++ name=main
++ type=disk
++ device=/dev/nvme1n1
++ efiGptPartitionFirst=1
++ type=gpt
++ blkid /dev/nvme1n1
++ sgdisk --clear /dev/nvme1n1
+Creating new GPT entries in memory.
+The operation has completed successfully.
++ sgdisk --align-end --new=1:0:+1G --partition-guid=1:R --change-name=1:disk-main-ESP --typecode=1:EF00 --attributes=1:=:0 /dev/nvme1n1
+The operation has completed successfully.
++ partprobe /dev/nvme1n1
++ udevadm trigger --subsystem-match=block
++ udevadm settle --timeout 120
++ sgdisk --align-end --new=2:0:+16G --partition-guid=2:R --change-name=2:disk-main-swap --typecode=2:8200 --attributes=2:=:0 /dev/nvme1n1
+The operation has completed successfully.
++ partprobe /dev/nvme1n1
++ udevadm trigger --subsystem-match=block
++ udevadm settle --timeout 120
++ sgdisk --align-end --new=3:0:-0 --partition-guid=3:R --change-name=3:disk-main-luks --typecode=3:8300 --attributes=3:=:0 /dev/nvme1n1
+The operation has completed successfully.
++ partprobe /dev/nvme1n1
++ udevadm trigger --subsystem-match=block
++ udevadm settle --timeout 120
++ device=/dev/disk/by-partlabel/disk-main-ESP
++ extraArgs=()
++ declare -a extraArgs
++ format=vfat
++ mountOptions=('umask=0077')
++ declare -a mountOptions
++ mountpoint=/boot
++ type=filesystem
++ blkid /dev/disk/by-partlabel/disk-main-ESP
++ grep -q TYPE=
++ device=/dev/disk/by-partlabel/disk-main-swap
++ discardPolicy=
++ extraArgs=()
++ declare -a extraArgs
++ mountOptions=('defaults')
++ declare -a mountOptions
++ priority=
++ randomEncryption=1
++ resumeDevice=
++ type=swap
++ additionalKeyFiles=()
++ declare -a additionalKeyFiles
++ askPassword=1
++ device=/dev/disk/by-partlabel/disk-main-luks
++ extraFormatArgs=()
++ declare -a extraFormatArgs
++ extraOpenArgs=()
++ declare -a extraOpenArgs
++ initrdUnlock=1
++ keyFile=
++ name=cryptroot
++ passwordFile=
++ settings=(['allowDiscards']='1')
++ declare -A settings
++ type=luks
++ blkid /dev/disk/by-partlabel/disk-main-luks
++ cryptsetup isLuks /dev/disk/by-partlabel/disk-main-luks
++ askPassword
++ '[' -z ']'
++ set +x
+Enter password for /dev/disk/by-partlabel/disk-main-luks: 
+Enter password for /dev/disk/by-partlabel/disk-main-luks again to be safe: 
++ cryptsetup -q luksFormat /dev/disk/by-partlabel/disk-main-luks --key-file /dev/fd/63
+++ set +x
++ cryptsetup status cryptroot
++ cryptsetup open /dev/disk/by-partlabel/disk-main-luks cryptroot --allow-discards --key-file /dev/fd/63 --persistent
+++ set +x
++ device=/dev/mapper/cryptroot
++ pool=rpool
++ type=zfs
++ echo /dev/mapper/cryptroot
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=rpool
++ options=(['ashift']='12' ['autotrim']='on')
++ declare -A options
++ rootFsOptions=(['acltype']='posixacl' ['compression']='zstd' ['mountpoint']='none' ['relatime']='on' ['xattr']='sa')
++ declare -A rootFsOptions
++ type=zpool
++ readarray -t zfs_devices
+++ cat /tmp/nix-shell-25483-0/tmp.AlgfGexV8Z/zfs_rpool
++ '[' 1 -eq 0 ']'
++ zpool import -N -f rpool
+cannot import 'rpool': no such pool available
++ zpool list rpool
+cannot open 'rpool': no such pool
++ continue=1
++ for dev in "${zfs_devices[@]}"
++ blkid /dev/mapper/cryptroot
++ :
++ '[' 1 -eq 1 ']'
++ topology=
++ mode=
++ '[' '' '!=' prescribed ']'
++ topology=' /dev/mapper/cryptroot'
++ '[' 1 -eq 1 ']'
++ zpool create -f rpool -R /mnt -o ashift=12 -o autotrim=on -O acltype=posixacl -O compression=zstd -O mountpoint=none -O relatime=on -O xattr=sa /dev/mapper/cryptroot
+++ zfs get -H mounted rpool
+++ cut -f3
++ [[ no == \y\e\s ]]
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=__root
++ options=(['acltype']='posixacl' ['compression']='zstd' ['mountpoint']='none' ['relatime']='on' ['xattr']='sa')
++ declare -A options
++ type=zfs_fs
++ zfs get type rpool
++ zfs set -u acltype=posixacl compression=zstd mountpoint=none relatime=on xattr=sa rpool
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=local/nix
++ options=(['com.sun:auto-snapshot']='false' ['mountpoint']='legacy' ['recordsize']='1M')
++ declare -A options
++ type=zfs_fs
++ zfs get type rpool/local/nix
++ zfs create -up rpool/local/nix -o com.sun:auto-snapshot=false -o mountpoint=legacy -o recordsize=1M
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=local/root
++ options=(['mountpoint']='legacy' ['recordsize']='1M')
++ declare -A options
++ type=zfs_fs
++ zfs get type rpool/local/root
++ zfs create -up rpool/local/root -o mountpoint=legacy -o recordsize=1M
++ zfs snapshot rpool/local/root@blank
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=safe/home
++ options=(['mountpoint']='legacy' ['recordsize']='128K')
++ declare -A options
++ type=zfs_fs
++ zfs get type rpool/safe/home
++ zfs create -up rpool/safe/home -o mountpoint=legacy -o recordsize=128K
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=safe/persist
++ options=(['mountpoint']='legacy' ['recordsize']='128K')
++ declare -A options
++ type=zfs_fs
++ zfs get type rpool/safe/persist
++ zfs create -up rpool/safe/persist -o mountpoint=legacy -o recordsize=128K
++ set -efux
++ destroy=1
++ device=/dev/nvme1n1
++ imageName=main
++ imageSize=2G
++ name=main
++ type=disk
++ device=/dev/nvme1n1
++ efiGptPartitionFirst=1
++ type=gpt
++ additionalKeyFiles=()
++ declare -a additionalKeyFiles
++ askPassword=1
++ device=/dev/disk/by-partlabel/disk-main-luks
++ extraFormatArgs=()
++ declare -a extraFormatArgs
++ extraOpenArgs=()
++ declare -a extraOpenArgs
++ initrdUnlock=1
++ keyFile=
++ name=cryptroot
++ passwordFile=
++ settings=(['allowDiscards']='1')
++ declare -A settings
++ type=luks
++ cryptsetup status cryptroot
++ mountOptions=('defaults')
++ declare -a mountOptions
++ mountpoint=
++ name=rpool
++ options=(['ashift']='12' ['autotrim']='on')
++ declare -A options
++ rootFsOptions=(['acltype']='posixacl' ['compression']='zstd' ['mountpoint']='none' ['relatime']='on' ['xattr']='sa')
++ declare -A rootFsOptions
++ type=zpool
++ zpool list rpool
++ destroy=1
++ device=/dev/nvme1n1
++ imageName=main
++ imageSize=2G
++ name=main
++ type=disk
++ device=/dev/nvme1n1
++ efiGptPartitionFirst=1
++ type=gpt
++ device=/dev/disk/by-partlabel/disk-main-ESP
++ extraArgs=()
++ declare -a extraArgs
++ format=vfat
++ mountOptions=('umask=0077')
++ declare -a mountOptions
++ mountpoint=/boot
++ type=filesystem
++ findmnt /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
++ mount /dev/disk/by-partlabel/disk-main-ESP /mnt/boot -t vfat -o umask=0077 -o X-mount.mkdir
++ rm -rf /tmp/nix-shell-25483-0/tmp.AlgfGexV8Z
+[SUCCESS] Disko partitioning completed successfully
+[STEP] Setting up LUKS encryption...
+[INFO] Opening LUKS container...
+[SUCCESS] LUKS container opened successfully
+[STEP] Setting up ZFS pool and datasets...
+[SUCCESS] ZFS pool and datasets ready
+[STEP] Creating mount directories...
+[SUCCESS] Mount directories created
+[STEP] Mounting filesystems...
+[INFO] Mounting root dataset...
+[INFO] Mounting nix dataset...
+filesystem 'rpool/local/nix' cannot be mounted at '/mnt/nix' due to canonicalization error: No such file or directory
+[ERROR] Failed to mount nix dataset
 [INFO] Attempting cleanup...
+[INFO] Unmounting filesystems...
+[INFO] Closing LUKS container...
+[INFO] Exporting ZFS pool...
