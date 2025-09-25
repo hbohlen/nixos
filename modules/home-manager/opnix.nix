@@ -51,10 +51,12 @@
   # Setup Git with 1Password
   programs.git = {
     enable = true;
-    userName = "Hayden Bohlen";
-    userEmail = "bohlenhayden@gmail.com";
+    # Note: userName and userEmail should be configured in user-specific files
+    # userName = "Your Name";
+    # userEmail = "your.email@example.com";
     signing = {
-      key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqnk8Q2ZJ4KkHhT7gQJ8vX9zY2WxLmNpOqRtUvWxY";
+      # Note: Configure your SSH signing key in user-specific configuration
+      # key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIYourPublicKeyHere";
       signByDefault = true;
       # Use SSH key from 1Password for signing
     };
