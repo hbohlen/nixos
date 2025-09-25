@@ -5,6 +5,7 @@
 - [Quick Reference Commands](#quick-reference-commands)
 - [Emergency Recovery Procedures](#emergency-recovery-procedures)
 - [Build and Configuration Issues](#build-and-configuration-issues)
+- [Home Manager Issues](#home-manager-issues)
 - [Installation Troubleshooting](#installation-troubleshooting)
 - [Hardware and Driver Issues](#hardware-and-driver-issues)
 - [System and Service Problems](#system-and-service-problems)
@@ -13,6 +14,7 @@
 - [Performance and Optimization](#performance-and-optimization)
 - [Security and Recovery](#security-and-recovery)
 - [Debugging Techniques](#debugging-techniques)
+- [Advanced Diagnostic Tools](#advanced-diagnostic-tools)
 
 ## Overview
 
@@ -204,6 +206,18 @@ systemd.unit=emergency.target
 
 ## Build and Configuration Issues
 
+**Using the Enhanced Rebuild Script:**
+The repository includes an enhanced `scripts/rebuild.sh` script with comprehensive error handling and debugging options:
+
+```bash
+# Use the enhanced rebuild script for better error reporting
+./scripts/rebuild.sh --verbose     # Detailed output for debugging
+./scripts/rebuild.sh dry-run       # Preview changes without building
+./scripts/rebuild.sh build         # Build without activation (safer testing)
+./scripts/rebuild.sh --rollback    # Emergency rollback to previous generation
+./scripts/rebuild.sh --help        # Show all available options
+```
+
 ### Flake Configuration Problems
 
 #### Flake Check Failures
@@ -327,9 +341,151 @@ nixos-rebuild build --flake .#hostname --option max-jobs 1
 # Use remote builder or binary cache
 ```
 
+## Home Manager Issues
+
+### Home Manager Build Failures
+
+#### Configuration Conflicts
+**Symptoms:** Home Manager build fails with option conflicts or type errors
+
+**Diagnosis:**
+```bash
+# Build Home Manager configuration separately
+home-manager build
+
+# Check Home Manager configuration
+home-manager edit
+
+# Debug specific module
+nix eval --show-trace .#homeConfigurations.username.config.programs.module-name
+```
+
+**Solutions:**
+```nix
+# Resolve option conflicts with proper priorities
+programs.git = {
+  enable = true;
+  userName = lib.mkDefault "default-name";  # Lower priority
+  userEmail = lib.mkForce "forced@email.com";  # Higher priority
+};
+
+# Check for duplicate module imports
+imports = [
+  # Remove duplicate imports
+  ./modules/git.nix  # Keep only one
+];
+```
+
+#### Service Activation Failures
+**Symptoms:** Home Manager services fail to start or activate
+
+**Diagnosis:**
+```bash
+# Check Home Manager services
+systemctl --user status
+systemctl --user --failed
+
+# Check specific service
+systemctl --user status service-name
+journalctl --user -u service-name
+
+# Test service manually
+systemctl --user restart service-name
+```
+
+**Solutions:**
+```bash
+# Reload user services
+systemctl --user daemon-reload
+
+# Reset failed services
+systemctl --user reset-failed
+
+# Check service dependencies
+systemctl --user list-dependencies service-name
+```
+
+#### Package Installation Issues
+**Symptoms:** Home Manager packages don't install or aren't available
+
+**Diagnosis:**
+```bash
+# Check package availability
+nix search nixpkgs package-name
+
+# Build specific package
+nix build nixpkgs#package-name
+
+# Check package derivation
+nix show-derivation nixpkgs#package-name
+```
+
+**Solutions:**
+- Update nixpkgs input: `nix flake update nixpkgs`
+- Use unfree packages configuration if needed
+- Check package name spelling and availability
+- Use package overlays for custom versions
+
+### Home Manager State Issues
+
+#### Profile Corruption
+**Symptoms:** Home Manager can't switch generations or profile is corrupted
+
+**Diagnosis:**
+```bash
+# Check Home Manager generations
+home-manager generations
+
+# List profiles
+nix-env --list-generations --profile ~/.local/state/nix/profiles/home-manager
+
+# Check profile link
+ls -la ~/.nix-profile
+```
+
+**Solutions:**
+```bash
+# Remove corrupted profile
+rm ~/.local/state/nix/profiles/home-manager*
+
+# Rebuild Home Manager profile
+home-manager switch
+
+# Or rollback to previous generation
+home-manager switch --rollback
+```
+
+#### Dotfile Conflicts
+**Symptoms:** Configuration files conflict with existing dotfiles
+
+**Diagnosis:**
+```bash
+# Check for conflicting files
+ls -la ~/.config/
+ls -la ~/.bashrc ~/.zshrc
+
+# Find Home Manager managed files
+find ~/.nix-profile/home-files -type f
+```
+
+**Solutions:**
+```bash
+# Backup existing dotfiles
+mkdir ~/dotfiles-backup
+mv ~/.config/conflicting-config ~/dotfiles-backup/
+
+# Or use Home Manager's backup feature
+home-manager switch --backup-extension .backup
+```
+
 ## Installation Troubleshooting
 
 ### Installation Script Errors
+
+#### Script-Based Installation Issues
+**Reference:** The repository includes comprehensive installation scripts with built-in error handling. See `scripts/install.sh` for the full installation automation.
+
+**Common Script Errors:**
 
 #### Disk Detection Issues
 **Symptoms:** Script can't find target disk or wrong disk selected
@@ -1065,6 +1221,238 @@ nix-shell -p package1 package2
 
 # Test in VM
 nixos-rebuild build-vm --flake .#hostname
+```
+
+## Advanced Diagnostic Tools
+
+### System Information and Analysis
+
+#### System Info Tools
+```bash
+# Comprehensive system information
+nix run nixpkgs#neofetch
+nix run nixpkgs#uwufetch  # Alternative system info
+
+# Hardware information
+lshw -short
+inxi -Fxz
+hwinfo --short
+
+# CPU and memory details
+cat /proc/cpuinfo
+cat /proc/meminfo
+lscpu
+free -h --si
+```
+
+#### Nix Store Analysis
+```bash
+# Analyze Nix store usage
+nix path-info -rSh /run/current-system | sort -nk2
+du -sh /nix/store
+
+# Find largest store paths
+nix path-info -rS /run/current-system | sort -nk2 | tail -20
+
+# Check store integrity
+nix store verify --all
+nix store repair --all
+```
+
+#### Dependency Analysis
+```bash
+# Show package dependencies
+nix why-depends /run/current-system package-name
+
+# Generate dependency graph
+nix-store --query --graph /run/current-system > deps.dot
+dot -Tpng deps.dot > dependencies.png
+
+# Show reverse dependencies
+nix-store --query --referrers /nix/store/hash-package
+```
+
+### Emergency Access and Recovery
+
+#### Emergency Mode Access
+**Configure emergency access in initrd:**
+```nix
+# In configuration.nix
+boot.initrd.systemd.emergencyAccess = true;  # Unauthenticated access
+# Or for authenticated access:
+boot.initrd.systemd.emergencyAccess = "$6$hashed$password";
+
+# Enable emergency mode for failed mounts
+systemd.enableEmergencyMode = true;
+```
+
+**Access emergency mode:**
+```bash
+# During boot failure, you'll be dropped into emergency shell
+# Or force emergency mode by adding to kernel parameters:
+systemd.unit=emergency.target
+
+# In emergency mode:
+systemctl list-units --failed
+journalctl -xb
+mount -o remount,rw /
+```
+
+#### Crash Dump Analysis
+```nix
+# Enable crash dumps in configuration
+boot.crashDump.enable = true;
+```
+
+```bash
+# After a crash, analyze dump
+crash /proc/vmcore /boot/vmlinux
+# Or
+makedumpfile -l /proc/vmcore
+```
+
+### Performance Analysis Tools
+
+#### System Performance Monitoring
+```bash
+# Real-time system monitoring
+htop
+iotop
+nethogs  # Network usage per process
+iftop    # Network bandwidth usage
+
+# System call tracing
+strace -f -p PID
+ltrace command  # Library call tracing
+
+# Performance profiling
+perf top
+perf record -g command
+perf report
+```
+
+#### Boot Performance Analysis
+```bash
+# Detailed boot analysis
+systemd-analyze
+systemd-analyze blame
+systemd-analyze critical-chain
+systemd-analyze plot > boot-chart.svg
+
+# Service startup times
+systemd-analyze time
+systemd-analyze dump
+```
+
+#### Memory Analysis
+```bash
+# Memory usage breakdown
+smem -tk
+pmap -x PID
+cat /proc/PID/smaps
+
+# Memory leaks detection
+valgrind --leak-check=full command
+```
+
+### Network Diagnostics
+
+#### Advanced Network Analysis
+```bash
+# Network interface statistics
+cat /proc/net/dev
+ethtool interface-name
+
+# Network connections and processes
+netstat -tulnp
+ss -tulnp
+
+# Network packet analysis
+tcpdump -i interface -w capture.pcap
+tshark -i interface -f "filter"
+```
+
+#### DNS and Connectivity Testing
+```bash
+# DNS resolution testing
+dig domain.com
+nslookup domain.com
+host domain.com
+
+# Connectivity testing
+mtr domain.com  # Traceroute with statistics
+traceroute domain.com
+nc -zv host port  # Port testing
+```
+
+### Hardware Diagnostics
+
+#### Hardware Health Monitoring
+```bash
+# Temperature and fan monitoring
+sensors
+watch -n1 sensors
+
+# Disk health
+smartctl -a /dev/sdX
+badblocks -v /dev/sdX
+
+# Memory testing (run from live environment)
+memtest86+
+# Or from running system:
+memtester 1G 5  # Test 1GB memory 5 times
+```
+
+#### GPU Diagnostics
+```bash
+# NVIDIA GPU monitoring
+nvidia-smi
+watch -n1 nvidia-smi
+
+# Intel GPU information
+intel_gpu_top
+cat /sys/kernel/debug/dri/0/i915_frequency_info
+
+# AMD GPU monitoring
+radeontop
+cat /sys/class/drm/card0/device/power_state
+```
+
+### Log Analysis and Monitoring
+
+#### Centralized Log Analysis
+```bash
+# Follow all system logs
+journalctl -f
+
+# Filter by service
+journalctl -u service-name -f
+
+# Filter by priority
+journalctl -p err..alert
+
+# Boot-specific logs
+journalctl -b
+journalctl -b -1  # Previous boot
+
+# User session logs
+journalctl --user
+
+# Log statistics
+journalctl --disk-usage
+journalctl --vacuum-time=7d  # Clean logs older than 7 days
+```
+
+#### Custom Log Monitoring
+```bash
+# Monitor specific log files
+tail -f /var/log/specific.log
+
+# Search logs with context
+grep -B5 -A5 "error pattern" /var/log/messages
+
+# Real-time log filtering
+journalctl -f | grep -i error
 ```
 
 This troubleshooting guide provides comprehensive coverage of common NixOS issues and their solutions. Always start with the basic diagnostic commands and work through the solutions systematically. When in doubt, consult the NixOS manual and community resources for additional help.
