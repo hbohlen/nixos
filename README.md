@@ -279,7 +279,13 @@ If you already have a working NixOS system, you can also use the simpler approac
    ```bash
    sudo nixos-rebuild switch --flake .#hostname
    ```
-   Or use the convenient script:
+   Or use the convenient rebuild alias from anywhere:
+   ```bash
+   rebuild switch    # Same as above but works from any directory
+   rebuild test      # Test changes without making them permanent
+   rebuild build     # Build to check for errors
+   ```
+   Or use the original script:
    ```bash
    ./scripts/rebuild.sh
    ```
@@ -720,6 +726,19 @@ This is a modern, declarative NixOS system built on the "Erase Your Darlings" ph
 
 ## Build Commands
 
+### Convenient Rebuild Alias
+The system provides a convenient `rebuild` alias that works from any directory:
+
+```bash
+rebuild          # Build and switch (default mode)
+rebuild test     # Build and test without making permanent  
+rebuild build    # Build only, don't activate
+rebuild --help   # Show all available options
+```
+
+This alias automatically finds your NixOS configuration directory using git repository detection and common path searching.
+
+### Manual Commands
 - **Full system rebuild**: `./scripts/rebuild.sh` (auto-detects hostname)
 - **Manual rebuild**: `sudo nixos-rebuild switch --flake .#hostname`
 - **Test build**: `nixos-rebuild build --flake .#hostname`

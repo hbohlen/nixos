@@ -61,7 +61,10 @@
     enable = true;
     shellAliases = {
       ll = "ls -la";
-      update = "cd /workspaces/nixos && ./scripts/rebuild.sh";
+      # Enhanced update alias using the system rebuildn command
+      update = "rebuildn";
+      # User-level rebuild alias (same as system-wide for consistency)
+      rebuild = "rebuildn";
       # Add more aliases as needed
     };
     bashrcExtra = ''
@@ -82,7 +85,10 @@
     };
     shellAliases = {
       ll = "ls -la";
-      update = "cd /workspaces/nixos && ./scripts/rebuild.sh";
+      # Enhanced update alias using the system rebuildn command
+      update = "rebuildn";
+      # User-level rebuild alias (same as system-wide for consistency)
+      rebuild = "rebuildn";
       # Add more aliases as needed
     };
   };

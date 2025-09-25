@@ -1,6 +1,83 @@
 # /modules/nixos/common.nix
 { config, pkgs, lib, username, ... }:
 
+let
+  # Create a system-wide rebuild script package
+  rebuildn = pkgs.writeShellScriptBin "rebuildn" ''
+    #!/usr/bin/env bash
+    # System-wide NixOS rebuild helper
+    # Automatically finds the NixOS configuration and runs the rebuild script
+    
+    set -euo pipefail
+    
+    # Function to find the NixOS configuration root directory
+    find_nixos_root() {
+        # Try git repository root first (most reliable)
+        if git rev-parse --show-toplevel 2>/dev/null; then
+            return 0
+        fi
+        
+        # Look for common NixOS configuration locations
+        local search_paths=(
+            "/etc/nixos"
+            "/workspaces/nixos"
+            "/nix/config"
+            "$HOME/nixos"
+            "$HOME/.config/nixos"
+        )
+        
+        # Also search home directories
+        for home_dir in /home/*; do
+            if [[ -d "$home_dir/nixos" ]]; then
+                search_paths+=("$home_dir/nixos")
+            fi
+        done
+        
+        for path in "''${search_paths[@]}"; do
+            if [[ -f "$path/flake.nix" && -f "$path/scripts/rebuild.sh" ]]; then
+                echo "$path"
+                return 0
+            fi
+        done
+        
+        # Fall back to current directory if it looks right
+        if [[ -f "./flake.nix" && -f "./scripts/rebuild.sh" ]]; then
+            pwd
+            return 0
+        fi
+        
+        echo "Error: Could not find NixOS configuration directory" >&2
+        echo "Searched paths: ''${search_paths[*]}" >&2
+        echo "Current directory: $(pwd)" >&2
+        return 1
+    }
+    
+    # Main execution
+    main() {
+        local nixos_root
+        if ! nixos_root=$(find_nixos_root); then
+            exit 1
+        fi
+        
+        if [[ ! -f "$nixos_root/flake.nix" ]]; then
+            echo "Error: flake.nix not found in $nixos_root" >&2
+            exit 1
+        fi
+        
+        if [[ ! -x "$nixos_root/scripts/rebuild.sh" ]]; then
+            echo "Error: rebuild.sh not found or not executable in $nixos_root/scripts/" >&2
+            exit 1
+        fi
+        
+        # Change to the NixOS configuration directory and run rebuild
+        cd "$nixos_root"
+        exec ./scripts/rebuild.sh "$@"
+    }
+    
+    # Run main function with all arguments
+    main "$@"
+  '';
+in
 {
   imports = [
     ./unfree-packages.nix
@@ -58,6 +135,9 @@
     
     # Note: Development tools moved to development.nix module
     # Import and enable development.nix in host configs that need dev tools
+    
+    # System rebuild helper (custom package defined above)
+    rebuildn
     
     # Security tools
     _1password-cli
@@ -158,6 +238,8 @@
     grep = "grep --color=auto";
     fgrep = "fgrep --color=auto";
     egrep = "egrep --color=auto";
+    # System-wide rebuild alias - uses dedicated rebuildn command
+    rebuild = "rebuildn";
   };
 
   # Enable system-wide bash completion
