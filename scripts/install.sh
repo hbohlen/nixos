@@ -222,8 +222,10 @@ run_disko() {
     # Run disko with the host-specific configuration using the flake's disko configuration
     print_status "Partitioning disk with disko for host: $HOSTNAME..."
     nix --experimental-features 'nix-command flakes' run github:nix-community/disko -- \
-        --mode zap_create_mount \
-        --disk main "$DISK_DEVICE" \
+        --mode destroy,format,mount \
+        --root-mountpoint "$MOUNT_POINT" \
+        --yes-wipe-all-disks \
+        --argstr device "$DISK_DEVICE" \
         ./hosts/"$HOSTNAME"/hardware/disko-layout.nix || \
         handle_error "Disko partitioning failed"
     
