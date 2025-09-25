@@ -9,6 +9,11 @@
       # Enable editor for emergency recovery (set to false for security)
       editor = false;
     };
+  boot.initrd.luks.devices."cryptroot" = {
+    device = "/dev/disk/by-partlabel/luks";
+    preLVM = true;
+    allowDiscards = true;
+  };
     efi = {
       canTouchEfiVariables = true;
       # Enable EFI boot manager integration
