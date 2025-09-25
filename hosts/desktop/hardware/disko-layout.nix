@@ -42,7 +42,7 @@
               };
             };
             luks = {
-              name = "luks";
+              
               size = "100%";
               content = {
                 type = "luks";
