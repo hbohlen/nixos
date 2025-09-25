@@ -57,5 +57,10 @@ print_success "Bootstrap complete! Now running the installation script..."
 print_status "You will be prompted for hostname, username, and target disk..."
 print_status "During disk partitioning, you will also be prompted for LUKS encryption password..."
 
+# Ensure Nix environment is available for the install script
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+
 # Run the main installation script with proper TTY inheritance
 exec ./scripts/install.sh < /dev/tty

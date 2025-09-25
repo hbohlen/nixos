@@ -234,26 +234,61 @@ run_disko() {
     
     # Create a temporary script to run disko with proper TTY handling
     local disko_script="/tmp/run_disko.sh"
-    cat > "$disko_script" << 'EOF'
-#!/bin/bash
+    cat > "$disko_script" << EOF
+#!/usr/bin/env bash
 # Ensure we have proper TTY access
 exec < /dev/tty
 exec > /dev/tty
 exec 2> /dev/tty
 
+# Inherit the current PATH and NIX_PATH
+export PATH="$PATH"
+export NIX_PATH="${NIX_PATH:-}"
+
+# Source the Nix environment to ensure nix command is available
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+
 # Run disko with the arguments passed to this script
-nix --experimental-features 'nix-command flakes' run github:nix-community/disko -- "$@"
+nix --experimental-features 'nix-command flakes' run github:nix-community/disko -- "\$@"
 EOF
     chmod +x "$disko_script"
     
+    # Verify the script was created successfully
+    if [[ ! -x "$disko_script" ]]; then
+        handle_error "Failed to create executable disko script at $disko_script"
+    fi
+    
+    # Check if nix is available before running disko
+    if ! command -v nix >/dev/null 2>&1; then
+        print_warning "nix command not found in PATH: $PATH"
+        # Try to source Nix environment
+        if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+            print_status "Attempting to source Nix environment..."
+            source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+        fi
+        
+        # Check again
+        if ! command -v nix >/dev/null 2>&1; then
+            handle_error "nix command is not available. Please ensure you're running this from a NixOS live ISO or environment with Nix installed."
+        fi
+    fi
+    
     # Run the disko script with our configuration
+    print_status "Executing disko with the following parameters:"
+    print_status "  Mode: destroy,format,mount"
+    print_status "  Root mountpoint: $MOUNT_POINT"
+    print_status "  Device: $DISK_DEVICE"
+    print_status "  Config: ./hosts/$HOSTNAME/hardware/disko-layout.nix"
+    
     "$disko_script" \
         --mode destroy,format,mount \
         --root-mountpoint "$MOUNT_POINT" \
         --yes-wipe-all-disks \
         --argstr device "$DISK_DEVICE" \
         ./hosts/"$HOSTNAME"/hardware/disko-layout.nix || \
-        handle_error "Disko partitioning failed"
+        handle_error "Disko partitioning failed. Check the error messages above for details."
     
     # Clean up the temporary script
     rm -f "$disko_script"
