@@ -1,5 +1,5 @@
 # /modules/nixos/desktop.nix
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, username, ... }:
 
 {
   # Define desktop module options
@@ -68,7 +68,7 @@
   # 1Password GUI configuration
   programs._1password-gui = {
     enable = true;
-    polkitPolicyOwners = [ "hbohlen" ];
+    polkitPolicyOwners = [ username ];
   };
 
   # Bluetooth support for desktop

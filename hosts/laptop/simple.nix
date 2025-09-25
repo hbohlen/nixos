@@ -6,6 +6,7 @@
   imports = [
     ./hardware-configuration.nix
     ../../modules/nixos/common.nix
+    ../../modules/nixos/users.nix
     ../../modules/nixos/nvidia-rog.nix
     inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
   ];
@@ -17,14 +18,8 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Define the user account for this machine.
-  users.users.hbohlen = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ]; # Sudo and network access.
-    initialPassword = "changeme";
-    createHome = true;
-    home = "/home/hbohlen";
-  };
+  # Set host type for user management
+  users.hostType = "laptop";
 
   # Hardware-specific configurations for laptop
   services.tlp = {
