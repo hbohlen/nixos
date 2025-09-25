@@ -17,6 +17,8 @@ This document provides a comprehensive overview of the system architecture for t
 - [Performance Optimizations](#performance-optimizations)
 - [Maintenance and Operations](#maintenance-and-operations)
 
+> **📖 For detailed host-specific documentation, see [Host Configuration Documentation](hosts/README.md)**
+
 ## Architecture Philosophy
 
 The system is built around the "Erase Your Darlings" philosophy, implementing:
