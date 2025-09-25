@@ -16,27 +16,44 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
-  # Packages specific to this user (minimal set for ISO install)
+  # Packages specific to this user
   home.packages = with pkgs; [
-   # Development tools
+    # Development tools and IDEs
     zed-editor
     vscode
-   nodejs
-   python3
-   uv
-   git
-   gh
+    nodejs
+    python3
+    uv
+    git
+    gh
     
-  # Applications
-  affine
-  _1password-cli
-  _1password-gui
-  opencode
-  podman
-  podman-desktop
-  vivaldi
+    # Terminals
+    alacritty
+    kitty
     
-    # Add more packages specific to this user
+    # Browsers
+    vivaldi
+    
+    # Productivity applications
+    affine
+    
+    # 1Password family
+    _1password-cli
+    _1password-gui
+    
+    # Development and DevOps tools
+    opencode
+    podman
+    podman-desktop
+    podman-compose
+    
+    # CLI tools for development
+    # TODO: Add these tools if/when they become available in nixpkgs or as custom packages
+    # rovodev-cli  # Rovo CLI tool (may need custom package)
+    # gemini-cli   # Gemini CLI tool (may need custom package)
+    
+    # Additional development tools
+    npm
   ];
 
   # Shell configuration

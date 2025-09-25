@@ -2,7 +2,10 @@
 { pkgs, inputs, ... }:
 
 {
-  # ...existing code...
+  imports = [
+    # Import the official Hyprland Home Manager module.
+    inputs.hyprland.homeManagerModules.default
+  ];
 
   # GTK and cursor theme
   gtk = {
@@ -41,10 +44,6 @@
       separator-color = "#cdd6f4";
     };
   };
-  imports = [
-    # Import the official Hyprland Home Manager module.
-    inputs.hyprland.homeManagerModules.default
-  ];
 
   # Install essential desktop applications.
   home.packages = with pkgs; [
@@ -83,12 +82,11 @@
     direnv
     nix-direnv
     # Fonts
-  nerd-fonts.jetbrains-mono
-  swww # Animated wallpaper daemon
-  swaylock-effects # Stylish lock screen
-  adw-gtk3 # GTK theme
-  catppuccin-cursors # Cursor theme
-  cava # Audio visualizer (optional, for terminal)
+    nerd-fonts.jetbrains-mono
+    swww # Animated wallpaper daemon
+    swaylock-effects # Stylish lock screen
+    adw-gtk3 # GTK theme
+    catppuccin-cursors # Cursor theme
     # Add more packages as needed
   ];
 
@@ -137,8 +135,8 @@
           size = 3;
           passes = 1;
         };
-  # drop_shadow, shadow_range, and shadow_render_power removed (deprecated in recent Hyprland)
-  # col.shadow removed (deprecated in recent Hyprland)
+        # drop_shadow, shadow_range, and shadow_render_power removed (deprecated in recent Hyprland)
+        # col.shadow removed (deprecated in recent Hyprland)
       };
 
       # Animations
@@ -196,14 +194,14 @@
         "$mainMod SHIFT, 9, movetoworkspace, 9"
         "$mainMod SHIFT, 0, movetoworkspace, 10"
 
-  # Screenshot bindings
-  ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
-  "SHIFT, Print, exec, grim - | wl-copy"
+        # Screenshot bindings
+        ", Print, exec, grim -g \"$(slurp)\" - | wl-copy"
+        "SHIFT, Print, exec, grim - | wl-copy"
 
-  # Custom: Launch Alacritty with mainMod+Shift+Return
-  "$mainMod SHIFT, Return, exec, alacritty"
+        # Custom: Launch Alacritty with mainMod+Shift+Return
+        "$mainMod SHIFT, Return, exec, alacritty"
 
-  # Add more custom keybindings below as needed
+        # Add more custom keybindings below as needed
       ];
     };
   };
@@ -239,7 +237,7 @@
         height = 30;
         modules-left = [ "hyprland/workspaces" "hyprland/window" ];
         modules-center = [ "clock" ];
-        modules-right = [ "battery" "disk" "weather" "pulseaudio" "network" "cpu" "memory" "tray" ];
+        modules-right = [ "battery" "disk" "pulseaudio" "network" "cpu" "memory" "tray" ];
 
         "hyprland/workspaces" = {
           format = "{icon}";
@@ -267,11 +265,6 @@
         disk = {
           format = "{free} free";
           path = "/";
-        };
-        weather = {
-          format = "{temperature}°C {icon}";
-          format-icons = [ "☀️" "⛅" "☁️" "🌧️" "⛈️" "❄️" ];
-          # You may need to set your location in the Waybar config or via env vars
         };
         pulseaudio = {
           format = "{volume}% {icon}";
