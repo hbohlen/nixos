@@ -66,6 +66,97 @@ graph TB
     style OP fill:#f3e5f5
 ```
 
+## Module Loading and Configuration Process
+
+### NixOS Configuration Evaluation Flow
+
+```mermaid
+flowchart TD
+    Start([nixos-rebuild starts]) --> ReadFlake[Read flake.nix]
+    ReadFlake --> ResolveInputs[Resolve flake inputs<br/>nixpkgs, home-manager, etc.]
+    ResolveInputs --> CallMkSystem[Call mkSystem helper function<br/>with hostname & username]
+    
+    CallMkSystem --> LoadHostConfig[Load host configuration<br/>hosts/hostname/default.nix]
+    LoadHostConfig --> ProcessImports[Process imports list<br/>in host configuration]
+    
+    ProcessImports --> LoadModule{Load next module}
+    LoadModule --> EvalModule[Evaluate module]
+    EvalModule --> CheckDeps{Module dependencies?}
+    
+    CheckDeps -->|Yes| LoadDeps[Load dependency modules<br/>via imports]
+    LoadDeps --> MergeDeps[Merge dependency configurations]
+    MergeDeps --> ApplyModule[Apply module options & config]
+    
+    CheckDeps -->|No| ApplyModule
+    ApplyModule --> RegisterServices[Register systemd services]
+    RegisterServices --> RegisterPackages[Register packages in environment]
+    RegisterPackages --> MoreModules{More modules to load?}
+    
+    MoreModules -->|Yes| LoadModule
+    MoreModules -->|No| LoadHomeManager[Load Home Manager module]
+    
+    LoadHomeManager --> LoadUserConfig[Load user configuration<br/>users/username/home.nix]
+    LoadUserConfig --> ProcessHMModules[Process Home Manager modules]
+    ProcessHMModules --> MergeConfigs[Merge all configurations]
+    
+    MergeConfigs --> ValidateConfig[Validate final configuration<br/>Check for conflicts & errors]
+    ValidateConfig -->|Failed| ConfigError[Configuration Error<br/>Exit with detailed message]
+    ValidateConfig -->|Success| GenerateSystem[Generate system derivation]
+    
+    GenerateSystem --> BuildPackages[Build required packages]
+    BuildPackages --> InstallSystem[Install/activate system]
+    InstallSystem --> Complete([System ready])
+    
+    ConfigError --> End([Exit with error])
+    Complete --> End
+    
+    %% Styling
+    style Start fill:#c8e6c9
+    style Complete fill:#c8e6c9
+    style End fill:#ffecb3
+    style ConfigError fill:#ffcdd2
+    style LoadModule fill:#e1f5fe
+    style ApplyModule fill:#fff3e0
+    style GenerateSystem fill:#f3e5f5
+```
+
+### Host-Specific Module Resolution
+
+```mermaid
+sequenceDiagram
+    participant Flake as flake.nix
+    participant MkSystem as mkSystem Function  
+    participant HostConfig as Host Configuration
+    participant SystemModule as System Module
+    participant HMModule as Home Manager Module
+    participant External as External Flakes
+    
+    Flake->>MkSystem: mkSystem { hostname, username }
+    MkSystem->>HostConfig: Import hosts/hostname/default.nix
+    HostConfig->>HostConfig: Read imports list
+    
+    loop For each system module
+        HostConfig->>SystemModule: Import module (e.g., common.nix)
+        SystemModule->>SystemModule: Evaluate module options
+        SystemModule->>External: Import external dependencies (if needed)
+        External-->>SystemModule: Provide module functions
+        SystemModule-->>HostConfig: Return configuration
+    end
+    
+    HostConfig->>MkSystem: System configuration complete
+    MkSystem->>HMModule: Setup Home Manager integration
+    HMModule->>HMModule: Import users/username/home.nix
+    
+    loop For each home-manager module
+        HMModule->>HMModule: Load user module (e.g., desktop.nix)
+        HMModule->>External: Import external HM modules (if needed)
+        External-->>HMModule: Provide HM module functions
+    end
+    
+    HMModule-->>MkSystem: User configuration complete
+    MkSystem-->>Flake: Complete system derivation
+```
+
 ## Module Usage Patterns
 
 ### Host Type Modules
