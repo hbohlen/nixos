@@ -29,9 +29,13 @@ readonly NC='\033[0m' # No Color
 # Configuration variables - hardcoded for this installation
 readonly HOSTNAME="desktop"
 readonly DEFAULT_USERNAME="hbohlen"
-readonly DISK_DEVICE="/dev/nvme1n1"  # Your 2TB SSD (CT2000P310SSD8)
+readonly DEFAULT_DISK_DEVICE="/dev/nvme1n1"  # Your 2TB SSD (CT2000P310SSD8)
 readonly REPO_URL="https://github.com/hbohlen/nixos"
 readonly MOUNT_POINT="/mnt"
+
+# Mutable globals populated during configuration
+DISK_DEVICE="$DEFAULT_DISK_DEVICE"
+USERNAME="$DEFAULT_USERNAME"
 
 # Function to print colored output
 print_status() {
@@ -158,6 +162,14 @@ collect_configuration() {
     
     # Get username (only prompt)
     USERNAME=$(prompt_user "Enter username" "$DEFAULT_USERNAME")
+
+    # Show available disks to help selection
+    print_status "Detected block devices:"
+    lsblk -d -o NAME,SIZE,MODEL || handle_error "Failed to list block devices"
+
+    # Get target disk and validate
+    local disk_prompt="Enter target disk (will be ERASED)"
+    DISK_DEVICE=$(prompt_user "$disk_prompt" "$DEFAULT_DISK_DEVICE")
     
     # Show configuration for confirmation
     print_status "Installation configuration:"
