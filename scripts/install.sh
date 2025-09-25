@@ -163,13 +163,18 @@ collect_configuration() {
     # Get username (only prompt)
     USERNAME=$(prompt_user "Enter username" "$DEFAULT_USERNAME")
 
-    # Show available disks to help selection
+    # Determine target disk (no prompt by default)
+    if [[ -n "${INSTALL_DISK_DEVICE:-}" ]]; then
+        DISK_DEVICE="$INSTALL_DISK_DEVICE"
+        print_status "Using disk from INSTALL_DISK_DEVICE='$DISK_DEVICE'"
+    else
+        DISK_DEVICE="$DEFAULT_DISK_DEVICE"
+        print_status "Using default disk: $DISK_DEVICE"
+    fi
+
+    # Show available disks to help with validation/debugging
     print_status "Detected block devices:"
     lsblk -d -o NAME,SIZE,MODEL || handle_error "Failed to list block devices"
-
-    # Get target disk and validate
-    local disk_prompt="Enter target disk (will be ERASED)"
-    DISK_DEVICE=$(prompt_user "$disk_prompt" "$DEFAULT_DISK_DEVICE")
     
     # Show configuration for confirmation
     print_status "Installation configuration:"
@@ -182,6 +187,17 @@ collect_configuration() {
     # Show disk information
     print_status "Target disk information:"
     lsblk -d -o NAME,SIZE,MODEL "$DISK_DEVICE" || handle_error "Cannot access disk $DISK_DEVICE"
+
+    # Confirm disk device exists, otherwise allow interactive selection as a fallback
+    if [[ ! -b "$DISK_DEVICE" ]]; then
+        print_warning "Default disk '$DISK_DEVICE' not found."
+        local disk_prompt="Enter target disk (will be ERASED)"
+        DISK_DEVICE=$(prompt_user "$disk_prompt" "$DEFAULT_DISK_DEVICE")
+    fi
+
+    if [[ ! -b "$DISK_DEVICE" ]]; then
+        handle_error "Disk device '$DISK_DEVICE' does not exist"
+    fi
     echo
     
     # Validate disk device exists
