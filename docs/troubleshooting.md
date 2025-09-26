@@ -757,39 +757,170 @@ boot.kernelParams = [ "amd_pstate=passive" ];
 ```
 
 #### WiFi and Bluetooth Issues
-**Symptoms:** No connectivity, poor signal, connection drops
+**Symptoms:** WiFi continuously prompts for password, connection failures, poor signal, connection drops, authentication issues
 
-**Diagnosis:**
+**Enhanced Diagnosis:**
 ```bash
-# Check network interfaces
+# Check network interfaces and WiFi status
 ip link show
 nmcli device status
+nmcli device wifi list
+iw dev  # Show wireless interfaces
 
-# Check WiFi drivers
-lspci | grep -i network
-lsmod | grep iwl
+# Check WiFi hardware and drivers
+lspci | grep -i -E "(network|wireless)"
+lsusb | grep -i wireless  # For USB WiFi adapters
+lsmod | grep -E "(iwl|cfg80211|mac80211|rtw|brcm)"
 
-# Bluetooth status
+# Check firmware loading and driver messages
+dmesg | grep -i -E "(firmware|iwl|wifi|wireless)"
+journalctl -u NetworkManager.service | tail -50
+
+# Test WiFi functionality step by step
+sudo iw dev wlan0 scan | grep SSID  # Scan for networks (replace wlan0 with your interface)
+wpa_supplicant -i wlan0 -c /dev/null -D nl80211 -d  # Test driver directly
+
+# Check NetworkManager configuration
+nmcli connection show
+nmcli connection show --active
+cat /etc/NetworkManager/NetworkManager.conf
+
+# Check power management settings
+cat /sys/class/net/wl*/device/power_save
+iwconfig | grep "Power Management"
+
+# Bluetooth status (if applicable)
 bluetoothctl show
 systemctl status bluetooth
-
-# Check firmware loading
-dmesg | grep -i firmware
+rfkill list all  # Check if WiFi/Bluetooth are blocked
 ```
 
-**Solutions:**
-```nix
-# WiFi firmware
-hardware.enableRedistributableFirmware = true;
+**Common WiFi Connection Issues and Solutions:**
 
-# Bluetooth
+1. **Password Prompts Loop Issue:**
+```bash
+# Delete and recreate the connection
+nmcli connection delete "WiFi-Network-Name"
+nmcli device wifi connect "WiFi-Network-Name" password "your-password"
+
+# Or manually disable MAC address randomization
+nmcli connection modify "WiFi-Network-Name" wifi.mac-address-randomization no
+```
+
+2. **Power Management Interference:**
+```bash
+# Temporarily disable power saving to test
+sudo iwconfig wlan0 power off
+# Or disable via NetworkManager
+nmcli connection modify "WiFi-Network-Name" wifi.powersave 0
+```
+
+3. **Driver/Firmware Issues:**
+```bash
+# Reload WiFi modules
+sudo modprobe -r iwlwifi && sudo modprobe iwlwifi
+sudo systemctl restart NetworkManager
+```
+
+**NixOS Configuration Solutions:**
+```nix
+# Comprehensive WiFi configuration (recommended approach)
+wifi = {
+  enable = true;
+  powerSaving = "low";  # or "off" for stability testing
+  enableFirmware = true;
+};
+
+# Alternative: Manual NetworkManager configuration
+networking.networkmanager = {
+  enable = true;
+  wifi.powersave = false;  # Disable for troubleshooting
+  wifi.backend = "wpa_supplicant";
+  connectionConfig = {
+    "wifi.powersave" = 0;
+    "wifi.scan-rand-mac-address" = "no";
+  };
+};
+
+# Essential firmware and drivers
+hardware.enableRedistributableFirmware = true;
+hardware.enableAllFirmware = true;
+
+# WiFi kernel modules
+boot.kernelModules = [ "iwlwifi" "cfg80211" "mac80211" ];
+
+# Kernel parameters for WiFi stability
+boot.kernelParams = [
+  "iwlwifi.power_save=0"      # Disable Intel WiFi power saving
+  "iwlwifi.uapsd_disable=1"   # Disable U-APSD for compatibility
+];
+
+# For laptops: Fix TLP WiFi conflicts
+services.tlp.settings = {
+  # Don't disable WiFi on startup
+  DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth wwan";  # Remove "wifi"
+  WIFI_PWR_ON_AC = "off";
+  WIFI_PWR_ON_BAT = "on";
+};
+
+# Debug packages for troubleshooting
+environment.systemPackages = with pkgs; [
+  wirelesstools     # iwconfig, iwlist
+  iw               # Modern wireless tools  
+  wpa_supplicant   # WPA authentication
+  networkmanagerapplet
+  wavemon          # WiFi monitoring
+  tcpdump          # Packet capture
+];
+
+# Bluetooth configuration
 hardware.bluetooth.enable = true;
 hardware.bluetooth.powerOnBoot = true;
 
-# Specific WiFi drivers
+# Specific drivers for common hardware
 boot.extraModulePackages = with config.boot.kernelPackages; [
-  rtl8814au  # Example for specific USB WiFi adapter
+  # rtl8814au      # Realtek USB adapters
+  # rtl88xxau-aircrack  # For monitoring mode
 ];
+```
+
+**Temporary Workarounds for Testing:**
+```bash
+# Use USB tethering from phone
+# Enable USB tethering on phone, then:
+nmcli device status  # Should see usb0 or similar
+
+# Use Ethernet adapter if available
+# Connect via USB-to-Ethernet adapter
+
+# Use different WiFi backend temporarily
+sudo systemctl stop NetworkManager
+sudo wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf -B
+sudo dhclient wlan0
+
+# Create temporary wpa_supplicant config:
+wpa_passphrase "YourWiFiName" "YourPassword" > /tmp/wpa.conf
+sudo wpa_supplicant -i wlan0 -c /tmp/wpa.conf -B
+```
+
+**Advanced Debugging:**
+```bash
+# Monitor NetworkManager in real-time
+journalctl -u NetworkManager.service -f
+
+# Enable NetworkManager debug logging
+sudo nmcli general logging level DEBUG domains ALL
+# Then check: journalctl -u NetworkManager.service
+
+# Capture network traffic during connection attempt
+sudo tcpdump -i wlan0 -w /tmp/wifi-debug.pcap
+
+# Check kernel WiFi events
+sudo dmesg -w | grep -i wifi
+
+# Test raw WiFi interface
+sudo ip link set wlan0 up
+sudo iw dev wlan0 scan dump
 ```
 
 ## System and Service Problems

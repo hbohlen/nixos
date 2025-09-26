@@ -81,6 +81,7 @@ in
 {
   imports = [
     ./unfree-packages.nix
+    ./wifi.nix  # Import comprehensive WiFi configuration
   ];
   # Define common module options
   options = {
@@ -168,11 +169,11 @@ in
     xz
   ];
 
-  # Setup networking with NetworkManager
-  networking.networkmanager = {
+  # WiFi and networking configuration is handled by the WiFi module
+  wifi = {
     enable = true;
-    # Enable WiFi power saving by default (can be overridden)
-    wifi.powersave = true;
+    powerSaving = "medium";  # Balanced power saving for good connectivity and battery life
+    enableFirmware = true;
   };
 
   # Disable systemd-networkd wait online since NetworkManager manages connectivity
