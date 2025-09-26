@@ -316,6 +316,8 @@
       wifi-status = "nmcli device status";
       wifi-diag = "journalctl -u NetworkManager.service -f";
       wifi-restart = "sudo systemctl restart NetworkManager";
+      wifi-diagnostics = "/etc/nixos/scripts/wifi-diagnostics.sh";
+      wifi-repair = "/etc/nixos/scripts/wifi-diagnostics.sh --repair";
     };
   };
 }
