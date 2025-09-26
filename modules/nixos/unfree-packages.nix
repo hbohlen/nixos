@@ -38,6 +38,14 @@
     "broadcom-bt-firmware"
     "facetimehd-firmware"
     "rtl8761b-firmware"
+    "intel-ucode"
+    "amd-ucode"
+    "sof-firmware"
+    "alsa-firmware"
+    "wireless-regdb"
+    "intel2200BGFirmware"
+    "rt73-firmware"
+    "zd1211fw"
     
     # Other common unfree packages
     "nvidia-vaapi-driver"
