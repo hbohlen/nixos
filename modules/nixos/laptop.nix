@@ -279,9 +279,9 @@
 
   # Enable laptop-specific networking optimizations
   networking = {
-    # Enable IPv6 privacy extensions
-    useDHCP = false;
-    useNetworkd = true;
+    # Enable IPv6 privacy extensions for better privacy
+    useDHCP = lib.mkDefault false;
+    useNetworkd = lib.mkDefault true;
   };
 
   # Enable laptop-specific systemd services

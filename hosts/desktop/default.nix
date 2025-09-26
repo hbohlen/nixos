@@ -32,6 +32,12 @@
     enableFirmware = true;
   };
 
+  # Desktop-specific networking (ensure no conflicts with laptop settings)
+  networking = {
+    # Use DHCP by default (can be overridden by hardware configuration)
+    useDHCP = lib.mkDefault true;
+  };
+
   # SSH Key Configuration (Security)
   # To set up SSH keys and disable password authentication:
   # 1. Generate SSH key: ssh-keygen -t ed25519 -C "your-email@example.com"

@@ -84,7 +84,123 @@
       linssid           # WiFi scanner GUI
       
       # WiFi diagnostics script
-      (pkgs.writeShellScriptBin "wifi-diagnostics" (builtins.readFile ../../scripts/wifi-diagnostics.sh))
+      (pkgs.writeShellScriptBin "wifi-diagnostics" ''
+        #!/usr/bin/env bash
+        # WiFi Diagnostics Script for NixOS
+        # Comprehensive WiFi troubleshooting and information gathering
+
+        set -euo pipefail
+
+        # Colors for output
+        RED='\033[0;31m'
+        GREEN='\033[0;32m'
+        YELLOW='\033[1;33m'
+        BLUE='\033[0;34m'
+        CYAN='\033[0;36m'
+        NC='\033[0m' # No Color
+
+        # Logging function
+        log() {
+            echo -e "''${BLUE}[$(date +'%H:%M:%S')]''${NC} $*"
+        }
+
+        error() {
+            echo -e "''${RED}[ERROR]''${NC} $*" >&2
+        }
+
+        success() {
+            echo -e "''${GREEN}[SUCCESS]''${NC} $*"
+        }
+
+        warning() {
+            echo -e "''${YELLOW}[WARNING]''${NC} $*"
+        }
+
+        info() {
+            echo -e "''${CYAN}[INFO]''${NC} $*"
+        }
+
+        # Function to check if command exists
+        command_exists() {
+            command -v "$1" >/dev/null 2>&1
+        }
+
+        # Function to run command and capture output with error handling
+        run_cmd() {
+            local cmd="$1"
+            local description="$2"
+            
+            echo
+            info "Running: $description"
+            echo "Command: $cmd"
+            echo "----------------------------------------"
+            
+            if eval "$cmd" 2>&1; then
+                success "$description completed"
+            else
+                warning "$description failed or returned error"
+            fi
+        }
+
+        echo
+        echo "=================================="
+        echo "    WiFi Diagnostics for NixOS    "
+        echo "=================================="
+        echo
+        
+        # Basic system information
+        info "System Information:"
+        run_cmd "uname -a" "System kernel information"
+        run_cmd "hostnamectl" "System hostname and OS info"
+        
+        # Network interfaces
+        info "Network Interface Information:"
+        run_cmd "ip link show" "Network interfaces"
+        if command_exists iwconfig; then
+            run_cmd "iwconfig" "Wireless interface configuration"
+        fi
+        if command_exists iw; then
+            run_cmd "iw dev" "Wireless device information"
+        fi
+        
+        # Hardware detection
+        info "Hardware Detection:"
+        run_cmd "lspci | grep -i -E '(network|wireless)'" "PCI WiFi hardware"
+        run_cmd "lsusb | grep -i wireless" "USB WiFi hardware"
+        if command_exists rfkill; then
+            run_cmd "rfkill list" "WiFi/Bluetooth radio status"
+        fi
+        
+        # Driver and firmware status
+        info "Driver and Firmware Status:"
+        run_cmd "lsmod | grep -E '(iwl|cfg80211|mac80211|rtw|brcm)'" "Loaded WiFi kernel modules"
+        run_cmd "dmesg | grep -i -E '(firmware|iwl|wifi|wireless)' | tail -20" "Recent WiFi/firmware messages"
+        
+        # NetworkManager status
+        if command_exists nmcli; then
+            info "NetworkManager Information:"
+            run_cmd "nmcli --version" "NetworkManager version"
+            run_cmd "nmcli general status" "NetworkManager general status"
+            run_cmd "nmcli device status" "Device status"
+            run_cmd "nmcli connection show" "Network connections"
+            run_cmd "nmcli device wifi list" "Available WiFi networks"
+            
+            # Check active connections
+            if nmcli connection show --active | grep -q wifi; then
+                info "Active WiFi connection details:"
+                run_cmd "nmcli connection show --active" "Active connections"
+            else
+                warning "No active WiFi connections found"
+            fi
+        else
+            error "NetworkManager (nmcli) not found"
+        fi
+        
+        echo
+        info "WiFi diagnostics completed!"
+        LOG_FILE="/tmp/wifi-diagnostics-$(date +%Y%m%d-%H%M%S).log"
+        info "For detailed logs, check: $LOG_FILE"
+      '')
     ];
 
     # Enable WPA supplicant service
