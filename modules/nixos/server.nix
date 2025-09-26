@@ -209,7 +209,7 @@
     ];
     
     # Enable CPU performance governor
-    kernelModules = [ "cpufreq_performance" ];
+    kernelModules = lib.mkAfter [ "cpufreq_performance" ];
   };
 
   # Resource limits

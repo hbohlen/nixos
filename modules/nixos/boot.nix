@@ -26,11 +26,6 @@
     # Clean /tmp on boot
     tmp.cleanOnBoot = true;
     
-    # Enable kernel modules for common hardware
-    kernelModules = [
-      "v4l2loopback" # For virtual camera support
-    ];
-    
     # Enable kernel parameters for better performance and compatibility
     kernelParams = [
       "quiet"

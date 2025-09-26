@@ -46,7 +46,7 @@
   hardware.enableAllFirmware = true;  # Include proprietary firmware for WiFi adapters
 
   # Hardware-specific kernel modules (WiFi modules are handled by laptop.nix and wifi.nix)
-  boot.kernelModules = [ "kvm-intel" ];
+  # Note: kvm-intel is already defined above on line 21
   boot.extraModulePackages = with config.boot.kernelPackages; [
     # Add any additional WiFi drivers if needed
   ];
