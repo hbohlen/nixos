@@ -170,10 +170,12 @@ in
   ];
 
   # WiFi and networking configuration is handled by the WiFi module
+  # Using mkDefault allows hosts to override these settings
   wifi = {
-    enable = true;
-    powerSaving = "medium";  # Balanced power saving for good connectivity and battery life
-    enableFirmware = true;
+    enable = lib.mkDefault true;
+    powerSaving = lib.mkDefault "medium";  # Default - hosts can override with lib.mkForce
+    enableFirmware = lib.mkDefault true;
+    enableProprietaryFirmware = lib.mkDefault false;
   };
 
   # Disable systemd-networkd wait online since NetworkManager manages connectivity

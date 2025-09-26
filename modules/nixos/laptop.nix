@@ -6,10 +6,12 @@
   services.power-profiles-daemon.enable = false;
 
   # Configure WiFi for laptop use with moderate power saving
+  # Using mkDefault allows host configurations to override these settings
   wifi = {
-    enable = true;
-    powerSaving = "low";  # Use low power saving on laptop for better connectivity
-    enableFirmware = true;
+    enable = lib.mkDefault true;
+    powerSaving = lib.mkDefault "low";  # Use low power saving on laptop for better connectivity
+    enableFirmware = lib.mkDefault true;
+    enableProprietaryFirmware = lib.mkDefault false;
   };
 
   # TLP for advanced power management

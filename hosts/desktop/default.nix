@@ -28,7 +28,7 @@
   # Configure WiFi for desktop use
   wifi = {
     enable = true;
-    powerSaving = "off";  # Disable power saving on desktop for best performance
+    powerSaving = lib.mkForce "off";  # Force override common.nix setting for best performance
     enableFirmware = true;
     enableProprietaryFirmware = false;  # Set to true if needed for specific hardware
   };
