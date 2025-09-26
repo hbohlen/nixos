@@ -4,7 +4,10 @@
 {
   # Centralized unfree package allowlist
   # This prevents conflicts from multiple modules defining allowUnfreePredicate
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+  # NixOS 25.05 requires this to be set at the module level to avoid conflicts
+  nixpkgs.config = {
+    allowUnfree = true;
+    allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     # 1Password family
     "1password"
     "1password-cli"
@@ -58,5 +61,10 @@
     "nvidia-vaapi-driver"
     "cuda"
     "cudatoolkit"
+    
+    # System firmware - required for hardware.enableAllFirmware
+    "broadcom-sta"
+    "facetimehd-calibration"
   ];
+  };
 }

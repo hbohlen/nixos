@@ -52,10 +52,8 @@
     ];
   };
 
-  # Server-specific unfree packages (minimal)
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    # Add server-specific unfree packages if needed
-  ];
+  # Unfree packages are managed centrally by modules/nixos/unfree-packages.nix
+  # This prevents conflicts with the centralized allowUnfreePredicate configuration
 
   # Server-specific packages
   environment.systemPackages = with pkgs; [
