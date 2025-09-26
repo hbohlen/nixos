@@ -1115,22 +1115,60 @@ nmcli connection modify connection-name ipv4.dns "8.8.8.8,1.1.1.1"
 ```
 
 #### WiFi Problems
-**Symptoms:** Cannot connect to WiFi, authentication issues
+**Symptoms:** Cannot connect to WiFi, authentication issues, repeated password prompts
+
+**Common Scenarios:**
+- WiFi password prompts repeatedly after reboot (impermanence issue)
+- Connection drops frequently 
+- Unable to discover WiFi networks
+- Authentication failures with correct credentials
 
 **Diagnosis:**
 ```bash
-# Scan for networks
-nmcli device wifi list
+# Use comprehensive WiFi diagnostics script
+./scripts/wifi-diagnostics.sh
 
-# Check WiFi interface status
-iw dev
-iwconfig
+# Manual diagnosis commands
+nmcli device wifi list              # Scan for networks
+nmcli device status                 # Check interface status
+nmcli connection show               # Show saved connections
+iwconfig                           # Wireless interface configuration
+rfkill list                        # Check if WiFi is blocked
 
-# Check authentication
-wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf -d
+# Check for impermanence issues (if using ephemeral root)
+mount | grep persist               # Verify persistence mounts
+ls -la /persist/etc/NetworkManager/system-connections/  # Check persisted connections
+ls -la /etc/NetworkManager/system-connections/          # Check active connections
+
+# Permission and ownership check
+sudo ls -la /etc/NetworkManager/system-connections/*
 ```
 
 **Solutions:**
+
+**For Impermanence-Related Issues (Repeated Password Prompts):**
+```bash
+# Use automated repair tool
+./scripts/wifi-diagnostics.sh --repair
+
+# Or manual fix:
+# 1. Ensure persistence directory exists
+sudo mkdir -p /persist/etc/NetworkManager/system-connections
+sudo chown root:root /persist/etc/NetworkManager/system-connections
+sudo chmod 755 /persist/etc/NetworkManager/system-connections
+
+# 2. Copy existing connections to persist
+sudo cp /etc/NetworkManager/system-connections/* /persist/etc/NetworkManager/system-connections/
+
+# 3. Fix permissions
+sudo chown root:root /persist/etc/NetworkManager/system-connections/*
+sudo chmod 600 /persist/etc/NetworkManager/system-connections/*
+
+# 4. Rebuild system to apply impermanence configuration
+sudo nixos-rebuild switch --flake .#hostname
+```
+
+**For General WiFi Issues:**
 ```bash
 # Connect to WiFi
 nmcli device wifi connect "SSID" password "password"
@@ -1138,6 +1176,29 @@ nmcli device wifi connect "SSID" password "password"
 # Forget and reconnect
 nmcli connection delete "connection-name"
 nmcli device wifi connect "SSID" password "password"
+
+# Disable MAC address randomization (compatibility fix)
+nmcli connection modify "SSID" wifi.mac-address-randomization no
+
+# Restart WiFi drivers
+sudo modprobe -r iwlwifi && sudo modprobe iwlwifi
+
+# Reset NetworkManager
+sudo systemctl restart NetworkManager
+```
+
+**For Persistent Connection Issues:**
+```bash
+# Check and fix TLP power management
+tlp-stat -s | grep -i wifi
+sudo tlp setcharge 40 80 BAT0     # Adjust power settings
+
+# Disable power saving temporarily
+sudo iwconfig wlan0 power off
+
+# Check firmware and drivers
+dmesg | grep -i firmware
+lsmod | grep iwl
 ```
 
 ### SSH and Remote Access Issues

@@ -148,6 +148,58 @@ main() {
         run_cmd "tlp-stat -s | grep -E '(wifi|WIFI)'" "TLP WiFi status"
     fi
     
+    # Check for impermanence and persistence issues
+    echo
+    info "Impermanence and Persistence Checks:"
+    
+    # Check if system uses impermanence (ZFS root)
+    if mount | grep -q "rpool/local/root"; then
+        info "System uses impermanence (ephemeral root filesystem)"
+        
+        # Check if persist mount exists
+        if mount | grep -q "/persist"; then
+            success "/persist mount found"
+            run_cmd "mount | grep persist" "Persistent filesystem mounts"
+        else
+            error "/persist mount not found - impermanence may not be working"
+        fi
+        
+        # Check NetworkManager system-connections persistence
+        if [ -d "/persist/etc/NetworkManager/system-connections" ]; then
+            success "NetworkManager connections directory persisted at /persist/etc/NetworkManager/system-connections"
+            run_cmd "ls -la /persist/etc/NetworkManager/system-connections/" "Persistent connection files"
+            
+            # Check bind mount
+            if mount | grep -q "/etc/NetworkManager/system-connections"; then
+                success "NetworkManager system-connections properly bind-mounted"
+            else
+                error "NetworkManager system-connections NOT bind-mounted from /persist"
+            fi
+        else
+            error "NetworkManager connections directory NOT found in /persist"
+            warning "This will cause WiFi passwords to be lost on reboot"
+        fi
+        
+        # Check permissions on connection files
+        if [ -d "/etc/NetworkManager/system-connections" ]; then
+            echo
+            info "Checking NetworkManager connection file permissions:"
+            for conn_file in /etc/NetworkManager/system-connections/*; do
+                if [ -f "$conn_file" ]; then
+                    perms=$(stat -c "%a" "$conn_file" 2>/dev/null || echo "unknown")
+                    owner=$(stat -c "%U:%G" "$conn_file" 2>/dev/null || echo "unknown")
+                    if [ "$perms" = "600" ] && [ "$owner" = "root:root" ]; then
+                        success "$(basename "$conn_file"): $perms $owner ✓"
+                    else
+                        error "$(basename "$conn_file"): $perms $owner ✗ (should be 600 root:root)"
+                    fi
+                fi
+            done
+        fi
+    else
+        info "System does not appear to use impermanence"
+    fi
+    
     # Check for MAC address randomization issues
     if command_exists nmcli; then
         echo
@@ -170,34 +222,215 @@ main() {
     
     info "If experiencing connection issues, try these steps:"
     echo
-    echo "1. Reset NetworkManager:"
+    echo "=== IMPERMANENCE-SPECIFIC FIXES ==="
+    echo "1. Fix NetworkManager persistence (if connections lost after reboot):"
+    echo "   # Ensure persistence directory exists"
+    echo "   sudo mkdir -p /persist/etc/NetworkManager/system-connections"
+    echo "   sudo chown root:root /persist/etc/NetworkManager/system-connections"
+    echo "   sudo chmod 755 /persist/etc/NetworkManager/system-connections"
+    echo
+    echo "2. Fix connection file permissions:"
+    echo "   sudo chown root:root /etc/NetworkManager/system-connections/*"
+    echo "   sudo chmod 600 /etc/NetworkManager/system-connections/*"
+    echo
+    echo "3. Manually copy existing connections to persist (if needed):"
+    echo "   sudo cp -p /etc/NetworkManager/system-connections/* /persist/etc/NetworkManager/system-connections/"
+    echo
+    echo "=== GENERAL NETWORK FIXES ==="
+    echo "4. Reset NetworkManager:"
     echo "   sudo systemctl restart NetworkManager"
     echo
-    echo "2. Reload WiFi drivers:"
+    echo "5. Reload WiFi drivers:"
     echo "   sudo modprobe -r iwlwifi && sudo modprobe iwlwifi"
     echo
-    echo "3. Delete and recreate WiFi connection:"
+    echo "6. Delete and recreate WiFi connection:"
     echo "   nmcli connection delete 'WiFi-Name'"
     echo "   nmcli device wifi connect 'WiFi-Name' password 'password'"
     echo
-    echo "4. Disable MAC address randomization:"
+    echo "7. Disable MAC address randomization:"
     echo "   nmcli connection modify 'WiFi-Name' wifi.mac-address-randomization no"
     echo
-    echo "5. Disable power saving temporarily:"
+    echo "8. Disable power saving temporarily:"
     echo "   sudo iwconfig wlan0 power off"
     echo
-    echo "6. Check NixOS WiFi configuration:"
+    echo "9. Check NixOS WiFi configuration:"
     echo "   Ensure 'wifi.enable = true' and 'hardware.enableRedistributableFirmware = true'"
+    echo
+    echo "=== REBUILD SYSTEM ==="
+    echo "10. After configuration changes, rebuild:"
+    echo "    sudo nixos-rebuild switch --flake .#laptop"
     echo
     
     success "WiFi diagnostics completed!"
     echo
     info "Log saved to: /tmp/wifi-diagnostics-\$(date +%Y%m%d-%H%M%S).log"
+    echo
+    info "To run automated fixes, use: $0 --repair"
+}
+
+# Automatic repair functions
+fix_impermanence_persistence() {
+    info "Attempting to fix impermanence persistence issues..."
+    
+    # Check if we're running on an impermanence system
+    if ! mount | grep -q "rpool/local/root"; then
+        warning "System doesn't appear to use impermanence, skipping fixes"
+        return 0
+    fi
+    
+    # Ensure persist directory structure exists
+    if [ ! -d "/persist/etc/NetworkManager" ]; then
+        info "Creating /persist/etc/NetworkManager directory"
+        sudo mkdir -p /persist/etc/NetworkManager/system-connections
+        sudo chown root:root /persist/etc/NetworkManager
+        sudo chmod 755 /persist/etc/NetworkManager
+    fi
+    
+    if [ ! -d "/persist/etc/NetworkManager/system-connections" ]; then
+        info "Creating /persist/etc/NetworkManager/system-connections directory"
+        sudo mkdir -p /persist/etc/NetworkManager/system-connections
+    fi
+    
+    # Set correct permissions
+    sudo chown root:root /persist/etc/NetworkManager/system-connections
+    sudo chmod 755 /persist/etc/NetworkManager/system-connections
+    
+    # Copy existing connections if they exist and aren't already persisted
+    if [ -d "/etc/NetworkManager/system-connections" ]; then
+        for conn_file in /etc/NetworkManager/system-connections/*; do
+            if [ -f "$conn_file" ]; then
+                base_name=$(basename "$conn_file")
+                if [ ! -f "/persist/etc/NetworkManager/system-connections/$base_name" ]; then
+                    info "Copying connection file: $base_name"
+                    sudo cp "$conn_file" "/persist/etc/NetworkManager/system-connections/"
+                fi
+            fi
+        done
+    fi
+    
+    # Fix permissions on all connection files
+    if [ -d "/persist/etc/NetworkManager/system-connections" ]; then
+        info "Setting correct permissions on connection files"
+        sudo chown root:root /persist/etc/NetworkManager/system-connections/* 2>/dev/null || true
+        sudo chmod 600 /persist/etc/NetworkManager/system-connections/* 2>/dev/null || true
+    fi
+    
+    success "Impermanence persistence fixes completed"
+}
+
+fix_mac_randomization() {
+    info "Fixing MAC address randomization on WiFi connections..."
+    
+    if ! command_exists nmcli; then
+        error "nmcli not available, cannot fix MAC randomization"
+        return 1
+    fi
+    
+    # Get all WiFi connections and disable MAC randomization
+    nmcli connection show | grep wifi | while IFS= read -r line; do
+        conn_name=$(echo "$line" | awk '{print $1}')
+        info "Disabling MAC randomization for: $conn_name"
+        nmcli connection modify "$conn_name" wifi.mac-address-randomization no || true
+    done
+    
+    success "MAC address randomization fixes completed"
+}
+
+fix_permissions() {
+    info "Fixing NetworkManager connection file permissions..."
+    
+    if [ -d "/etc/NetworkManager/system-connections" ]; then
+        sudo chown root:root /etc/NetworkManager/system-connections/* 2>/dev/null || true
+        sudo chmod 600 /etc/NetworkManager/system-connections/* 2>/dev/null || true
+        success "Connection file permissions fixed"
+    else
+        warning "No NetworkManager system connections directory found"
+    fi
+    
+    if [ -d "/persist/etc/NetworkManager/system-connections" ]; then
+        sudo chown root:root /persist/etc/NetworkManager/system-connections/* 2>/dev/null || true
+        sudo chmod 600 /persist/etc/NetworkManager/system-connections/* 2>/dev/null || true
+        success "Persistent connection file permissions fixed"
+    fi
+}
+
+# Interactive repair menu
+repair_wifi() {
+    echo
+    echo "=========================================="
+    echo "        WiFi REPAIR FUNCTIONS           "
+    echo "=========================================="
+    echo
+    
+    echo "Available repair options:"
+    echo "1. Fix impermanence persistence issues"
+    echo "2. Fix MAC address randomization"
+    echo "3. Fix file permissions"
+    echo "4. All fixes"
+    echo "5. Restart NetworkManager"
+    echo "q. Quit"
+    echo
+    
+    read -p "Select repair option (1-5, q): " choice
+    
+    case $choice in
+        1)
+            fix_impermanence_persistence
+            ;;
+        2)
+            fix_mac_randomization
+            ;;
+        3)
+            fix_permissions
+            ;;
+        4)
+            fix_impermanence_persistence
+            fix_mac_randomization
+            fix_permissions
+            ;;
+        5)
+            info "Restarting NetworkManager..."
+            sudo systemctl restart NetworkManager
+            success "NetworkManager restarted"
+            ;;
+        q|Q)
+            info "Exiting repair menu"
+            return 0
+            ;;
+        *)
+            error "Invalid option selected"
+            ;;
+    esac
+    
+    echo
+    read -p "Run another repair? (y/n): " again
+    if [[ $again =~ ^[Yy] ]]; then
+        repair_wifi
+    fi
 }
 
 # Check if running as script or sourced
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    # Save output to log file
-    LOG_FILE="/tmp/wifi-diagnostics-$(date +%Y%m%d-%H%M%S).log"
-    main 2>&1 | tee "$LOG_FILE"
+    # Handle command line arguments
+    if [[ "$1" == "--repair" ]] || [[ "$1" == "-r" ]]; then
+        repair_wifi
+    elif [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+        echo "WiFi Diagnostics Script for NixOS"
+        echo
+        echo "Usage: $0 [options]"
+        echo
+        echo "Options:"
+        echo "  --repair, -r    Run interactive repair menu"
+        echo "  --help, -h      Show this help message"
+        echo "  (no options)    Run full diagnostics"
+        echo
+        echo "Examples:"
+        echo "  $0              # Run full diagnostics"
+        echo "  $0 --repair     # Run repair menu"
+        echo
+    else
+        # Save output to log file
+        LOG_FILE="/tmp/wifi-diagnostics-$(date +%Y%m%d-%H%M%S).log"
+        main 2>&1 | tee "$LOG_FILE"
+    fi
 fi

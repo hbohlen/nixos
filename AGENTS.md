@@ -106,7 +106,15 @@ This repository implements a modern, declarative NixOS configuration system usin
 - **NVIDIA problems**: Check driver version compatibility and kernel modules
 - **Power management**: Verify TLP configuration and conflicting services
 - **Network issues**: Check NetworkManager status and firewall rules
+- **WiFi password prompts**: Impermanence persistence issue - see WiFi troubleshooting below
 - **Display issues**: Verify Wayland/X11 configuration and GPU drivers
+
+#### WiFi-Specific Troubleshooting
+- **Repeated password prompts**: Use `wifi-diagnostics --repair` to fix impermanence issues
+- **Connection drops**: Disable MAC randomization with `nmcli connection modify "SSID" wifi.mac-address-randomization no`
+- **No networks found**: Check `rfkill list` and reload drivers with `sudo modprobe -r iwlwifi && sudo modprobe iwlwifi`
+- **Comprehensive diagnosis**: Run `./scripts/wifi-diagnostics.sh` for full system analysis
+- **Quick fixes**: Use shell aliases: `wifi-status`, `wifi-scan`, `wifi-restart`, `wifi-repair`
 
 #### Performance Issues
 - **Slow boot**: Check systemd service dependencies and initrd modules
