@@ -30,7 +30,7 @@
     enable = true;
     powerSaving = "off";  # Disable power saving on desktop for best performance
     enableFirmware = true;
-    enableProprietaryFirmware = false;
+    enableProprietaryFirmware = true;
   };
 
   # Desktop-specific networking (ensure no conflicts with laptop settings)
