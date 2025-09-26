@@ -47,6 +47,13 @@
     "rt73-firmware"
     "zd1211fw"
     
+    # Additional modern WiFi/Bluetooth firmware
+    "rtw88-firmware"
+    "rtw89-firmware"
+    "iwlwifi-firmware"
+    "brcmfmac-firmware"
+    "mt7921-firmware"
+    
     # Other common unfree packages
     "nvidia-vaapi-driver"
     "cuda"

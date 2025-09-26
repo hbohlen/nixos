@@ -43,7 +43,7 @@
   # Enable firmware that might be needed
   hardware.enableRedistributableFirmware = true;
 
-  hardware.enableAllFirmware = true;  # Include proprietary firmware for WiFi adapters
+  hardware.enableAllFirmware = false;  # Use redistributable firmware only to avoid unfree conflicts
 
   # Hardware-specific kernel modules (WiFi modules are handled by laptop.nix and wifi.nix)
   # Note: kvm-intel is already defined above on line 21
