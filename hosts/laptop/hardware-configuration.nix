@@ -17,7 +17,8 @@
   # Placeholder for hardware settings
   boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
+
+  boot.kernelModules = [ "kvm-intel" ];  # Only minimal, hardware-specific modules here!
 
   # Blacklist nouveau driver to prevent conflicts with NVIDIA proprietary driver
   boot.blacklistedKernelModules = [ "nouveau" ];
@@ -41,6 +42,7 @@
 
   # Enable firmware that might be needed
   hardware.enableRedistributableFirmware = true;
+
   hardware.enableAllFirmware = true;  # Include proprietary firmware for WiFi adapters
 
   # Hardware-specific kernel modules (WiFi modules are handled by laptop.nix and wifi.nix)
@@ -49,3 +51,4 @@
     # Add any additional WiFi drivers if needed
   ];
 }
+

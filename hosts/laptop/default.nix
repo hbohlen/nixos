@@ -23,6 +23,10 @@
   # Set host type for user management
   users.hostType = "laptop";
 
+  # --- CRITICAL: Ensure only NetworkManager manages WiFi (fix repeated prompts) ---
+  networking.wireless.enable = false;
+  systemd.services.wpa_supplicant.enable = false;
+
   # Configure WiFi for laptop use
   wifi = {
     enable = true;
