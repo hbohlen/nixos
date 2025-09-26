@@ -1,4 +1,6 @@
 name: "Copilot NixOS Flake CI"
+permissions:
+  contents: read
 
 on:
   push:
