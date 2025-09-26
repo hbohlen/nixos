@@ -253,10 +253,9 @@
     "intel_rapl_msr"
     "intel_rapl_common"
     "coretemp"
-    "kvm_intel"
+    # "kvm_intel" is handled by hardware-configuration.nix
     "snd_hda_intel"
-    "iwlwifi"
-    "cfg80211"
+    # WiFi modules ("iwlwifi", "cfg80211") are handled by wifi.nix
     "bluetooth"
   ];
 
