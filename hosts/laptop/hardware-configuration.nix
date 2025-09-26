@@ -42,7 +42,7 @@
 
   # Enable firmware that might be needed
   hardware.enableRedistributableFirmware = true;
-  hardware.enableAllFirmware = true;  # Include proprietary firmware for WiFi adapters
+  # hardware.enableAllFirmware = true;  # REMOVE or COMMENT OUT this line to avoid assertion errors
 
   # Remove all WiFi-specific boot.kernelModules here!
   # WiFi modules are handled in the wifi.nix module and/or laptop.nix module
