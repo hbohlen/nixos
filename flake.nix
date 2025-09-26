@@ -47,19 +47,8 @@
       # Define a helper function to build a NixOS system configuration.
       # This pattern reduces boilerplate and enforces a consistent structure.
       mkSystem = { system ? "x86_64-linux", hostname, username, extraModules ? [ ] }:
-        let
-          # Configure nixpkgs with unfree packages allowed
-          # This ensures both system and Home Manager can access unfree packages
-          # The specific allowlist is managed in modules/nixos/unfree-packages.nix
-          pkgs = import nixpkgs {
-            inherit system;
-            config = {
-              allowUnfree = true;
-            };
-          };
-        in
         nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
+          inherit system;
           specialArgs = { inherit inputs hostname username; }; # Pass inputs and other args to all modules.
 
           modules = [
