@@ -359,17 +359,17 @@ in
   systemd = {
     # Enable emergency mode
     enableEmergencyMode = true;
+  };
 
-    # Enable system-wide services
-    services = {
-      # Enable system cleanup
-      cleanup = {
-        description = "System Cleanup Service";
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = "${pkgs.coreutils}/bin/rm -rf /tmp/*";
-        };
+  # Define systemd services separately to avoid attribute conflicts
+  systemd.services = {
+    # Enable system cleanup
+    cleanup = {
+      description = "System Cleanup Service";
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.coreutils}/bin/rm -rf /tmp/*";
       };
     };
   };
