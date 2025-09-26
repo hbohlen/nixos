@@ -234,7 +234,7 @@
     networking.wireless.enable = lib.mkDefault false;  # Disable wpa_supplicant service (NetworkManager handles this)
 
     # Enable essential kernel modules (let hardware detection handle specific drivers)
-    boot.kernelModules = [
+    boot.kernelModules = lib.mkAfter ([
       # Core WiFi infrastructure (always needed)
       "cfg80211"        # WiFi configuration API
       "mac80211"        # WiFi MAC layer
@@ -247,7 +247,7 @@
       "iwlmvm"          # Intel MVM firmware interface
       "rtw88_core"      # Realtek WiFi core
       "brcmfmac"        # Broadcom FullMAC driver
-    ];
+    ]);
 
     # Conditional kernel parameters - only apply aggressive fixes when necessary
     boot.kernelParams = 

@@ -17,7 +17,6 @@
   # Placeholder for hardware settings
   boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "nvme" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   # Blacklist nouveau driver to prevent conflicts with NVIDIA proprietary driver
@@ -44,8 +43,8 @@
   hardware.enableRedistributableFirmware = true;
   hardware.enableAllFirmware = true;  # Include proprietary firmware for WiFi adapters
 
-  # WiFi-specific kernel modules for ASUS laptops
-  boot.kernelModules = [ "kvm-intel" "iwlwifi" "cfg80211" "mac80211" ];
+  # Hardware-specific kernel modules (WiFi modules are handled by laptop.nix and wifi.nix)
+  boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = with config.boot.kernelPackages; [
     # Add any additional WiFi drivers if needed
   ];

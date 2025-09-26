@@ -245,7 +245,7 @@
   };
 
   # Enable laptop-specific kernel modules
-  boot.kernelModules = [
+  boot.kernelModules = lib.mkAfter [
     "acpi_call"
     "tpm"
     "tpm_tis"
