@@ -29,7 +29,7 @@ readonly NC='\033[0m' # No Color
 # Configuration variables - hardcoded for this installation
 readonly HOSTNAME="desktop"
 readonly DEFAULT_USERNAME="hbohlen"
-readonly DEFAULT_DISK_DEVICE="/dev/nvme1n1"  # Your 2TB SSD (CT2000P310SSD8)
+readonly DEFAULT_DISK_DEVICE="/dev/nvme0n1"  # Your 2TB SSD (CT2000P310SSD8)
 readonly REPO_URL="https://github.com/hbohlen/nixos"
 readonly MOUNT_POINT="/mnt"
 
