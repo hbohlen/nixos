@@ -23,6 +23,13 @@
   # Set host type for user management
   users.hostType = "laptop";
 
+  # Configure WiFi for laptop use
+  wifi = {
+    enable = true;
+    powerSaving = "low";  # Use low power saving for better connectivity
+    enableFirmware = true;
+  };
+
   # SSH Key Configuration (Security)
   # To set up SSH keys and disable password authentication:
   # 1. Generate SSH key: ssh-keygen -t ed25519 -C "your-email@example.com"

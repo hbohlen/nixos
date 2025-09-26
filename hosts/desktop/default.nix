@@ -25,6 +25,13 @@
   # Set host type for user management
   users.hostType = "desktop";
 
+  # Configure WiFi for desktop use
+  wifi = {
+    enable = true;
+    powerSaving = "off";  # Disable power saving on desktop for best performance
+    enableFirmware = true;
+  };
+
   # SSH Key Configuration (Security)
   # To set up SSH keys and disable password authentication:
   # 1. Generate SSH key: ssh-keygen -t ed25519 -C "your-email@example.com"

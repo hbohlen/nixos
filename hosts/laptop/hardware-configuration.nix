@@ -42,4 +42,11 @@
 
   # Enable firmware that might be needed
   hardware.enableRedistributableFirmware = true;
+  hardware.enableAllFirmware = true;  # Include proprietary firmware for WiFi adapters
+
+  # WiFi-specific kernel modules for ASUS laptops
+  boot.kernelModules = [ "kvm-intel" "iwlwifi" "cfg80211" "mac80211" ];
+  boot.extraModulePackages = with config.boot.kernelPackages; [
+    # Add any additional WiFi drivers if needed
+  ];
 }

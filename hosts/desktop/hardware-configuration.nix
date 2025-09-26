@@ -27,4 +27,8 @@
 
   # CPU - Intel
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+  
+  # Enable firmware support including WiFi
+  hardware.enableRedistributableFirmware = true;
+  hardware.enableAllFirmware = true;
 }

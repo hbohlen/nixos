@@ -5,6 +5,13 @@
   # Disable power-profiles-daemon which conflicts with TLP
   services.power-profiles-daemon.enable = false;
 
+  # Configure WiFi for laptop use with moderate power saving
+  wifi = {
+    enable = true;
+    powerSaving = "low";  # Use low power saving on laptop for better connectivity
+    enableFirmware = true;
+  };
+
   # TLP for advanced power management
   services.tlp = {
     enable = true;
@@ -28,10 +35,11 @@
       USB_AUTOSUSPEND = 1;
       USB_AUTOSUSPEND_DISABLE_ON_SHUTDOWN = 1;
       
-      # Radio device control
-      DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth wifi wwan";
+      # Radio device control - Modified for better WiFi connectivity
+      # Don't disable WiFi on startup to prevent connection issues
+      DEVICES_TO_DISABLE_ON_STARTUP = "bluetooth wwan";  # Removed wifi
       DEVICES_TO_ENABLE_ON_AC = "bluetooth wifi wwan";
-      DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE = "bluetooth wifi wwan";
+      DEVICES_TO_DISABLE_ON_BAT_NOT_IN_USE = "bluetooth wwan";  # Removed wifi
       
       # Battery charge thresholds (for supported laptops)
       # START_CHARGE_THRESH_BAT0 = 75;
@@ -49,9 +57,9 @@
       PCIE_ASPM_ON_AC = "default";
       PCIE_ASPM_ON_BAT = "powersupersave";
       
-      # WiFi power saving
-      WIFI_PWR_ON_AC = "off";
-      WIFI_PWR_ON_BAT = "on";
+      # WiFi power saving - Use moderate settings for better connectivity
+      WIFI_PWR_ON_AC = "off";     # Disable power saving on AC for best performance
+      WIFI_PWR_ON_BAT = "on";     # Enable moderate power saving on battery
       
       # Wake-on-LAN
       WOL_DISABLE = "Y";
@@ -271,14 +279,6 @@
 
   # Enable laptop-specific networking optimizations
   networking = {
-    # Enable power saving for WiFi
-    networkmanager = {
-      wifi.powersave = true;
-      connectionConfig = {
-        "wifi.powersave" = 3;
-      };
-    };
-    
     # Enable IPv6 privacy extensions
     useDHCP = false;
     useNetworkd = true;
