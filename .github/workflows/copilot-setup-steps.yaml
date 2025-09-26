@@ -1,0 +1,34 @@
+name: "Copilot Nix Cache Setup"
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  copilot-setup:
+    runs-on: ubuntu-latest
+
+    env:
+      NIX_SUBSTITUTERS: "https://cache.nixos.org s3://hbohlen-nix-cache?region=us-west-004&endpoint=https://s3.us-west-004.backblazeb2.com"
+      NIX_TRUSTED_PUBLIC_KEYS: "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hbohlen-nix-cache-1:NCS/bUsN5Vjl8oEkCkvd2hztILP001j+DOAMYmiaoSQ="
+      AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APP_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v25
+
+      - name: Set up Nix binary cache
+        run: |
+          echo "substituters = $NIX_SUBSTITUTERS" | sudo tee -a /etc/nix/nix.conf
+          echo "trusted-public-keys = $NIX_TRUSTED_PUBLIC_KEYS" | sudo tee -a /etc/nix/nix.conf
+
+      - name: Nix Build
+        run: nix build . -L
+
+      # Optional: Run Copilot agent steps using Nix
+      - name: Copilot Coding Agent
+        run: |
+          echo "Run Copilot agent tasks..."
