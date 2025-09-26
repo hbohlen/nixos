@@ -308,7 +308,7 @@ in
   };
 
   # Enable kernel modules for common hardware
-  boot.kernelModules = [
+  boot.kernelModules = lib.mkAfter [
     "v4l2loopback"
     "loop"
     "tun"
