@@ -205,11 +205,6 @@
 
     # Enable WPA supplicant service
     networking.wireless.enable = lib.mkDefault false;  # Disable wpa_supplicant service (NetworkManager handles this)
-    
-    # Configure wpa_supplicant for NetworkManager
-    networking.wpa_supplicant = {
-      enable = false;  # Let NetworkManager handle wpa_supplicant
-    };
 
     # Enable kernel modules for common WiFi adapters
     boot.kernelModules = [
