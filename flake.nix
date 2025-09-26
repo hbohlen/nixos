@@ -47,8 +47,74 @@
       # Define a helper function to build a NixOS system configuration.
       # This pattern reduces boilerplate and enforces a consistent structure.
       mkSystem = { system ? "x86_64-linux", hostname, username, extraModules ? [ ] }:
+        let
+          # Configure nixpkgs with unfree packages allowed
+          # This ensures both system and Home Manager can access unfree packages
+          pkgs = import nixpkgs {
+            inherit system;
+            config = {
+              allowUnfree = true;
+              # Use the same allowlist as in modules/nixos/unfree-packages.nix
+              allowUnfreePredicate = pkg: builtins.elem (nixpkgs.lib.getName pkg) [
+                # 1Password family
+                "1password"
+                "1password-cli"
+                "1password-gui"
+                
+                # Development tools
+                "vscode"
+                "code"
+                
+                # Browsers
+                "vivaldi"
+                "chrome"
+                "google-chrome"
+                
+                # NVIDIA drivers
+                "nvidia-x11"
+                "nvidia-settings"
+                "nvidia-persistenced"
+                "libnvidia-ml"
+                
+                # Archive tools
+                "rar"
+                "unrar"
+                
+                # Fingerprint reader
+                "libfprint-2-tod1-goodix"
+                
+                # Firmware packages
+                "linux-firmware"
+                "b43-firmware"
+                "broadcom-bt-firmware"
+                "facetimehd-firmware"
+                "rtl8761b-firmware"
+                "intel-ucode"
+                "amd-ucode"
+                "sof-firmware"
+                "alsa-firmware"
+                "wireless-regdb"
+                "intel2200BGFirmware"
+                "rt73-firmware"
+                "zd1211fw"
+                
+                # Additional modern WiFi/Bluetooth firmware
+                "rtw88-firmware"
+                "rtw89-firmware"
+                "iwlwifi-firmware"
+                "brcmfmac-firmware"
+                "mt7921-firmware"
+                
+                # Other common unfree packages
+                "nvidia-vaapi-driver"
+                "cuda"
+                "cudatoolkit"
+              ];
+            };
+          };
+        in
         nixpkgs.lib.nixosSystem {
-          inherit system;
+          inherit system pkgs;
           specialArgs = { inherit inputs hostname username; }; # Pass inputs and other args to all modules.
 
           modules = [
@@ -69,7 +135,10 @@
         };
 
       # Helper to get pkgs for a given system without adding new inputs
-      pkgsFor = system: import nixpkgs { inherit system; };
+      pkgsFor = system: import nixpkgs { 
+        inherit system; 
+        config.allowUnfree = true; 
+      };
     in
     {
       # Define the NixOS configurations for each machine.
