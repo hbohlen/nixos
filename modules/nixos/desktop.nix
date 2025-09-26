@@ -41,7 +41,6 @@
 
   # Display Manager and Desktop Environment
   services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
 
   # Audio configuration using PipeWire
   security.rtkit.enable = true;
@@ -125,8 +124,11 @@
     # Location services
     geoclue2.enable = true;
 
-    # User directories
-    desktopManager.gnome.extraGSettingsOverridePackages = [ pkgs.gnome-settings-daemon ];
+    # Desktop Manager configuration
+    desktopManager.gnome = {
+      enable = true;
+      extraGSettingsOverridePackages = [ pkgs.gnome-settings-daemon ];
+    };
   };
 
   # Enable desktop user services
