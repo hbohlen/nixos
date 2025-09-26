@@ -30,5 +30,5 @@
   
   # Enable firmware support including WiFi
   hardware.enableRedistributableFirmware = true;
-  hardware.enableAllFirmware = true;
+  hardware.enableAllFirmware = false;
 }
