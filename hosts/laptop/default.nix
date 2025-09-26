@@ -26,8 +26,9 @@
   # Configure WiFi for laptop use
   wifi = {
     enable = true;
-    powerSaving = "low";  # Use low power saving for better connectivity
+    powerSaving = lib.mkForce "low";  # Force override common.nix setting for better connectivity
     enableFirmware = true;
+    enableProprietaryFirmware = lib.mkDefault false;  # Explicit default
   };
 
   # SSH Key Configuration (Security)
