@@ -154,6 +154,68 @@ nix-store -q --tree /run/current-system
 - **Alternative sources**: Use different package sources or channels
 - **Modular approach**: Split conflicting packages into different profiles
 
+## Installation and Bootstrap Issues
+
+### NixOS Installation Problems
+
+#### Firmware License Errors During Installation
+**Symptom**: `nixos-install` fails with error about `hardware.enableAllFirmware` requiring `allowUnfree = true`
+**Root Cause**: WiFi module was configured to enable all firmware (including proprietary) by default
+
+**Error Message**:
+```
+Failed assertions:
+- the list of hardware.enableAllFirmware contains non-redistributable licensed firmware files.
+  This requires nixpkgs.config.allowUnfree to be true.
+  An alternative is to use the hardware.enableRedistributableFirmware option.
+```
+
+**Solutions**:
+1. **Use redistributable firmware only** (recommended for installation):
+   ```nix
+   wifi = {
+     enable = true;
+     enableFirmware = true;                 # Redistributable firmware only
+     enableProprietaryFirmware = false;     # Disable proprietary firmware
+   };
+   ```
+
+2. **Enable proprietary firmware post-installation** (if specific hardware requires it):
+   ```nix
+   wifi = {
+     enable = true;
+     enableFirmware = true;
+     enableProprietaryFirmware = true;      # Enable after installation
+   };
+   ```
+
+3. **Temporary workaround for installation**:
+   ```bash
+   # During installation, edit the configuration to disable all firmware
+   # In /mnt/etc/nixos/configuration.nix or host config:
+   hardware.enableAllFirmware = lib.mkForce false;
+   hardware.enableRedistributableFirmware = true;
+   ```
+
+**Prevention**: The WiFi module now defaults to redistributable firmware only, preventing this installation issue while maintaining WiFi functionality.
+
+#### Disk Partitioning Issues
+**Symptoms**: Disko fails, partition creation errors
+**Diagnosis**:
+```bash
+# Check disk status
+lsblk -f
+sgdisk --print /dev/sdX
+
+# Check for existing partitions or filesystems
+wipefs -a /dev/sdX  # Use with caution - destroys data
+```
+
+**Solutions**:
+- **Clean disk**: Ensure target disk is clean of existing partitions
+- **Check device path**: Verify correct device path in disko configuration
+- **UEFI/BIOS compatibility**: Ensure EFI partition configuration matches boot mode
+
 ## Hardware and Driver Issues
 
 ### Graphics and Display Problems

@@ -32,6 +32,13 @@
     # Fingerprint reader
     "libfprint-2-tod1-goodix"
     
+    # Firmware packages
+    "linux-firmware"
+    "b43-firmware"
+    "broadcom-bt-firmware"
+    "facetimehd-firmware"
+    "rtl8761b-firmware"
+    
     # Other common unfree packages
     "nvidia-vaapi-driver"
     "cuda"
