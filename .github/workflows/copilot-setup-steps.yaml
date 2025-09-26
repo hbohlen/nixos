@@ -1,11 +1,11 @@
-name: "Copilot Nix Cache Setup"
+name: "Copilot NixOS Flake CI"
 
 on:
   push:
   pull_request:
 
 jobs:
-  copilot-setup:
+  build-flake-hosts:
     runs-on: ubuntu-latest
 
     env:
@@ -20,15 +20,22 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v25
 
-      - name: Set up Nix binary cache
+      - name: Configure Nix binary cache
         run: |
           echo "substituters = $NIX_SUBSTITUTERS" | sudo tee -a /etc/nix/nix.conf
           echo "trusted-public-keys = $NIX_TRUSTED_PUBLIC_KEYS" | sudo tee -a /etc/nix/nix.conf
 
-      - name: Nix Build
-        run: nix build . -L
+      - name: Flake Syntax Check
+        run: nix flake check
 
-      # Optional: Run Copilot agent steps using Nix
-      - name: Copilot Coding Agent
-        run: |
-          echo "Run Copilot agent tasks..."
+      - name: Build Desktop Host
+        run: nix build .#desktop
+
+      - name: Upload Desktop Build to Cache
+        run: nix copy --to "$NIX_SUBSTITUTERS" result
+
+      - name: Build Laptop Host
+        run: nix build .#laptop
+
+      - name: Upload Laptop Build to Cache
+        run: nix copy --to "$NIX_SUBSTITUTERS" result
