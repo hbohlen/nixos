@@ -44,14 +44,16 @@ The system was experiencing WiFi connectivity issues where NetworkManager contin
 **Configuration Options:**
 ```nix
 wifi = {
-  enable = true;                    # Enable/disable WiFi support
-  powerSaving = "medium";           # off/low/medium/high power saving
-  enableFirmware = true;            # Enable redistributable firmware
+  enable = true;                           # Enable/disable WiFi support
+  powerSaving = "medium";                  # off/low/medium/high power saving
+  enableFirmware = true;                   # Enable redistributable firmware
+  enableProprietaryFirmware = false;       # Enable proprietary firmware (requires allowUnfree)
 };
 ```
 
 **Key Components:**
-- **Firmware Support**: Enables `hardware.enableRedistributableFirmware` and `hardware.enableAllFirmware`
+- **Firmware Support**: Enables `hardware.enableRedistributableFirmware` by default for broad compatibility
+- **Proprietary Firmware**: Optional `enableProprietaryFirmware` for specific hardware requiring non-free firmware
 - **NetworkManager Configuration**: Proper backend selection and compatibility settings
 - **Essential Packages**: Wireless tools, WPA supplicant, network management utilities
 - **Kernel Modules**: Intel WiFi, Realtek, Broadcom drivers automatically loaded
@@ -142,8 +144,9 @@ The WiFi module is automatically enabled through `common.nix` with sensible defa
 # In your host configuration (laptop/desktop)
 wifi = {
   enable = true;
-  powerSaving = "medium";  # Adjust based on needs
-  enableFirmware = true;
+  powerSaving = "medium";              # Adjust based on needs
+  enableFirmware = true;               # Redistributable firmware (default)
+  enableProprietaryFirmware = false;   # Set to true if needed for specific hardware
 };
 ```
 
@@ -158,6 +161,15 @@ wifi = {
 - **Laptop on AC**: Use `"low"` or `"off"`  
 - **Laptop on Battery**: Use `"low"` or `"medium"`
 - **Server/Headless**: Use `"medium"` if WiFi needed
+
+### Firmware Configuration
+The WiFi module now provides separate control over redistributable and proprietary firmware:
+
+- **`enableFirmware = true`** (default): Enables redistributable firmware that doesn't require unfree package acceptance
+- **`enableProprietaryFirmware = false`** (default): Disables proprietary firmware to avoid installation conflicts
+- **`enableProprietaryFirmware = true`**: Enables all firmware including proprietary (requires unfree packages to be allowed)
+
+This separation prevents nixos-install failures while allowing users to enable additional firmware post-installation if needed for specific hardware.
 
 ## Troubleshooting Tools
 
