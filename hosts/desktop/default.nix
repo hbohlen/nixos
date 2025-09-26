@@ -29,8 +29,8 @@
   wifi = {
     enable = true;
     powerSaving = "off";  # Disable power saving on desktop for best performance
-    hardware.enableAllFirmware = false; # Or remove it
-    hardware.enableRedistributableFirmware = true;
+    enableFirmware = true;
+    enableProprietaryFirmware = false;  # Set to true if needed for specific hardware
   };
 
   # Desktop-specific networking (ensure no conflicts with laptop settings)

@@ -1,5 +1,22 @@
 # /modules/nixos/wifi.nix
 # Comprehensive WiFi configuration module for NixOS
+# 
+# This module provides a declarative interface for WiFi configuration,
+# handling firmware requirements, NetworkManager setup, and hardware compatibility.
+#
+# Key features:
+# - Automatic unfree firmware handling when needed
+# - Power saving configuration for desktop vs laptop use
+# - Hardware compatibility fixes
+# - Comprehensive diagnostics tools
+#
+# Usage in host configuration:
+# wifi = {
+#   enable = true;
+#   powerSaving = "low";  # "off", "low", "medium", "high"
+#   enableFirmware = true;
+#   enableProprietaryFirmware = false;  # Set to true if needed for your hardware
+# };
 { config, pkgs, lib, ... }:
 
 {
@@ -33,6 +50,9 @@
   };
 
   config = lib.mkIf config.wifi.enable {
+    # CRITICAL FIX: Handle unfree firmware requirement
+    nixpkgs.config.allowUnfree = lib.mkIf config.wifi.enableProprietaryFirmware true;
+    
     # Enable redistributable firmware for WiFi adapters (always safe)
     hardware.enableRedistributableFirmware = lib.mkDefault config.wifi.enableFirmware;
     
@@ -44,28 +64,28 @@
     networking.networkmanager = {
       enable = true;
       
-      # Configure WiFi power saving based on user preference
-      wifi.powersave = lib.mkDefault (config.wifi.powerSaving != "off");
-      
-      # Additional WiFi configuration
-      connectionConfig = {
-        # Map power saving levels to NetworkManager values
-        "wifi.powersave" = lib.mkDefault (
-          if config.wifi.powerSaving == "off" then 0
-          else if config.wifi.powerSaving == "low" then 1  
-          else if config.wifi.powerSaving == "medium" then 2
-          else 3  # high
-        );
-        
-        # Improve connection stability
-        "wifi.scan-rand-mac-address" = "no";  # Disable MAC randomization for better compatibility
-        "wifi.backend" = "wpa_supplicant";    # Use wpa_supplicant backend for better compatibility
+      # WiFi backend configuration
+      wifi = {
+        backend = "wpa_supplicant";
+        powersave = lib.mkDefault (config.wifi.powerSaving != "off");
       };
       
-      # Enable WiFi backend
-      wifi.backend = "wpa_supplicant";
+      # Modern settings format (replaces deprecated connectionConfig)
+      settings = {
+        connection = {
+          "wifi.powersave" = lib.mkDefault (
+            if config.wifi.powerSaving == "off" then 0
+            else if config.wifi.powerSaving == "low" then 1  
+            else if config.wifi.powerSaving == "medium" then 2
+            else 3  # high
+          );
+        };
+        wifi = {
+          "scan-rand-mac-address" = false;  # Improve compatibility
+        };
+      };
       
-      # Ensure NetworkManager starts after wpa_supplicant is ready
+      # DNS configuration
       insertNameservers = [ "8.8.8.8" "8.8.4.4" ];
     };
 
@@ -213,63 +233,41 @@
     # Enable WPA supplicant service
     networking.wireless.enable = lib.mkDefault false;  # Disable wpa_supplicant service (NetworkManager handles this)
 
-    # Enable kernel modules for common WiFi adapters
+    # Enable essential kernel modules (let hardware detection handle specific drivers)
     boot.kernelModules = [
-      # Intel WiFi drivers
-      "iwlwifi"         # Intel wireless driver
-      "iwldvm"          # Intel DVM firmware interface
-      "iwlmvm"          # Intel MVM firmware interface
-      
-      # Common WiFi infrastructure
+      # Core WiFi infrastructure (always needed)
       "cfg80211"        # WiFi configuration API
       "mac80211"        # WiFi MAC layer
       
-      # Realtek drivers (common in USB WiFi adapters)
+      # Intel WiFi drivers (most common, generally safe)
+      "iwlwifi"         # Intel wireless driver
+    ] ++ lib.optionals config.wifi.enableProprietaryFirmware [
+      # Additional drivers when proprietary firmware is available
+      "iwldvm"          # Intel DVM firmware interface
+      "iwlmvm"          # Intel MVM firmware interface
       "rtw88_core"      # Realtek WiFi core
-      "rtw88_pci"       # Realtek PCIe interface
-      "rtw88_usb"       # Realtek USB interface
-      
-      # Broadcom drivers
       "brcmfmac"        # Broadcom FullMAC driver
-      "brcmutil"        # Broadcom utilities
     ];
 
-    # Kernel parameters for better WiFi stability
-    boot.kernelParams = [
-      # Intel WiFi parameters
-      "iwlwifi.power_save=0"        # Disable Intel WiFi power saving for stability
-      "iwlwifi.uapsd_disable=1"     # Disable U-APSD for compatibility
-      "iwlwifi.wd_disable=1"        # Disable watchdog for stability
-      
-      # General WiFi stability improvements
-      "pci=nomsi"                   # Disable MSI for problematic hardware
-      "pcie_aspm=off"               # Disable PCIe power management if causing issues
-    ];
+    # Conditional kernel parameters - only apply aggressive fixes when necessary
+    boot.kernelParams = 
+      # Intel WiFi stability parameters (always safe)
+      [
+        "iwlwifi.power_save=0"        # Disable Intel WiFi power saving for stability
+        "iwlwifi.uapsd_disable=1"     # Disable U-APSD for compatibility
+        "iwlwifi.wd_disable=1"        # Disable watchdog for stability
+      ]
+      # Global hardware fixes (only when proprietary firmware is enabled)
+      ++ lib.optionals config.wifi.enableProprietaryFirmware [
+        "pci=nomsi"                   # Disable MSI for problematic hardware
+        "pcie_aspm=off"               # Disable PCIe power management if causing issues
+      ];
 
     # SystemD services for WiFi management
     systemd.services = {
-      # WiFi interface setup service
-      wifi-setup = {
-        description = "WiFi Interface Setup";
-        wantedBy = [ "network.target" ];
-        before = [ "NetworkManager.service" ];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = pkgs.writeShellScript "wifi-setup" ''
-            # Bring up wireless interfaces
-            for interface in /sys/class/net/wl*; do
-              if [ -d "$interface" ]; then
-                interface_name=$(basename "$interface")
-                echo "Setting up WiFi interface: $interface_name"
-                ${pkgs.iproute2}/bin/ip link set "$interface_name" up || true
-              fi
-            done
-          '';
-        };
-      };
+      # Remove wifi-setup service - NetworkManager handles interface management
       
-      # WiFi diagnostics service (for troubleshooting)
+      # Keep only the diagnostics service (rename for clarity)
       wifi-diagnostics = {
         description = "WiFi Diagnostics Service";
         serviceConfig = {
