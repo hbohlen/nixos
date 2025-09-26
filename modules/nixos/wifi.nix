@@ -23,15 +23,22 @@
         default = true;
         description = "Enable redistributable firmware for WiFi adapters";
       };
+      
+      enableProprietaryFirmware = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable proprietary firmware (requires allowUnfree packages)";
+      };
     };
   };
 
   config = lib.mkIf config.wifi.enable {
-    # Enable redistributable firmware for WiFi adapters
+    # Enable redistributable firmware for WiFi adapters (always safe)
     hardware.enableRedistributableFirmware = lib.mkDefault config.wifi.enableFirmware;
     
-    # Enable all firmware (includes proprietary WiFi firmware)
-    hardware.enableAllFirmware = lib.mkDefault config.wifi.enableFirmware;
+    # Only enable all firmware (including proprietary) if explicitly requested
+    # This prevents installation failures when allowUnfree is not set globally
+    hardware.enableAllFirmware = lib.mkDefault config.wifi.enableProprietaryFirmware;
 
     # NetworkManager configuration with proper WiFi settings
     networking.networkmanager = {
