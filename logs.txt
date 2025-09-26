@@ -1,18 +1,18 @@
 [root@nixos:~]# curl -L https://raw.githubusercontent.com/hbohlen/nixos/main/scripts/bootstrap.sh | bash
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100  1862  100  1862    0     0  20798      0 --:--:-- --:--:-- --:--:-- 20921
+100  1862  100  1862    0     0   4284      0 --:--:-- --:--:-- --:--:--  4290
 [BOOTSTRAP] 🚀 Starting NixOS installation bootstrap...
 [BOOTSTRAP] Installing git...
 Git available
 [BOOTSTRAP] Cloning NixOS configuration repository...
 Cloning into 'nixos'...
-remote: Enumerating objects: 1307, done.
-remote: Counting objects: 100% (43/43), done.
-remote: Compressing objects: 100% (30/30), done.
-remote: Total 1307 (delta 23), reused 15 (delta 13), pack-reused 1264 (from 1)
-Receiving objects: 100% (1307/1307), 14.59 MiB | 19.30 MiB/s, done.
-Resolving deltas: 100% (667/667), done.
+remote: Enumerating objects: 1330, done.
+remote: Counting objects: 100% (66/66), done.
+remote: Compressing objects: 100% (47/47), done.
+remote: Total 1330 (delta 34), reused 28 (delta 19), pack-reused 1264 (from 1)
+Receiving objects: 100% (1330/1330), 14.60 MiB | 20.54 MiB/s, done.
+Resolving deltas: 100% (678/678), done.
 [SUCCESS] Bootstrap complete! Now running the installation script...
 [BOOTSTRAP] You will be prompted for hostname, username, and target disk...
 [BOOTSTRAP] During disk partitioning, you will also be prompted for LUKS encryption password...
@@ -56,21 +56,22 @@ umount: /mnt: not mounted
 ++ realpath /dev/nvme0n1
 + disk=/dev/nvme0n1
 + lsblk -a -f
-NAME        FSTYPE   FSVER LABEL       UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
-loop0       squashfs 4.0                                                          0   100% /nix/.ro-store
-loop1                                                                                      
-loop2                                                                                      
-loop3                                                                                      
-loop4                                                                                      
-loop5                                                                                      
-loop6                                                                                      
-loop7                                                                                      
-sda                                                                                        
-└─sda1      vfat     FAT32 NIXOS-GRAPH 091A-202E                             110.7G     3% /iso
-nvme0n1                                                                                    
-├─nvme0n1p1 vfat     FAT32             254E-F5A8                                           
-├─nvme0n1p2                                                                                
-└─nvme0n1p3                                                                                
+NAME          FSTYPE      FSVER LABEL       UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+loop0         squashfs    4.0                                                          0   100% /nix/.ro-store
+loop1                                                                                           
+loop2                                                                                           
+loop3                                                                                           
+loop4                                                                                           
+loop5                                                                                           
+loop6                                                                                           
+loop7                                                                                           
+sda                                                                                             
+└─sda1        vfat        FAT32 NIXOS-GRAPH 091A-202E                             110.7G     3% /iso
+nvme0n1                                                                                         
+├─nvme0n1p1   vfat        FAT32             5A14-792B                              1022M     0% /mnt/boot
+├─nvme0n1p2                                                                                     
+└─nvme0n1p3   crypto_LUKS 2                 6bd447c1-79d1-4857-80fc-6cf34bfe48c8                
+  └─cryptroot zfs_member  5000  rpool       11268833817027317420                                
 + lsblk --output-all --json
 + bash -x
 ++ dirname /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/disk-deactivate
@@ -80,6 +81,7 @@ nvme0n1
 ++ dirname /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/disk-deactivate
 + jq -r --arg disk_to_clear /dev/nvme0n1 -f /nix/store/hvfndvsa1b9yb10mqaihk4hb9maym07i-disk-deactivate/disk-deactivate.jq
 + set -fu
++ umount -R /mnt/boot
 + wipefs --all -f /dev/nvme0n1p1
 /dev/nvme0n1p1: 8 bytes were erased at offset 0x00000052 (vfat): 46 41 54 33 32 20 20 20
 /dev/nvme0n1p1: 1 byte was erased at offset 0x00000000 (vfat): eb
@@ -91,13 +93,16 @@ nvme0n1
 + [[ -n '' ]]
 + unset zpool
 + wipefs --all -f /dev/nvme0n1p2
-++ type zdb
-++ zdb -l /dev/nvme0n1p3
-++ sed -nr 's/ +name: '\''(.*)'\''/\1/p'
-+ zpool=
-+ [[ -n '' ]]
-+ unset zpool
++ type zpool
++ zpool destroy -f rpool
+cannot open 'rpool': no such pool
++ zpool labelclear -f rpool
++ cryptsetup luksClose /dev/mapper/cryptroot
++ wipefs --all -f /dev/mapper/cryptroot
+wipefs: error: /dev/mapper/cryptroot: probing initialization failed: No such file or directory
 + wipefs --all -f /dev/nvme0n1p3
+/dev/nvme0n1p3: 6 bytes were erased at offset 0x00000000 (crypto_LUKS): 4c 55 4b 53 ba be
+/dev/nvme0n1p3: 6 bytes were erased at offset 0x00004000 (crypto_LUKS): 53 4b 55 4c ba be
 ++ type zdb
 ++ zdb -l /dev/nvme0n1
 ++ sed -nr 's/ +name: '\''(.*)'\''/\1/p'
@@ -115,7 +120,7 @@ nvme0n1
 + dd if=/dev/zero of=/dev/nvme0n1 bs=440 count=1
 1+0 records in
 1+0 records out
-440 bytes copied, 0.000299583 s, 1.5 MB/s
+440 bytes copied, 0.000379961 s, 1.2 MB/s
 + lsblk -a -f
 NAME    FSTYPE   FSVER LABEL       UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
 loop0   squashfs 4.0                                                          0   100% /nix/.ro-store
@@ -130,9 +135,9 @@ sda
 └─sda1  vfat     FAT32 NIXOS-GRAPH 091A-202E                             110.7G     3% /iso
 nvme0n1                                                                                
 ++ mktemp -d
-+ disko_devices_dir=/tmp/tmp.iySvGvY932
++ disko_devices_dir=/tmp/tmp.2wVg8lie50
 + trap 'rm -rf "$disko_devices_dir"' EXIT
-+ mkdir -p /tmp/tmp.iySvGvY932
++ mkdir -p /tmp/tmp.2wVg8lie50
 + destroy=1
 + device=/dev/nvme0n1
 + imageName=main
@@ -224,7 +229,7 @@ Enter password for /dev/disk/by-partlabel/disk-main-luks again to be safe:
 + declare -A rootFsOptions
 + type=zpool
 + readarray -t zfs_devices
-++ cat /tmp/tmp.iySvGvY932/zfs_rpool
+++ cat /tmp/tmp.2wVg8lie50/zfs_rpool
 + '[' 1 -eq 0 ']'
 + zpool import -N -f rpool
 cannot import 'rpool': no such pool available
@@ -345,7 +350,7 @@ cannot open 'rpool': no such pool
 + type=filesystem
 + findmnt /dev/disk/by-partlabel/disk-main-ESP /mnt/boot
 + mount /dev/disk/by-partlabel/disk-main-ESP /mnt/boot -t vfat -o umask=0077 -o X-mount.mkdir
-+ rm -rf /tmp/tmp.iySvGvY932
++ rm -rf /tmp/tmp.2wVg8lie50
 [SUCCESS] Disko partitioning completed successfully
 [STEP] Setting up LUKS encryption...
 [INFO] Opening LUKS container...
@@ -380,7 +385,7 @@ For more hardware-specific settings, see https://github.com/NixOS/nixos-hardware
 [SUCCESS] Configuration copied successfully
 [STEP] Installing NixOS...
 copying channel...
-building the flake in git+file:///tmp/nixos?ref=refs/heads/main&rev=67d0ac7bd85058ebaf73d92f980f25992d51b24e...
+building the flake in git+file:///tmp/nixos?ref=refs/heads/main&rev=2e12dc02955def682e39c34c406317b50d7cef0f...
 error:
        … while calling the 'head' builtin
          at /mnt/nix/store/yw0wijix50n0y2ii15sk8kvnwgalpq6f-source/lib/attrsets.nix:1701:13:
@@ -412,6 +417,4 @@ error:
 [INFO] Unmounting filesystems...
 [INFO] Closing LUKS container...
 [INFO] Exporting ZFS pool...
-
-[root@nixos:~]# 
 
