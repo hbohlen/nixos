@@ -224,4 +224,10 @@
     after = [ "systemd-tmpfiles-setup.service" ];
     wants = [ "systemd-tmpfiles-setup.service" ];
   };
+
+  # Ensure NetworkManager starts after persistent directories are mounted
+  systemd.services.NetworkManager = {
+    after = [ "systemd-tmpfiles-setup.service" ];
+    wants = [ "systemd-tmpfiles-setup.service" ];
+  };
 }
