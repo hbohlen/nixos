@@ -15,7 +15,8 @@ The laptop host configuration is specifically optimized for portable computing w
 - **Display**: High refresh rate (144Hz+) with variable refresh support
 
 ### Hardware-Specific Modules
-- `inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h`: ASUS-specific optimizations
+- `profiles/hardware/asus-rog-laptop.nix`: Aggregates nixos-hardware ASUS profiles and laptop
+  boot configuration.
 - `modules/nixos/nvidia-rog.nix`: NVIDIA mobile GPU with hybrid graphics
 - `modules/nixos/laptop.nix`: Comprehensive power management and laptop-specific services
 
@@ -318,7 +319,7 @@ Innovative power management combining suspend and hibernation:
    - Test keyboard special keys
 
 ### Installation Process
-1. **Disk Preparation**: Update device path in `hardware/disko-layout.nix`
+1. **Disk Preparation**: Update the arguments passed to `hardware/disko-layout.nix`
 2. **Hardware Config**: Run `nixos-generate-config` for hardware detection
 3. **GPU Configuration**: Verify and update PCI bus IDs for PRIME
 4. **Network Setup**: Configure WiFi during installation

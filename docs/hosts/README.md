@@ -71,7 +71,7 @@ hosts/{hostname}/
 ├── default.nix              # Main host configuration
 ├── hardware-configuration.nix # Hardware-specific settings  
 └── hardware/
-    ├── disko-layout.nix     # Disk partitioning layout
+    ├── disko-layout.nix     # Calls shared Disko template with host parameters
     └── disko-zfs.nix        # Disko module integration
 ```
 
@@ -79,7 +79,8 @@ hosts/{hostname}/
 1. **flake.nix**: Defines host in system configurations
 2. **hosts/{hostname}/default.nix**: Main host configuration and module imports
 3. **hardware-configuration.nix**: Hardware detection and device-specific settings
-4. **hardware/disko-layout.nix**: Declarative disk layout and ZFS configuration
+4. **hardware/disko-layout.nix**: Declarative disk layout built from
+   `profiles/hardware/disko/zfs-impermanence.nix`
 5. **modules/nixos/**: Shared system modules imported by hosts
 6. **users/**: Home Manager configurations for user environments
 
@@ -106,7 +107,7 @@ hosts/{hostname}/
    - Verify hardware compatibility
 
 2. **Configuration Preparation**:
-   - Update device paths in `hardware/disko-layout.nix`
+   - Update device paths via the arguments passed to `hardware/disko-layout.nix`
    - Generate hardware configuration with `nixos-generate-config`
    - Configure SSH keys and user settings
 

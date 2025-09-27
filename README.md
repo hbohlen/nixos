@@ -192,14 +192,21 @@ nix flake check                                # Validate flake syntax
 
 ### Hardware Configuration
 
-Each host has hardware-specific configurations in the `hardware/` subdirectory:
+Each host has hardware-specific configurations in the `hardware/` subdirectory, all of which
+compose reusable profiles:
 
-- **`disko-layout.nix`**: Host-specific disk partitioning and ZFS layout  
-- **`disko-zfs.nix`**: Disko module integration
+- **`disko-layout.nix`**: Calls the shared `profiles/hardware/disko/zfs-impermanence.nix`
+  function with host-specific parameters (device path, swap size, overrides, ...).
+- **`disko-zfs.nix`**: Disko module integration.
 
-**Important**: Update the device path in each host's `hardware/disko-layout.nix`:
+To use a different disk, update the `device` passed to the layout function or override it at
+invocation time:
+
 ```nix
-{ device ? "/dev/disk/by-id/your-actual-disk-id", ... }:
+let
+  mkLayout = import ../../../profiles/hardware/disko/zfs-impermanence.nix;
+in
+mkLayout { device = "/dev/disk/by-id/your-actual-disk-id"; }
 ```
 
 Find your device ID:
