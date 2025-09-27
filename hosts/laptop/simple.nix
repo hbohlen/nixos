@@ -5,10 +5,10 @@
   # Import unfree packages configuration
   imports = [
     ./hardware-configuration.nix
+    ../../profiles/hardware/asus-rog-laptop.nix
     ../../modules/nixos/common.nix
     ../../modules/nixos/users.nix
     ../../profiles/graphics/nvidia-laptop.nix
-    inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
   ];
 
   # Host-specific settings.

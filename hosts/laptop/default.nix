@@ -4,6 +4,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../profiles/hardware/asus-rog-laptop.nix
     ./hardware/disko-zfs.nix  # Host-specific disko configuration
     ../../modules/nixos/common.nix
     ../../modules/nixos/users.nix
@@ -13,7 +14,6 @@
     ../../modules/nixos/development.nix  # Development tools for laptop
     ../../modules/nixos/impermanence.nix
     ../../profiles/graphics/nvidia-laptop.nix
-    ../../profiles/hardware/asus-rog-laptop.nix
   ];
 
   # Host-specific settings

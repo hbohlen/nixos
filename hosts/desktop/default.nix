@@ -4,6 +4,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../profiles/hardware/intel-desktop.nix
     ./hardware/disko-zfs.nix  # Host-specific disko configuration
     ../../modules/nixos/common.nix
     ../../modules/nixos/users.nix
@@ -12,10 +13,6 @@
     ../../modules/nixos/development.nix  # Development tools for desktop
     ../../modules/nixos/impermanence.nix
     ../../profiles/graphics/nvidia-desktop.nix
-    # Intel CPU and desktop PC hardware support
-    inputs.nixos-hardware.nixosModules.common-cpu-intel
-    inputs.nixos-hardware.nixosModules.common-pc
-    inputs.nixos-hardware.nixosModules.common-pc-ssd
   ];
 
   # Host-specific settings

@@ -14,9 +14,8 @@ The desktop host configuration is optimized for high-performance desktop worksta
 - **Motherboard**: Standard desktop motherboards with MSI profiles when available
 
 ### Hardware-Specific Modules
-- `inputs.nixos-hardware.nixosModules.common-cpu-intel`: Intel CPU optimizations
-- `inputs.nixos-hardware.nixosModules.common-pc`: General desktop PC support
-- `inputs.nixos-hardware.nixosModules.common-pc-ssd`: SSD optimization
+- `profiles/hardware/intel-desktop.nix`: Aggregates nixos-hardware Intel/desktop modules and
+  low-level boot configuration.
 - `modules/nixos/nvidia-rog.nix`: NVIDIA GPU configuration with hybrid graphics
 
 ## Storage Configuration
@@ -24,7 +23,8 @@ The desktop host configuration is optimized for high-performance desktop worksta
 ### ZFS Layout Optimizations
 The desktop uses a performance-optimized ZFS configuration with the following characteristics:
 
-**Disk Partitioning (`hardware/disko-layout.nix`)**:
+**Disk Partitioning (`hardware/disko-layout.nix`)** (via
+`profiles/hardware/disko/zfs-impermanence.nix`):
 - **ESP**: 1GB EFI System Partition for boot files
 - **Swap**: 16GB encrypted swap (larger than laptop/server for desktop workloads)
 - **LUKS**: Full disk encryption with discard support for SSD optimization
@@ -171,7 +171,7 @@ This enables:
 
 ### Pre-Installation Steps
 1. **Hardware Detection**: Run `nixos-generate-config` for hardware detection
-2. **Disk Identification**: Update device path in `hardware/disko-layout.nix`
+2. **Disk Identification**: Update the arguments passed to `hardware/disko-layout.nix`
 3. **GPU Bus IDs**: Verify PCI bus IDs with `lspci` for PRIME configuration
 4. **BIOS Settings**: Enable UEFI mode, disable Secure Boot initially
 

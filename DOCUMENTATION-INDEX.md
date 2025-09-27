@@ -11,7 +11,7 @@ This comprehensive index provides navigation across all documentation in the Nix
 
 ### Configuration Files
 - **[flake.nix](flake.nix)** - Central Nix flake configuration defining all inputs and outputs
-- **[disko-layout.nix](disko-layout.nix)** - Advanced disk partitioning layout with ZFS
+- **[profiles/hardware/disko/zfs-impermanence.nix](profiles/hardware/disko/zfs-impermanence.nix)** - Parameterized Disko layout for LUKS-encrypted ZFS
 - **[disko-layout-simple.nix](disko-layout-simple.nix)** - Simplified disk layout for basic installations
 
 ## 📚 Documentation Directory (`docs/`)

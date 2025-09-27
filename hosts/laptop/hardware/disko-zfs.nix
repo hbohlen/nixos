@@ -1,5 +1,5 @@
 # /hosts/laptop/hardware/disko-zfs.nix
-# Laptop-specific disko configuration
+# Laptop-specific disko configuration built from reusable templates
 { inputs, ... }:
 
 {
