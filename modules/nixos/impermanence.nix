@@ -49,7 +49,9 @@
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
       "/var/lib/AccountsService"
+      # NetworkManager persistence (critical for WiFi connections)
       "/etc/NetworkManager/system-connections"
+      "/var/lib/NetworkManager"
       "/var/lib/colord"
       "/var/lib/flatpak"
       "/var/lib/systemd/timers"
@@ -74,6 +76,9 @@
         # Essential user directories
         ".ssh" # SSH keys and config
         ".gnupg" # GPG keys and configuration
+        
+        # GNOME keyring storage
+        ".local/share/keyrings" # GNOME keyring database
         
         # 1Password CLI and GUI (user-specific)
         ".config/op"
@@ -139,6 +144,47 @@
     '';
     deps = [ "users" ];
   };
+
+  # Ensure NetworkManager directories and permissions are properly set up
+  system.activationScripts.setupNetworkManagerPersistence = {
+    text = ''
+      # Create NetworkManager persistence directories if they don't exist
+      mkdir -p /persist/etc/NetworkManager/system-connections
+      mkdir -p /persist/var/lib/NetworkManager
+      
+      # Set correct ownership and permissions for NetworkManager directories
+      chown root:root /persist/etc/NetworkManager/system-connections
+      chmod 755 /persist/etc/NetworkManager/system-connections
+      
+      chown root:root /persist/var/lib/NetworkManager
+      chmod 755 /persist/var/lib/NetworkManager
+      
+      # Fix permissions on existing connection files
+      if [ -d "/persist/etc/NetworkManager/system-connections" ]; then
+        for conn_file in /persist/etc/NetworkManager/system-connections/*; do
+          if [ -f "$conn_file" ]; then
+            chown root:root "$conn_file"
+            chmod 600 "$conn_file"
+          fi
+        done
+      fi
+      
+      # Copy any existing connections to persist if not already there
+      if [ -d "/etc/NetworkManager/system-connections" ]; then
+        for conn_file in /etc/NetworkManager/system-connections/*; do
+          if [ -f "$conn_file" ]; then
+            base_name=$(basename "$conn_file")
+            if [ ! -f "/persist/etc/NetworkManager/system-connections/$base_name" ]; then
+              cp "$conn_file" "/persist/etc/NetworkManager/system-connections/"
+              chown root:root "/persist/etc/NetworkManager/system-connections/$base_name"
+              chmod 600 "/persist/etc/NetworkManager/system-connections/$base_name"
+            fi
+          fi
+        done
+      fi
+    '';
+    deps = [ "users" "setupSSHPermissions" ];
+  };
   fileSystems = {
     "/" = {
       device = "rpool/local/root";
@@ -175,6 +221,12 @@
   
   # Fix for SSH service - ensure it starts after persistent directories are available
   systemd.services.sshd = {
+    after = [ "systemd-tmpfiles-setup.service" ];
+    wants = [ "systemd-tmpfiles-setup.service" ];
+  };
+
+  # Ensure NetworkManager starts after persistent directories are mounted
+  systemd.services.NetworkManager = {
     after = [ "systemd-tmpfiles-setup.service" ];
     wants = [ "systemd-tmpfiles-setup.service" ];
   };
