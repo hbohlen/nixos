@@ -76,10 +76,10 @@
         # Essential user directories
         ".ssh" # SSH keys and config
         ".gnupg" # GPG keys and configuration
-        
+
         # GNOME keyring storage
-        ".local/share/keyrings" # GNOME keyring database
-        
+        { directory = ".local/share/keyrings"; mode = "0700"; } # GNOME keyring database
+
         # 1Password CLI and GUI (user-specific)
         ".config/op"
         ".config/1Password"
@@ -102,7 +102,7 @@
         "Pictures"
         "Music"
         "Videos"
-        ".local/share"
+        { directory = ".local/share"; mode = "0700"; }
         
         # Development directories (optional)
         ".cargo" # Rust cargo cache
@@ -141,6 +141,32 @@
         chmod 644 /persist/home/${username}/.ssh/authorized_keys 2>/dev/null || true
         chmod 644 /persist/home/${username}/.ssh/known_hosts* 2>/dev/null || true
       fi
+    '';
+    deps = [ "users" ];
+  };
+
+  system.activationScripts.fixKeyringsPermissions = {
+    text = ''
+      # Fix keyring directory permissions for each user after rollback
+      for user_home in /home/*; do
+        if [ -d "$user_home" ]; then
+          username=$(basename "$user_home")
+          keyring_dir="/persist$user_home/.local/share/keyrings"
+          share_dir="/persist$user_home/.local/share"
+
+          if [ -d "$share_dir" ]; then
+            chown -R "$username:$username" "$share_dir"
+            chmod 700 "$share_dir"
+          fi
+
+          if [ -d "$keyring_dir" ]; then
+            echo "Fixing keyring permissions for user $username"
+            chown -R "$username:$username" "$keyring_dir"
+            find "$keyring_dir" -type d -exec chmod 700 {} \;
+            find "$keyring_dir" -type f -exec chmod 600 {} \;
+          fi
+        fi
+      done
     '';
     deps = [ "users" ];
   };
