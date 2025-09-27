@@ -7,7 +7,7 @@
     ./hardware-configuration.nix
     ../../modules/nixos/common.nix
     ../../modules/nixos/users.nix
-    ../../modules/nixos/nvidia-rog.nix
+    ../../profiles/graphics/nvidia-laptop.nix
     inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
   ];
 
