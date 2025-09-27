@@ -24,31 +24,36 @@
     };
   };
 
-  config = {
-    # Define the main user account
-    users.users.${username} = {
-      isNormalUser = true;
-      description = "Primary User Account";
-      extraGroups = [ "wheel" "networkmanager" ]
-        ++ lib.optionals (config.users.hostType != "server") [ "video" "audio" ];
-      
-      # SSH key authentication (preferred for security)
-      openssh.authorizedKeys.keys = config.users.sshKeys;
-      
-      # Password authentication (only for initial setup)
-      initialPassword = lib.mkIf config.users.enablePasswordAuth "changeme";
-      hashedPassword = lib.mkIf (!config.users.enablePasswordAuth && config.users.sshKeys == []) 
-        (lib.mkForce null); # Disable password auth when SSH keys are configured
-      
-      group = username;
-      createHome = true;
-      home = "/home/${username}";
-    };
+  config = lib.mkMerge [
+    {
+      # Define the main user account
+      users.users.${username} = {
+        isNormalUser = true;
+        description = "Primary User Account";
+        extraGroups = [ "wheel" "networkmanager" ]
+          ++ lib.optionals (config.users.hostType != "server") [ "video" "audio" ];
 
-    # Create user group
-    users.groups.${username} = {};
+        # SSH key authentication (preferred for security)
+        openssh.authorizedKeys.keys = config.users.sshKeys;
 
-    # Security configuration
-    security.sudo.wheelNeedsPassword = true;
-  };
+        group = username;
+        createHome = true;
+        home = "/home/${username}";
+      };
+
+      # Create user group
+      users.groups.${username} = {};
+
+      # Security configuration
+      security.sudo.wheelNeedsPassword = true;
+    }
+
+    (lib.mkIf config.users.enablePasswordAuth {
+      users.users.${username}.initialPassword = "changeme";
+    })
+
+    (lib.mkIf (!config.users.enablePasswordAuth && config.users.sshKeys == []) {
+      users.users.${username}.hashedPassword = lib.mkForce null;
+    })
+  ];
 }

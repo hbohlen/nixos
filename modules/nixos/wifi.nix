@@ -19,6 +19,16 @@
 # };
 { config, pkgs, lib, ... }:
 
+let
+  powerSavingLevels = {
+    off = 0;
+    low = 1;
+    medium = 2;
+    high = 3;
+  };
+  powerSavingValue = powerSavingLevels.${config.wifi.powerSaving};
+  powerSavingEnabled = config.wifi.powerSaving != "off";
+in
 {
   # Module options for WiFi configuration
   options = {
@@ -49,61 +59,59 @@
     };
   };
 
-  config = lib.mkIf config.wifi.enable {
-    # CRITICAL FIX: Handle unfree firmware requirement
-    nixpkgs.config.allowUnfree = lib.mkIf config.wifi.enableProprietaryFirmware true;
-    
-    # Enable redistributable firmware for WiFi adapters (always safe)
-    hardware.enableRedistributableFirmware = lib.mkDefault config.wifi.enableFirmware;
-    
-    # Only enable all firmware (including proprietary) if explicitly requested
-    # This prevents installation failures when allowUnfree is not set globally
-    hardware.enableAllFirmware = lib.mkDefault config.wifi.enableProprietaryFirmware;
+  config = lib.mkIf config.wifi.enable (lib.mkMerge [
+    (lib.mkIf config.wifi.enableProprietaryFirmware {
+      # Allow unfree packages only when proprietary firmware is required
+      nixpkgs.config.allowUnfree = lib.mkDefault true;
+    })
 
-    # NetworkManager configuration with proper WiFi settings
-    networking.networkmanager = {
-      enable = true;
-      
-      # WiFi backend configuration
-      wifi = {
-        backend = "wpa_supplicant";
-        powersave = lib.mkDefault (config.wifi.powerSaving != "off");
-        # Disable MAC address randomization to prevent connection issues
-        macAddress = "preserve";
-      };
-      
-      # Modern settings format (replaces deprecated connectionConfig)
-      settings = {
-        connection = {
-          "wifi.powersave" = lib.mkDefault (
-            if config.wifi.powerSaving == "off" then 0
-            else if config.wifi.powerSaving == "low" then 1  
-            else if config.wifi.powerSaving == "medium" then 2
-            else 3  # high
-          );
-        };
+    {
+      # Enable redistributable firmware for WiFi adapters (always safe)
+      hardware.enableRedistributableFirmware = lib.mkDefault config.wifi.enableFirmware;
+
+      # Only enable all firmware (including proprietary) if explicitly requested
+      # This prevents installation failures when allowUnfree is not set globally
+      hardware.enableAllFirmware = lib.mkDefault config.wifi.enableProprietaryFirmware;
+
+      # NetworkManager configuration with proper WiFi settings
+      networking.networkmanager = {
+        enable = true;
+
+        # WiFi backend configuration
         wifi = {
-          # Disable MAC address randomization to improve connection stability
-          "scan-rand-mac-address" = false;
-          "mac-address-randomization" = 0;
+          backend = "wpa_supplicant";
+          powersave = lib.mkDefault powerSavingEnabled;
+          # Disable MAC address randomization to prevent connection issues
+          macAddress = "preserve";
         };
-        # Main NetworkManager configuration for stable connections
-        main = {
-          # Use GNOME keyring for secret storage
-          "auth-polkit" = true;
-          # Prevent automatic connection drops
-          "no-auto-default" = false;
+
+        # Modern settings format (replaces deprecated connectionConfig)
+        settings = {
+          connection = {
+            "wifi.powersave" = lib.mkDefault powerSavingValue;
+          };
+          wifi = {
+            # Disable MAC address randomization to improve connection stability
+            "scan-rand-mac-address" = false;
+            "mac-address-randomization" = 0;
+          };
+          # Main NetworkManager configuration for stable connections
+          main = {
+            # Use GNOME keyring for secret storage
+            "auth-polkit" = true;
+            # Prevent automatic connection drops
+            "no-auto-default" = false;
+          };
+          # Keyfile plugin configuration for connection storage
+          keyfile = {
+            # Store passwords in GNOME keyring instead of plaintext
+            "unmanaged-devices" = "";
+          };
         };
-        # Keyfile plugin configuration for connection storage
-        keyfile = {
-          # Store passwords in GNOME keyring instead of plaintext
-          "unmanaged-devices" = "";
-        };
+
+        # DNS configuration
+        insertNameservers = [ "8.8.8.8" "8.8.4.4" ];
       };
-      
-      # DNS configuration
-      insertNameservers = [ "8.8.8.8" "8.8.4.4" ];
-    };
 
     # Install essential WiFi packages
     environment.systemPackages = with pkgs; [
@@ -336,4 +344,5 @@
       wifi-repair = "/etc/nixos/scripts/wifi-diagnostics.sh --repair";
     };
   };
+  ]);
 }
