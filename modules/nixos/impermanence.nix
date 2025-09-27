@@ -52,6 +52,8 @@
       # NetworkManager persistence (critical for WiFi connections)
       "/etc/NetworkManager/system-connections"
       "/var/lib/NetworkManager"
+      # IWD persistence (for IWD backend)
+      "/var/lib/iwd"
       "/var/lib/colord"
       "/var/lib/flatpak"
       "/var/lib/systemd/timers"
@@ -145,12 +147,13 @@
     deps = [ "users" ];
   };
 
-  # Ensure NetworkManager directories and permissions are properly set up
+  # Ensure NetworkManager and IWD directories and permissions are properly set up
   system.activationScripts.setupNetworkManagerPersistence = {
     text = ''
       # Create NetworkManager persistence directories if they don't exist
       mkdir -p /persist/etc/NetworkManager/system-connections
       mkdir -p /persist/var/lib/NetworkManager
+      mkdir -p /persist/var/lib/iwd
       
       # Set correct ownership and permissions for NetworkManager directories
       chown root:root /persist/etc/NetworkManager/system-connections
@@ -158,6 +161,10 @@
       
       chown root:root /persist/var/lib/NetworkManager
       chmod 755 /persist/var/lib/NetworkManager
+      
+      # Set correct ownership and permissions for IWD directory
+      chown root:root /persist/var/lib/iwd
+      chmod 700 /persist/var/lib/iwd
       
       # Fix permissions on existing connection files
       if [ -d "/persist/etc/NetworkManager/system-connections" ]; then
