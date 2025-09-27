@@ -63,43 +63,51 @@ This repository is configured with multiple Model Context Protocol (MCP) servers
 
 ### ByteRover MCP Memory Management
 
-**Leverage memory and context management for consistency:**
+**Repository Knowledge Base:**
 
-- Use `byterover_store_memory` to remember important project decisions
-- Use `byterover_search_memory` to recall past solutions and patterns
-- Use `byterover_store_knowledge` for reusable technical information
-- Use `byterover_planning_create` for project roadmap management
-- Use `byterover_task_management` for tracking development tasks
-- Use `byterover_context_compose` for maintaining conversation context
+The repository maintains a comprehensive knowledge base in `.github/` for context preservation:
+- **[byterover-index.md](.github/byterover-index.md)**: Master index and quick reference
+- **[byterover-context.md](.github/byterover-context.md)**: Complete architecture and technology stack
+- **[module-patterns.md](.github/module-patterns.md)**: Module relationships and conventions
+- **[development-workflows.md](.github/development-workflows.md)**: Practical workflows and troubleshooting
+
+**Context Usage Guidelines:**
+- Reference the knowledge base files for consistent decision-making
+- Update knowledge base when new patterns or solutions are discovered
+- Use the decision history to understand why architectural choices were made
+- Follow established patterns for module structure and configuration
 
 **Memory Best Practices:**
-- Store recurring patterns and solutions for future reference
-- Remember user preferences and coding standards
-- Track project-specific conventions and decisions
-- Maintain context across multiple development sessions
+- Consult existing knowledge base before proposing new solutions
+- Document new patterns and decisions in the appropriate knowledge base file
+- Maintain consistency with established architectural patterns
+- Reference past solutions for similar problems before creating new approaches
 
 ## Development Workflow Integration
 
 ### Issue Analysis Process
 
-1. **Initial Research**: Use Brave Search to understand the problem domain
-2. **Package Validation**: Use NixOS MCP to verify any package dependencies
-3. **Structured Analysis**: Apply Sequential Thinking for complex issues
-4. **Context Storage**: Store findings using ByteRover for future reference
+1. **Context Review**: Consult `.github/byterover-index.md` for repository context
+2. **Initial Research**: Use Brave Search to understand the problem domain
+3. **Package Validation**: Use NixOS MCP to verify any package dependencies
+4. **Structured Analysis**: Apply Sequential Thinking for complex issues
+5. **Pattern Matching**: Reference `.github/module-patterns.md` for established solutions
 
 ### Solution Development
 
-1. **Research Solutions**: Search for existing patterns and best practices
-2. **Validate Dependencies**: Ensure all packages and versions are available
-3. **Think Through Implementation**: Use structured thinking for complex changes
-4. **Document Decisions**: Store important choices in memory for consistency
+1. **Knowledge Base Review**: Check `.github/development-workflows.md` for existing approaches
+2. **Research Solutions**: Search for existing patterns and best practices
+3. **Validate Dependencies**: Ensure all packages and versions are available
+4. **Think Through Implementation**: Use structured thinking for complex changes
+5. **Document Decisions**: Update knowledge base files with new patterns or solutions
 
 ### Code Review and Validation
 
 1. **Verify Configurations**: Check NixOS configurations against official sources
-2. **Research Best Practices**: Look up current recommended approaches
-3. **Consider Alternatives**: Use branching logic for different solution paths
-4. **Remember Patterns**: Store successful patterns for reuse
+2. **Pattern Compliance**: Ensure changes follow established patterns in knowledge base
+3. **Research Best Practices**: Look up current recommended approaches
+4. **Consider Alternatives**: Use branching logic for different solution paths
+5. **Update Context**: Add successful patterns to the knowledge base for reuse
 
 ## Coding Standards and Practices
 
