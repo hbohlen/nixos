@@ -144,6 +144,17 @@
 
     # AppArmor for application sandboxing
     apparmor.enable = true;
+    
+    # PAM configuration for GNOME keyring integration
+    pam.services = {
+      login.enableGnomeKeyring = true;
+      passwd.enableGnomeKeyring = true;
+      gdm-password.enableGnomeKeyring = true;
+      gdm-autologin.enableGnomeKeyring = true;
+      # For systems using lightdm instead of gdm
+      lightdm.enableGnomeKeyring = lib.mkDefault true;
+      lightdm-greeter.enableGnomeKeyring = lib.mkDefault true;
+    };
   };
 };
 }

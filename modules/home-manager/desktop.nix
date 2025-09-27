@@ -348,6 +348,13 @@
     };
   };
 
+  # GNOME keyring service for credential storage
+  services.gnome-keyring = {
+    enable = true;
+    # Enable all components for maximum compatibility
+    components = [ "pkcs11" "secrets" "ssh" ];
+  };
+
   # Create the theme file for Hyprland
   xdg.configFile."hypr/theme.conf".text = ''
     # Catppuccin Mocha theme for Hyprland

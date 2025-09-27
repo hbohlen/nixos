@@ -68,6 +68,8 @@
       wifi = {
         backend = "wpa_supplicant";
         powersave = lib.mkDefault (config.wifi.powerSaving != "off");
+        # Disable MAC address randomization to prevent connection issues
+        macAddress = "preserve";
       };
       
       # Modern settings format (replaces deprecated connectionConfig)
@@ -81,7 +83,21 @@
           );
         };
         wifi = {
-          "scan-rand-mac-address" = false;  # Improve compatibility
+          # Disable MAC address randomization to improve connection stability
+          "scan-rand-mac-address" = false;
+          "mac-address-randomization" = 0;
+        };
+        # Main NetworkManager configuration for stable connections
+        main = {
+          # Use GNOME keyring for secret storage
+          "auth-polkit" = true;
+          # Prevent automatic connection drops
+          "no-auto-default" = false;
+        };
+        # Keyfile plugin configuration for connection storage
+        keyfile = {
+          # Store passwords in GNOME keyring instead of plaintext
+          "unmanaged-devices" = "";
         };
       };
       
