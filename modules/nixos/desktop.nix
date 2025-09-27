@@ -142,6 +142,20 @@
     pkgs.gcr
   ];
 
+  systemd.user.services.gnome-keyring = {
+    Unit = {
+      Description = "GNOME Keyring Daemon";
+      Before = [ "graphical-session.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.gnome-keyring}/bin/gnome-keyring-daemon --start --foreground --components=secrets,ssh,pkcs11";
+      Type = "forking";
+    };
+    Install = {
+      WantedBy = [ "default.target" ];
+    };
+  };
+
   # Enable desktop user services
   programs = {
     # DConf for GNOME settings
