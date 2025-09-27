@@ -39,7 +39,17 @@ fi
 
 # Test 4: Check that all hosts have explicit enableAllFirmware settings
 echo "📋 Test 4: Checking hardware.enableAllFirmware settings..."
-HOSTS_WITH_FIRMWARE=$(grep -r "enableAllFirmware" hosts/ --include="*.nix" | wc -l)
+# grep exits with status 1 when no matches are found, which would normally terminate
+# the script due to `set -e`. The configuration intentionally omits
+# `hardware.enableAllFirmware` on some hosts, so treat "no matches" as zero results
+# instead of a hard failure.
+HOSTS_WITH_FIRMWARE_OUTPUT=$(grep -r "enableAllFirmware" hosts/ --include="*.nix" || true)
+if [ -n "$HOSTS_WITH_FIRMWARE_OUTPUT" ]; then
+    HOSTS_WITH_FIRMWARE=$(printf "%s\n" "$HOSTS_WITH_FIRMWARE_OUTPUT" | wc -l)
+else
+    HOSTS_WITH_FIRMWARE=0
+fi
+
 if [ "$HOSTS_WITH_FIRMWARE" -ge 2 ]; then
     echo "✅ PASS: Found explicit enableAllFirmware settings in host configurations"
 else
