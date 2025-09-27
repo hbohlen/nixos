@@ -183,7 +183,7 @@
         done
       fi
     '';
-    deps = [ "users" "setupSSHPermissions" ];
+    deps = [ "users" "fixSSHPermissions" ];
   };
   fileSystems = {
     "/" = {
