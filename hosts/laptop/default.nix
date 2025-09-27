@@ -13,7 +13,7 @@
     ../../modules/nixos/development.nix  # Development tools for laptop
     ../../modules/nixos/impermanence.nix
     ../../modules/nixos/nvidia-rog.nix
-    inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h
+    ../../profiles/hardware/asus-rog-laptop.nix
   ];
 
   # Host-specific settings
@@ -33,6 +33,48 @@
     powerSaving = lib.mkForce "low";  # Force override common.nix setting for better connectivity
     enableFirmware = true;
     enableProprietaryFirmware = lib.mkDefault false;  # Explicit default
+  };
+
+  services = {
+    asusd = {
+      enable = true;
+      enableUserService = true;
+    };
+
+    supergfxd.enable = true;
+  };
+
+  systemd.services.supergfxd.path = [ pkgs.pciutils ];
+
+  boot.kernelParams = [
+    "acpi_backlight=vendor"
+    "acpi_osi=Linux"
+    "nvidia-drm.modeset=1"
+    "nvidia.NVreg_EnableBacklightHandler=0"
+    "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
+    "mem_sleep_default=deep"
+    "nvme_core.default_ps_max_latency_us=0"
+  ];
+
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  environment.systemPackages = with pkgs; [
+    asusctl
+    supergfxctl
+    tlp
+    powertop
+    acpi
+  ];
+
+  services.tlp.settings = {
+    CPU_SCALING_GOVERNOR_ON_AC = "performance";
+    CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
+    CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+    CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+    PLATFORM_PROFILE_ON_AC = "performance";
+    PLATFORM_PROFILE_ON_BAT = "low-power";
+    WIFI_PWR_ON_AC = "off";
+    WIFI_PWR_ON_BAT = "on";
   };
 
   # SSH Key Configuration (Security)
