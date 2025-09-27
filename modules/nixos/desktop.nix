@@ -86,7 +86,7 @@
   environment.systemPackages = with pkgs; [
     # Browsers
     firefox
-    
+
     # Development IDEs and editors
     zed-editor
     vscode
@@ -114,6 +114,12 @@
     # Audio tools (essential for desktop)
     pavucontrol
     easyeffects
+
+    # Secrets management utilities
+    gnome-keyring
+    libsecret
+    seahorse
+    libgnome-keyring
   ];
 
   # Enable desktop services
