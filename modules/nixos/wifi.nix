@@ -60,13 +60,13 @@
     # This prevents installation failures when allowUnfree is not set globally
     hardware.enableAllFirmware = lib.mkDefault config.wifi.enableProprietaryFirmware;
 
-    # NetworkManager configuration with proper WiFi settings
+    # NetworkManager configuration with IWD backend for better reliability
     networking.networkmanager = {
       enable = true;
       
-      # WiFi backend configuration
+      # WiFi backend configuration - use IWD for improved stability
       wifi = {
-        backend = "wpa_supplicant";
+        backend = "iwd";
         powersave = lib.mkDefault (config.wifi.powerSaving != "off");
         # Disable MAC address randomization to prevent connection issues
         macAddress = "preserve";
@@ -105,13 +105,28 @@
       insertNameservers = [ "8.8.8.8" "8.8.4.4" ];
     };
 
+    # Enable IWD service when using IWD backend
+    networking.wireless.iwd = {
+      enable = true;
+      settings = {
+        General = {
+          EnableNetworkConfiguration = false;  # Let NetworkManager handle this
+        };
+        Settings = {
+          AutoConnect = true;
+        };
+      };
+    };
+
+    # Ensure wpa_supplicant is disabled when using IWD
+    networking.wireless.enable = false;
+
     # Install essential WiFi packages
     environment.systemPackages = with pkgs; [
       # Core wireless tools
       wirelesstools      # iwconfig, iwlist, etc.
-      wpa_supplicant     # WPA/WPA2 authentication
-      wpa_supplicant_gui # GUI for wpa_supplicant
-      iw                 # Modern wireless tools
+      iwd               # Intel's iNet wireless daemon
+      iw                # Modern wireless tools
       
       # Network management tools
       networkmanagerapplet  # NetworkManager GUI
