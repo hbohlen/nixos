@@ -12,7 +12,7 @@
     ../../modules/nixos/laptop.nix
     ../../modules/nixos/development.nix  # Development tools for laptop
     ../../modules/nixos/impermanence.nix
-    ../../modules/nixos/nvidia-rog.nix
+    ../../profiles/graphics/nvidia-laptop.nix
     ../../profiles/hardware/asus-rog-laptop.nix
   ];
 

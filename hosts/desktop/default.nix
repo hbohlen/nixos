@@ -11,7 +11,7 @@
     ../../modules/nixos/desktop.nix
     ../../modules/nixos/development.nix  # Development tools for desktop
     ../../modules/nixos/impermanence.nix
-    ../../modules/nixos/nvidia-rog.nix
+    ../../profiles/graphics/nvidia-desktop.nix
     # Intel CPU and desktop PC hardware support
     inputs.nixos-hardware.nixosModules.common-cpu-intel
     inputs.nixos-hardware.nixosModules.common-pc

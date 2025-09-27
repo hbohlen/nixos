@@ -11,7 +11,7 @@ This directory contains the desktop host configuration, optimized for a full des
 - Imports common system modules from `/modules/nixos/common.nix`
 - Imports ZFS and disk configuration from `./hardware/disko-zfs.nix` (host-specific)  
 - Imports impermanence configuration from `/modules/nixos/impermanence.nix`
-- Imports NVIDIA-specific configuration from `/modules/nixos/nvidia-rog.nix`
+- Imports NVIDIA-specific configuration from `/profiles/graphics/nvidia-desktop.nix`
 - References user configurations through Home Manager integration
 - Uses root-level flake.nix for system definition
 

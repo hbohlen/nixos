@@ -53,7 +53,7 @@ modules = [
   ../../modules/nixos/boot.nix          # Boot optimization
   ../../modules/nixos/desktop.nix       # Desktop environment
   ../../modules/nixos/development.nix   # Development tools
-  ../../modules/nixos/nvidia-rog.nix    # Graphics drivers
+  ../../profiles/graphics/nvidia-desktop.nix  # Desktop NVIDIA drivers
   ../../modules/nixos/impermanence.nix  # Ephemeral root
   ../../modules/nixos/users.nix         # User management
 ];
@@ -422,7 +422,8 @@ networking = {
     ../../modules/nixos/users.nix
     
     # Hardware-specific modules
-    ../../modules/nixos/nvidia-rog.nix # When applicable
+    ../../profiles/graphics/nvidia-desktop.nix  # Desktop NVIDIA (when applicable)
+    ../../profiles/graphics/nvidia-laptop.nix   # Laptop NVIDIA (when applicable)
     
     # External hardware profiles
     inputs.nixos-hardware.nixosModules.asus-zephyrus-gu603h  # When applicable
