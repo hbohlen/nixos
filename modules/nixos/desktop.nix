@@ -137,6 +137,11 @@
     };
   };
 
+  services.dbus.packages = [
+    pkgs.gnome-keyring
+    pkgs.gcr
+  ];
+
   # Enable desktop user services
   programs = {
     # DConf for GNOME settings
